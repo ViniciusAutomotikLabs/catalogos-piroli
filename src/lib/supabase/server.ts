@@ -1,10 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "./types";
-import { requireSupabasePublicEnv } from "@/lib/env";
+import { getSupabasePublicEnv } from "@/lib/env";
 
 export async function createClient() {
-  const { url, key } = requireSupabasePublicEnv();
+  const { url, key } = getSupabasePublicEnv();
+  if (!url || !key) {
+    throw new Error(
+      "Supabase não configurado: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY."
+    );
+  }
   const cookieStore = await cookies();
 
   return createServerClient<Database>(url, key, {
@@ -18,7 +23,7 @@ export async function createClient() {
             cookieStore.set(name, value, options)
           );
         } catch {
-          // Server Component: middleware cuida do refresh de cookies.
+          // Server Component: refresh de cookies em Route Handlers / Server Actions.
         }
       },
     },
