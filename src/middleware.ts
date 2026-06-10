@@ -1,7 +1,9 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-export async function proxy(request: NextRequest) {
+// middleware.ts é o caminho estável na Vercel; proxy.ts (Next 16) falha em produção
+// com Internal Server Error em alguns deploys (manifest / bundling).
+export async function middleware(request: NextRequest) {
   return await updateSession(request);
 }
 
