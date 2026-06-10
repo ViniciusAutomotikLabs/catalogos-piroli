@@ -6,9 +6,7 @@ import { getSupabasePublicEnv } from "@/lib/env";
 export async function createClient() {
   const { url, key } = getSupabasePublicEnv();
   if (!url || !key) {
-    throw new Error(
-      "Supabase não configurado: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY."
-    );
+    throw new Error("SUPABASE_ENV_MISSING");
   }
   const cookieStore = await cookies();
 

@@ -1,11 +1,15 @@
 import { cache } from "react";
 import { createClient } from "./supabase/server";
+import { getSupabasePublicEnv } from "./env";
 
 /**
  * Contexto da loja do usuário logado (1 revenda = 1 loja).
  * Cacheado por request para evitar queries repetidas entre layout e páginas.
  */
 export const getContextoLoja = cache(async () => {
+  const { url, key } = getSupabasePublicEnv();
+  if (!url || !key) return null;
+
   const supabase = await createClient();
   const {
     data: { user },

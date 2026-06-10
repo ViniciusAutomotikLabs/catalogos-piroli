@@ -7,7 +7,12 @@ import { getContextoLoja } from "@/lib/loja";
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const contexto = await getContextoLoja();
+  let contexto = null;
+  try {
+    contexto = await getContextoLoja();
+  } catch {
+    redirect("/login");
+  }
   if (!contexto) redirect("/login");
 
   if (!contexto.lojaId) {
