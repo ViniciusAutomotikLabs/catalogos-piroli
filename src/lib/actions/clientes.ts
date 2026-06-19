@@ -5,22 +5,16 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 
-export type EstadoFormCliente = { erro?: string } | null;
+export type EstadoFormCliente = { erro?: string; ok?: boolean; mensagem?: string } | null;
 
-export async function criarCliente(
-  _estado: EstadoFormCliente,
-  formData: FormData
-): Promise<EstadoFormCliente> {
-  const contexto = await getContextoLoja();
-  if (!contexto?.lojaId) return { erro: "Sua conta não está vinculada a uma loja." };
+function valor(fd: FormData, key: string): string | null {
+  const v = String(fd.get(key) ?? "").trim();
+  return v || null;
+}
 
-  const razaoSocial = String(formData.get("razao_social") ?? "").trim();
-  if (!razaoSocial) return { erro: "Razão social é obrigatória." };
-
-  const supabase = await createClient();
-  const { error } = await supabase.from("clientes").insert({
-    loja_id: contexto.lojaId,
-    razao_social: razaoSocial,
+function dadosFormCliente(formData: FormData) {
+  return {
+    razao_social: String(formData.get("razao_social") ?? "").trim(),
     nome_fantasia: valor(formData, "nome_fantasia"),
     cnpj: valor(formData, "cnpj"),
     contato_nome: valor(formData, "contato_nome"),
@@ -35,6 +29,23 @@ export async function criarCliente(
     bairro: valor(formData, "bairro"),
     cidade: valor(formData, "cidade"),
     uf: valor(formData, "uf"),
+  };
+}
+
+export async function criarCliente(
+  _estado: EstadoFormCliente,
+  formData: FormData
+): Promise<EstadoFormCliente> {
+  const contexto = await getContextoLoja();
+  if (!contexto?.lojaId) return { erro: "Sua conta não está vinculada a uma loja." };
+
+  const dados = dadosFormCliente(formData);
+  if (!dados.razao_social) return { erro: "Razão social é obrigatória." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("clientes").insert({
+    loja_id: contexto.lojaId,
+    ...dados,
   });
 
   if (error) return { erro: `Não foi possível salvar: ${error.message}` };
@@ -43,7 +54,32 @@ export async function criarCliente(
   redirect("/clientes");
 }
 
-function valor(fd: FormData, key: string): string | null {
-  const v = String(fd.get(key) ?? "").trim();
-  return v || null;
+export async function atualizarCliente(
+  _estado: EstadoFormCliente,
+  formData: FormData
+): Promise<EstadoFormCliente> {
+  const contexto = await getContextoLoja();
+  if (!contexto?.lojaId) return { erro: "Sua conta não está vinculada a uma loja." };
+
+  const id = Number(formData.get("id"));
+  if (!id) return { erro: "Cliente inválido." };
+
+  const dados = dadosFormCliente(formData);
+  if (!dados.razao_social) return { erro: "Razão social é obrigatória." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("clientes")
+    .update({
+      ...dados,
+      ativo: formData.get("ativo") === "on",
+    })
+    .eq("id", id)
+    .eq("loja_id", contexto.lojaId);
+
+  if (error) return { erro: `Não foi possível salvar: ${error.message}` };
+
+  revalidatePath("/clientes");
+  revalidatePath(`/clientes/${id}`);
+  return { ok: true, mensagem: "Cadastro atualizado com sucesso." };
 }

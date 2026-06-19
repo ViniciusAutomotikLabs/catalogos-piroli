@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CART_EVENT, cartCount } from "@/lib/cart";
 
 const ITEMS = [
   { href: "/", icon: "home", label: "Início" },
   { href: "/busca", icon: "search", label: "Busca" },
+  { href: "/orcamento", icon: "shopping_cart", label: "Orçamento", showCartBadge: true },
   { href: "/veiculo", icon: "directions_car", label: "Veículo" },
   { href: "/catalogos", icon: "menu_book", label: "Catálogos" },
   { href: "/historico", icon: "history", label: "Histórico" },
@@ -21,6 +24,18 @@ function isActive(pathname: string, href: string) {
 
 export function Sidebar({ lojaNome }: { lojaNome?: string | null }) {
   const pathname = usePathname();
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const update = () => setCount(cartCount());
+    update();
+    window.addEventListener(CART_EVENT, update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener(CART_EVENT, update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
 
   return (
     <nav className="bg-primary h-screen w-64 fixed left-0 top-0 border-r border-outline-variant flex flex-col py-6 px-4 z-50">
@@ -48,7 +63,12 @@ export function Sidebar({ lojaNome }: { lojaNome?: string | null }) {
                 <span className={`material-symbols-outlined ${active ? "filled" : ""}`}>
                   {item.icon}
                 </span>
-                <span className="text-label-sm">{item.label}</span>
+                <span className="text-label-sm flex-1">{item.label}</span>
+                {"showCartBadge" in item && item.showCartBadge && count > 0 && (
+                  <span className="bg-secondary text-on-secondary text-label-sm rounded-full min-w-5 h-5 flex items-center justify-center px-1">
+                    {count}
+                  </span>
+                )}
               </Link>
             </li>
           );

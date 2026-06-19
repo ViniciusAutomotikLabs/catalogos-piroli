@@ -21,8 +21,9 @@ export default async function ClientesPage({
   let query = supabase
     .from("clientes")
     .select(
-      "id, razao_social, nome_fantasia, cnpj, contato_nome, telefone_whatsapp, especialidade, marcas, ativo, ultima_compra_em, cidade, uf"
+      "id, razao_social, nome_fantasia, cnpj, contato_nome, telefone_whatsapp, especialidade, marcas, ativo, ultima_compra_em, cidade, uf, orcamentos(count)"
     )
+    .order("ultima_compra_em", { ascending: false, nullsFirst: false })
     .order("razao_social", { ascending: true })
     .limit(100);
 
@@ -120,11 +121,14 @@ export default async function ClientesPage({
                 <th className="px-4 py-3 w-44">CNPJ / Cód.</th>
                 <th className="px-4 py-3">Especialidade / Marcas</th>
                 <th className="px-4 py-3 w-36">Última Compra</th>
-                <th className="px-4 py-3 w-24 text-right">Ação</th>
+                <th className="px-4 py-3 w-24">Orçamentos</th>
+                <th className="px-4 py-3 w-28 text-right">Ação</th>
               </tr>
             </thead>
             <tbody className="text-body-md text-on-surface">
-              {clientes.map((c, i) => (
+              {clientes.map((c, i) => {
+                const qtdOrcamentos = (c.orcamentos as { count: number }[] | null)?.[0]?.count ?? 0;
+                return (
                 <tr
                   key={c.id}
                   className={`border-b border-outline-variant hover:bg-surface-container transition-colors group h-16 ${
@@ -132,8 +136,9 @@ export default async function ClientesPage({
                   }`}
                 >
                   <td className="px-4 py-2">
-                    <p className="font-bold text-on-surface flex items-center gap-2">
-                      {c.nome_fantasia ?? c.razao_social}
+                    <Link href={`/clientes/${c.id}`} className="block group/link">
+                      <p className="font-bold text-on-surface flex items-center gap-2 group-hover/link:text-primary transition-colors">
+                        {c.nome_fantasia ?? c.razao_social}
                       {!c.ativo && (
                         <span className="text-label-sm text-error uppercase border border-error/40 rounded px-1.5">
                           Inativo
@@ -145,6 +150,7 @@ export default async function ClientesPage({
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
+                    </Link>
                   </td>
                   <td className="px-4 py-2">
                     <span className="font-mono text-code-md text-on-surface-variant">
@@ -176,7 +182,18 @@ export default async function ClientesPage({
                       ? new Date(c.ultima_compra_em).toLocaleDateString("pt-BR")
                       : "—"}
                   </td>
+                  <td className="px-4 py-2 font-mono text-code-md text-on-surface-variant">
+                    {qtdOrcamentos}
+                  </td>
                   <td className="px-4 py-2 text-right">
+                    <div className="inline-flex items-center gap-1">
+                      <Link
+                        href={`/clientes/${c.id}`}
+                        className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-primary transition-colors items-center justify-center border border-transparent hover:border-primary"
+                        title="Ver perfil"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">person</span>
+                      </Link>
                     {c.telefone_whatsapp && (
                       <a
                         href={`https://wa.me/55${c.telefone_whatsapp.replace(/\D/g, "")}`}
@@ -188,9 +205,11 @@ export default async function ClientesPage({
                         <span className="material-symbols-outlined text-[18px]">chat</span>
                       </a>
                     )}
+                    </div>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         ) : (

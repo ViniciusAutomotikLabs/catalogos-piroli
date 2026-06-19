@@ -1,27 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { WhatsAppIcon } from "@/components/whatsapp-icon";
-import { addToCart, cartCount } from "@/lib/cart";
 import {
-  buildProdutoMensagem,
+  buildOrcamentoCodigos,
+  buildOrcamentoMensagem,
   buildWhatsAppUrl,
-  type ProdutoMensagem,
 } from "@/lib/whatsapp";
+import type { CartItem } from "@/lib/cart";
 
 type Props = {
-  produto: ProdutoMensagem & { produtoId: number };
-  telefoneLoja?: string | null;
+  itens: CartItem[];
+  clienteNome?: string | null;
+  telefoneDestino?: string | null;
 };
 
-export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
-  const router = useRouter();
+export function OrcamentoBarraAcoes({ itens, clienteNome, telefoneDestino }: Props) {
   const [modalAberto, setModalAberto] = useState(false);
-  const [incluirFoto, setIncluirFoto] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const mensagem = buildProdutoMensagem(produto, incluirFoto);
+  const temItens = itens.length > 0;
+  const mensagem = buildOrcamentoMensagem(itens, { clienteNome, validadeDias: 5 });
+  const codigos = buildOrcamentoCodigos(itens);
 
   function avisar(msg: string) {
     setFeedback(msg);
@@ -35,55 +36,50 @@ export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
 
   return (
     <>
-      {/* Barra de ações fixa */}
       <div className="fixed bottom-0 left-64 right-0 bg-surface-container-lowest border-t border-outline-variant px-8 py-3 z-40 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-3">
-          <button
-            onClick={() => router.back()}
+          <Link
+            href="/busca"
             className="flex items-center gap-2 px-4 py-2.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Voltar
-          </button>
+            <span className="material-symbols-outlined text-[18px]">search</span>
+            Buscar peças
+          </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap justify-end">
             {feedback && (
               <span className="text-body-md text-secondary font-semibold">{feedback}</span>
             )}
             <button
-              onClick={() => copiar(produto.codigo, "Código copiado!")}
-              className="flex items-center gap-2 px-4 py-2.5 rounded bg-tertiary text-on-tertiary hover:bg-tertiary-container transition-colors text-label-sm uppercase"
+              type="button"
+              disabled={!temItens}
+              onClick={() => copiar(codigos, "Códigos copiados!")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded bg-tertiary text-on-tertiary hover:bg-tertiary-container transition-colors text-label-sm uppercase disabled:opacity-40 disabled:pointer-events-none"
             >
               <span className="material-symbols-outlined text-[18px]">content_copy</span>
               Copiar código
             </button>
             <button
+              type="button"
+              disabled={!temItens}
               onClick={() => copiar(mensagem, "Texto copiado!")}
-              className="flex items-center gap-2 px-4 py-2.5 rounded border border-outline-variant text-on-surface hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
+              className="flex items-center gap-2 px-4 py-2.5 rounded border border-outline-variant text-on-surface hover:border-primary hover:text-primary transition-colors text-label-sm uppercase disabled:opacity-40 disabled:pointer-events-none"
             >
               <span className="material-symbols-outlined text-[18px]">description</span>
               Copiar texto
             </button>
-            <button
-              onClick={() => {
-                addToCart({
-                  produtoId: produto.produtoId,
-                  codigo: produto.codigo,
-                  descricao: produto.descricao ?? "Peça",
-                  fabricante: produto.fabricante,
-                  fotoUrl: produto.fotoUrl,
-                  precoUnitario: 0,
-                });
-                avisar(`Adicionado! ${cartCount()} item(ns) — abra Orçamento no menu`);
-              }}
+            <Link
+              href="/busca"
               className="flex items-center gap-2 px-4 py-2.5 rounded border border-primary text-primary hover:bg-primary hover:text-on-primary transition-colors text-label-sm uppercase"
             >
               <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
               Orçamento
-            </button>
+            </Link>
             <button
+              type="button"
+              disabled={!temItens}
               onClick={() => setModalAberto(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded bg-secondary text-on-secondary hover:bg-on-secondary-container transition-colors text-label-sm uppercase"
+              className="flex items-center gap-2 px-5 py-2.5 rounded bg-secondary text-on-secondary hover:bg-on-secondary-container transition-colors text-label-sm uppercase disabled:opacity-40 disabled:pointer-events-none"
             >
               <WhatsAppIcon className="w-4 h-4" />
               Enviar WhatsApp
@@ -92,7 +88,6 @@ export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
         </div>
       </div>
 
-      {/* Modal WhatsApp (W10) */}
       {modalAberto && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
@@ -105,9 +100,10 @@ export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
               <h2 className="text-headline-sm text-primary flex items-center gap-2">
                 <WhatsAppIcon className="w-5 h-5 text-secondary" />
-                Compartilhar no WhatsApp
+                Enviar orçamento no WhatsApp
               </h2>
               <button
+                type="button"
                 onClick={() => setModalAberto(false)}
                 className="p-1 rounded-full hover:bg-surface-container-high text-on-surface-variant"
               >
@@ -115,30 +111,22 @@ export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
               </button>
             </div>
 
-            <div className="p-6 flex flex-col gap-4">
+            <div className="p-6">
               <pre className="bg-surface-container-low border border-outline-variant rounded p-4 text-body-md text-on-surface whitespace-pre-wrap font-sans">
                 {mensagem}
               </pre>
-              <label className="flex items-center gap-2 text-body-md text-on-surface cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={incluirFoto}
-                  onChange={(e) => setIncluirFoto(e.target.checked)}
-                  className="rounded border-outline-variant text-primary focus:ring-primary"
-                />
-                Incluir link da foto
-              </label>
             </div>
 
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant">
               <button
+                type="button"
                 onClick={() => copiar(mensagem, "Texto copiado!")}
                 className="px-4 py-2.5 rounded border border-outline-variant text-on-surface hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
               >
                 Copiar texto
               </button>
               <a
-                href={buildWhatsAppUrl(mensagem, telefoneLoja)}
+                href={buildWhatsAppUrl(mensagem, telefoneDestino)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-5 py-2.5 rounded bg-secondary text-on-secondary hover:bg-on-secondary-container transition-colors text-label-sm uppercase"

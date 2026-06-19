@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 
@@ -13,12 +14,13 @@ type ItemOrcamento = {
 export async function salvarOrcamento(
   clienteId: number | null,
   itens: ItemOrcamento[]
-): Promise<{ ok: boolean; erro?: string }> {
+): Promise<{ ok: boolean; erro?: string; orcamentoId?: number }> {
   const contexto = await getContextoLoja();
   if (!contexto?.lojaId) return { ok: false, erro: "Conta sem loja vinculada." };
   if (itens.length === 0) return { ok: false, erro: "O orçamento está vazio." };
 
   const supabase = await createClient();
+  const agora = new Date().toISOString();
   const { data: orcamento, error } = await supabase
     .from("orcamentos")
     .insert({
@@ -45,5 +47,17 @@ export async function salvarOrcamento(
   );
 
   if (itensErro) return { ok: false, erro: itensErro.message };
-  return { ok: true };
+
+  if (clienteId) {
+    await supabase
+      .from("clientes")
+      .update({ ultima_compra_em: agora })
+      .eq("id", clienteId)
+      .eq("loja_id", contexto.lojaId);
+    revalidatePath("/clientes");
+    revalidatePath(`/clientes/${clienteId}`);
+  }
+
+  revalidatePath("/orcamento");
+  return { ok: true, orcamentoId: orcamento.id };
 }

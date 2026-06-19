@@ -12,8 +12,7 @@ import {
   type CartItem,
 } from "@/lib/cart";
 import { salvarOrcamento } from "@/lib/actions/orcamentos";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
-import { WhatsAppIcon } from "@/components/whatsapp-icon";
+import { OrcamentoBarraAcoes } from "@/components/orcamento/barra-acoes";
 
 type ClienteOption = { id: number; nome: string; whatsapp: string | null };
 
@@ -59,23 +58,6 @@ export default function OrcamentoPage() {
   const subtotal = itens.reduce((acc, i) => acc + i.quantidade * i.precoUnitario, 0);
   const cliente = clientes.find((c) => c.id === clienteId) ?? null;
 
-  function mensagemWhatsApp() {
-    const linhas = [
-      `📋 *Orçamento — válido por ${VALIDADE_DIAS} dias*`,
-      cliente ? `Cliente: ${cliente.nome}` : null,
-      "",
-      ...itens.map(
-        (i) =>
-          `• ${i.quantidade}x *${i.descricao}* (${i.codigo})${
-            i.precoUnitario > 0 ? ` — ${formatBRL(i.quantidade * i.precoUnitario)}` : ""
-          }`
-      ),
-      "",
-      subtotal > 0 ? `💰 *Total: ${formatBRL(subtotal)}*` : null,
-    ].filter((l): l is string => l !== null);
-    return linhas.join("\n");
-  }
-
   async function handleSalvar() {
     setSalvando(true);
     setMensagem(null);
@@ -91,14 +73,18 @@ export default function OrcamentoPage() {
     setSalvando(false);
     if (resultado.ok) {
       clearCart();
-      setMensagem("Orçamento salvo como rascunho!");
+      setMensagem(
+        clienteId
+          ? `Orçamento salvo! Veja o histórico de ${cliente?.nome ?? "cliente"} no CRM.`
+          : "Orçamento salvo como rascunho!"
+      );
     } else {
       setMensagem(resultado.erro ?? "Erro ao salvar.");
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-headline-lg text-primary font-bold">Carrinho de Orçamento</h1>
@@ -120,6 +106,14 @@ export default function OrcamentoPage() {
       {mensagem && (
         <p className="text-body-md text-on-secondary-container bg-secondary-fixed/30 border border-secondary-fixed-dim rounded px-3 py-2">
           {mensagem}
+          {clienteId && (
+            <>
+              {" "}
+              <Link href={`/clientes/${clienteId}`} className="text-primary font-semibold hover:underline">
+                Abrir perfil no CRM
+              </Link>
+            </>
+          )}
         </p>
       )}
 
@@ -128,7 +122,7 @@ export default function OrcamentoPage() {
           <span className="material-symbols-outlined text-outline text-5xl">shopping_cart_off</span>
           <p className="text-headline-sm text-on-surface">Orçamento vazio</p>
           <p className="text-body-md text-on-surface-variant">
-            Adicione peças a partir do detalhe do produto.
+            Adicione peças pelo botão <strong>Orçamento</strong> na ficha do produto.
           </p>
           <Link
             href="/busca"
@@ -256,15 +250,6 @@ export default function OrcamentoPage() {
             </div>
 
             <div className="flex flex-col gap-2 pt-2">
-              <a
-                href={buildWhatsAppUrl(mensagemWhatsApp(), cliente?.whatsapp)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded bg-secondary text-on-secondary hover:bg-on-secondary-container transition-colors text-label-sm uppercase"
-              >
-                <WhatsAppIcon className="w-4 h-4" />
-                Enviar WhatsApp
-              </a>
               <button
                 onClick={handleSalvar}
                 disabled={salvando}
@@ -284,6 +269,12 @@ export default function OrcamentoPage() {
           </aside>
         </div>
       )}
+
+      <OrcamentoBarraAcoes
+        itens={itens}
+        clienteNome={cliente?.nome}
+        telefoneDestino={cliente?.whatsapp}
+      />
     </div>
   );
 }
