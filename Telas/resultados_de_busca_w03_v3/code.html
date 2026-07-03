@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resultados de Busca - Catálogo Industrial</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline": "#74777f",
+                      "inverse-surface": "#2d3133",
+                      "tertiary": "#212121",
+                      "on-surface": "#181c1e",
+                      "on-primary-container": "#87a0cd",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed-dim": "#3de273",
+                      "surface-container": "#ebeef0",
+                      "secondary": "#006d2f",
+                      "on-secondary-fixed-variant": "#005322",
+                      "inverse-primary": "#aec7f7",
+                      "surface-container-low": "#f1f4f6",
+                      "surface": "#f7fafc",
+                      "primary": "#002046",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#2e476f",
+                      "primary-fixed-dim": "#aec7f7",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#d6e3ff",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#eef1f3",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "background": "#f7fafc",
+                      "surface-dim": "#d7dadc",
+                      "on-background": "#181c1e",
+                      "surface-variant": "#e0e3e5",
+                      "on-primary-fixed": "#001b3d",
+                      "primary-container": "#1b365d",
+                      "surface-tint": "#465f88",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#44474e",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-bright": "#f7fafc",
+                      "surface-container-high": "#e5e9eb",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "tertiary-container": "#363636",
+                      "on-secondary": "#ffffff",
+                      "secondary-container": "#5dfd8a",
+                      "tertiary-fixed": "#e4e2e1",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#c4c6cf",
+                      "on-tertiary-container": "#a09f9e",
+                      "on-secondary-fixed": "#002109",
+                      "secondary-fixed": "#66ff8e",
+                      "on-secondary-container": "#007232"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "margin-mobile": "16px",
+                      "container-max": "1440px",
+                      "base": "8px",
+                      "margin-desktop": "32px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "code-md": [
+                              "JetBrains Mono"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "code-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for clean industrial look where appropriate */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- Shared Component: SideNavBar -->
+<nav class="bg-primary dark:bg-primary-container h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flat no shadows flex flex-col py-6 px-4 z-50">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="Store Logo" class="w-full h-full object-cover" data-alt="A stylized, minimalist logo for a high-end automotive parts manufacturer. The logo features sharp geometric lines resembling a gear and a spark plug, rendered in metallic silver and deep industrial blue. The background is a clean, bright white to ensure high contrast and readability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKQP7K8A0wB_14f5mCfwBBMnrRlQhXWCDx7asxaTifoMo2Um_Uh25yltrFdqy_TbORDoP_xwJogo5E-Pmg_IGICu4u_mHYaV3hPo5SafzzAUwaJsIa99gcGqNoXWsmuseZmWwGbPzaX1ZFPngWXYgsFftWkSTh04mWeoMPdKGOC0kC6yb2x_v0206wXGDn9kIAhR08dRxc4OXP5rouMEYbcAVcyvXO-MFxwJfWZXlQ_APpBleO6OqZ8-MipjAVYZ-h0T9yBjTdJjue"/>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-black text-on-primary tracking-tighter">AUTO-PEÇAS</h1>
+<p class="font-label-sm text-label-sm text-on-primary-container">Unidade Matriz</p>
+</div>
+</div>
+<ul class="flex flex-col gap-2 font-headline-sm text-headline-sm font-label-sm text-label-sm">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+                    Início
+                </a>
+</li>
+<!-- Active Tab: Busca -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT bg-primary-fixed-dim text-on-primary-fixed font-bold border-l-4 border-secondary scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+                    Busca
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+                    Veículo
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+                    Catálogos
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">history</span>
+                    Histórico
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+                    CRM
+                </a>
+</li>
+<li class="mt-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Configurações
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen w-[calc(100%-256px)]">
+<!-- Shared Component: TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim sticky top-0 w-full z-40 border-b border-outline-variant shadow-sm flex items-center justify-between px-margin-desktop py-4 h-[72px]">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md text-primary font-bold uppercase">CATÁLOGO INDUSTRIAL</span>
+</div>
+<div class="flex items-center gap-4 text-primary dark:text-primary-fixed-dim">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary flex items-center justify-center">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</header>
+<!-- Search Context & Filters (Sticky below TopAppBar) -->
+<div class="bg-surface sticky top-[72px] z-30 border-b border-outline-variant px-margin-desktop py-4 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+<div class="flex flex-col gap-4 max-w-[1440px] mx-auto">
+<!-- Search Bar -->
+<div class="flex items-center gap-4">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded text-body-lg font-body-lg text-on-surface py-3 pl-12 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Buscar por código, descrição ou aplicação..." type="text" value="filtro gol"/>
+</div>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-high px-4 py-3 rounded flex items-center gap-2 font-headline-sm text-headline-sm transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined">tune</span>
+                        Filtros Avançados
+                    </button>
+</div>
+<!-- Chips & Sort -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+<button class="bg-primary-container text-on-primary-container border border-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm whitespace-nowrap transition-colors">
+                            Todos
+                        </button>
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant hover:border-primary hover:text-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm whitespace-nowrap transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">image</span> Com foto
+                        </button>
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant hover:border-primary hover:text-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm whitespace-nowrap transition-colors">
+                            Iguaçu
+                        </button>
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant hover:border-primary hover:text-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm whitespace-nowrap transition-colors">
+                            Kit&amp;Cia
+                        </button>
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant hover:border-primary hover:text-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm whitespace-nowrap transition-colors">
+                            Disauto
+                        </button>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Ordenar por:</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded font-body-md text-body-md text-on-surface py-1.5 pl-3 pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2344474e%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat">
+<option>Relevância</option>
+<option>Código A–Z</option>
+<option>Menor Preço</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Dense Data Table Container -->
+<div class="flex-1 px-margin-desktop py-6 overflow-x-auto">
+<div class="max-w-[1440px] mx-auto bg-surface-container-lowest border border-outline-variant rounded shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high border-b-2 border-outline-variant text-on-surface font-label-sm text-label-sm uppercase">
+<tr>
+<th class="px-4 py-3 w-16 text-center">Foto</th>
+<th class="px-4 py-3 w-32">Código</th>
+<th class="px-4 py-3">Descrição</th>
+<th class="px-4 py-3 w-32">Fabricante</th>
+<th class="px-4 py-3 w-32">Catálogo</th>
+<th class="px-4 py-3 w-24 text-right">Ação</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container hover:border-l-2 hover:border-l-primary transition-all group h-14 bg-surface-container-lowest">
+<td class="px-4 py-1 text-center">
+<div class="w-12 h-12 bg-white border border-outline-variant rounded flex items-center justify-center overflow-hidden shrink-0 mx-auto group-hover:border-primary transition-colors">
+<img alt="Filtro de Óleo" class="w-10 h-10 object-contain" data-alt="A clean, clinical product photography shot of a cylindrical automotive oil filter. It is painted a metallic industrial grey and sits on a pure white background. The lighting is bright and even, casting almost no shadows, highlighting the precise screw threads and rubber gasket at the base." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIIAwvHgM8lS5FUhdBhM3xfnhFOijN_fYk_ugk5dL6yl05cnILUt0vNDoNSiKkKyGA1bLR9VZtNFTJTfPqdPlSWr-tFt2bo-jDbIYwxGOel7F5rvcQDBC285XJSOLpE3H_rvdCEG2BXaaNVeIOpJyi4QPqHM8YvIA_dpMvnl1FqTU4Cp_85JIPFkkkx60uNCgzS0sAQFfhk3NVpVzzmqFcQ_sWEuJyKA26rEEc3wtkS1ZmbBiQG_S7xUmKwcTSi6l3G8Ax9Ozeet9P"/>
+</div>
+</td>
+<td class="px-4 py-1 font-code-md text-code-md text-primary">IG-FO1029</td>
+<td class="px-4 py-1 font-headline-sm text-headline-sm text-on-surface">Filtro de Óleo Motor AP 1.6 / 1.8 - Gol G2/G3/G4</td>
+<td class="px-4 py-1 text-on-surface-variant">Iguaçu</td>
+<td class="px-4 py-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface font-label-sm text-label-sm text-on-surface-variant uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span> Óleo
+                                </span>
+</td>
+<td class="px-4 py-1 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors flex items-center justify-center border border-transparent hover:border-secondary" title="Compartilhar WhatsApp">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-5.824 4.74-10.563 10.573-10.564 5.824.001 10.566 4.746 10.566 10.564-.001 5.827-4.739 10.567-10.566 10.567l-.636-.624z"></path></svg>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center border border-transparent hover:border-primary" title="Ver Detalhes">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container hover:border-l-2 hover:border-l-primary transition-all group h-14 bg-surface-container-low">
+<td class="px-4 py-1 text-center">
+<div class="w-12 h-12 bg-white border border-outline-variant rounded flex items-center justify-center overflow-hidden shrink-0 mx-auto group-hover:border-primary transition-colors">
+<img alt="Filtro de Ar" class="w-10 h-10 object-contain" data-alt="A rectangular automotive air filter resting on a stark white surface. The filter has bright yellow pleated paper surrounded by a rigid black polyurethane frame. The lighting is studio quality, emphasizing the texture of the filter media and the structural integrity of the part." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAZJsynHkit4_z3g8wXbNzWIEAB8Q2Pzy0-QiIQ5yQZDnvCVcwLrD64wC3dvEtCipGLwjwOoZwmr7mAfXdg27cbO8tT3mpfvylJPCKwQq5rf1u03DzBXftxbaGCyrPEFV1cdmi8Wu6cfMm1yaIk3zQJiAbz5M4s1HiJ-5tVJDp0YBuK5_BFLQoq4Os3xjMQU2do0pSlMB8oSGDGrvrWATML-xQ1863DxulSl5sNZLMatW3xKs4KuFoUz1jzXcIOwE445Kcr8hl-4pd"/>
+</div>
+</td>
+<td class="px-4 py-1 font-code-md text-code-md text-primary">KC-FA8833</td>
+<td class="px-4 py-1 font-headline-sm text-headline-sm text-on-surface">Filtro de Ar do Motor - Gol G5/G6 1.0/1.6</td>
+<td class="px-4 py-1 text-on-surface-variant">Kit&amp;Cia</td>
+<td class="px-4 py-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface font-label-sm text-label-sm text-on-surface-variant uppercase">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> Ar
+                                </span>
+</td>
+<td class="px-4 py-1 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors flex items-center justify-center border border-transparent hover:border-secondary">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-5.824 4.74-10.563 10.573-10.564 5.824.001 10.566 4.746 10.566 10.564-.001 5.827-4.739 10.567-10.566 10.567l-.636-.624z"></path></svg>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 (Missing Photo) -->
+<tr class="border-b border-outline-variant hover:bg-surface-container hover:border-l-2 hover:border-l-primary transition-all group h-14 bg-surface-container-lowest">
+<td class="px-4 py-1 text-center">
+<div class="w-12 h-12 bg-surface-variant border border-outline-variant rounded flex items-center justify-center shrink-0 mx-auto text-outline group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">image_not_supported</span>
+</div>
+</td>
+<td class="px-4 py-1 font-code-md text-code-md text-primary">DS-FC5512</td>
+<td class="px-4 py-1 font-headline-sm text-headline-sm text-on-surface">Filtro de Combustível Flex - Gol G4/G5/G6</td>
+<td class="px-4 py-1 text-on-surface-variant">Disauto</td>
+<td class="px-4 py-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface font-label-sm text-label-sm text-on-surface-variant uppercase">
+<span class="w-2 h-2 rounded-full bg-error"></span> Combustível
+                                </span>
+</td>
+<td class="px-4 py-1 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors flex items-center justify-center border border-transparent hover:border-secondary">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-5.824 4.74-10.563 10.573-10.564 5.824.001 10.566 4.746 10.566 10.564-.001 5.827-4.739 10.567-10.566 10.567l-.636-.624z"></path></svg>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-lowest border-t border-outline-variant px-4 py-3 flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant">
+                        Mostrando <span class="font-bold text-on-surface">1–25</span> de <span class="font-bold text-on-surface">342</span>
+</span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center font-label-sm text-label-sm bg-primary text-on-primary">1</button>
+<button class="w-8 h-8 rounded flex items-center justify-center font-label-sm text-label-sm text-on-surface hover:bg-surface-container transition-colors">2</button>
+<button class="w-8 h-8 rounded flex items-center justify-center font-label-sm text-label-sm text-on-surface hover:bg-surface-container transition-colors">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-outline">...</span>
+<button class="w-8 h-8 rounded flex items-center justify-center font-label-sm text-label-sm text-on-surface hover:bg-surface-container transition-colors">14</button>
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Shared Component: Footer -->
+<footer class="bg-surface-container-low dark:bg-tertiary-container w-full py-4 mt-auto border-t border-outline-variant flat flex flex-col md:flex-row justify-between items-center px-margin-desktop">
+<div class="font-label-sm text-label-sm font-bold text-primary dark:text-tertiary-fixed mb-4 md:mb-0">
+                © 2026 Logística Automotiva S.A. - Todos os direitos reservados.
+            </div>
+<div class="flex items-center gap-6">
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Termos de Uso</a>
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Privacidade</a>
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Suporte Técnico</a>
+</div>
+</footer>
+</main>
+</body></html>

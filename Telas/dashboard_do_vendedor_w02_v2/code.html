@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard do Vendedor - AUTO-PEÇAS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#5dfd8a",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e0e3e5",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "secondary-fixed": "#66ff8e",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container-high": "#e5e9eb",
+                      "secondary": "#006d2f",
+                      "primary-container": "#1b365d",
+                      "surface-container-low": "#f1f4f6",
+                      "surface": "#f7fafc",
+                      "inverse-on-surface": "#eef1f3",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#87a0cd",
+                      "on-secondary-fixed-variant": "#005322",
+                      "primary": "#002046",
+                      "error": "#ba1a1a",
+                      "primary-fixed-dim": "#aec7f7",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#aec7f7",
+                      "outline-variant": "#c4c6cf",
+                      "on-secondary-container": "#007232",
+                      "outline": "#74777f",
+                      "surface-container": "#ebeef0",
+                      "on-surface": "#181c1e",
+                      "primary-fixed": "#d6e3ff",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-container": "#a09f9e",
+                      "on-secondary-fixed": "#002109",
+                      "tertiary-container": "#363636",
+                      "secondary-fixed-dim": "#3de273",
+                      "inverse-surface": "#2d3133",
+                      "background": "#f7fafc",
+                      "surface-dim": "#d7dadc",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "surface-tint": "#465f88",
+                      "error-container": "#ffdad6",
+                      "on-background": "#181c1e",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed-variant": "#2e476f",
+                      "on-primary-fixed": "#001b3d",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "surface-bright": "#f7fafc",
+                      "tertiary": "#212121",
+                      "tertiary-fixed": "#e4e2e1",
+                      "on-surface-variant": "#44474e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "margin-mobile": "16px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "code-md": [
+                              "JetBrains Mono"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "code-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-md text-body-md">
+<!-- SideNavBar -->
+<nav class="bg-primary dark:bg-primary-container h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col h-full py-6 px-4 z-50">
+<div class="mb-8">
+<h1 class="font-headline-lg text-headline-lg font-black text-on-primary tracking-tighter">AUTO-PEÇAS</h1>
+<p class="font-label-sm text-label-sm text-primary-fixed-dim">Unidade Matriz</p>
+</div>
+<ul class="flex flex-col gap-2"><li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Início</span>
+</a>
+</li><li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT bg-primary-fixed-dim text-on-primary-fixed font-bold border-l-4 border-secondary hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Busca</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Veículo</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Catálogos</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Histórico</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">CRM</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Configurações</span>
+</a>
+</li></ul>
+</nav>
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim sticky top-0 w-full z-40 border-b border-outline-variant shadow-sm flex items-center justify-between px-margin-desktop py-4 ml-64">
+<div class="font-headline-md text-headline-md text-primary font-bold uppercase">
+            Catálogo Industrial
+        </div>
+<div class="flex items-center gap-4 text-primary dark:text-primary-fixed-dim">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 flex-1 p-margin-desktop bg-background">
+<div class="max-w-container-max mx-auto space-y-8">
+<!-- Hero Search Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-8 shadow-sm flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden group hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-surface-container-low opacity-50 pointer-events-none" style="background-image: radial-gradient(var(--tw-colors-outline-variant) 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="z-10 w-full max-w-3xl relative">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-6 text-center font-bold">Busca Rápida de Peças</h2>
+<div class="relative flex items-center w-full focus-within:ring-2 focus-within:ring-primary rounded-DEFAULT">
+<span class="material-symbols-outlined absolute left-4 text-outline" style="font-variation-settings: 'FILL' 1;">search</span>
+<input class="w-full py-4 pl-12 pr-4 bg-surface-container-lowest border border-outline-variant rounded-DEFAULT font-code-md text-code-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-0 shadow-sm transition-colors h-14" placeholder="Código, descrição ou referência (ex: 201.0813, PH2870A)" type="text"/>
+<button class="absolute right-2 bg-primary text-on-primary px-6 py-2 rounded-DEFAULT font-label-sm text-label-sm font-bold hover:bg-primary-container transition-colors h-10">
+                            BUSCAR
+                        </button>
+</div>
+<!-- Quick Actions -->
+<div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant rounded-full font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">directions_car</span>
+                            Buscar por veículo
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant rounded-full font-label-sm text-label-sm text-on-surface-variant hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                            Últimas consultas
+                        </button>
+</div>
+</div>
+</section>
+<!-- Dashboard Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Summary Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm hover:border-primary transition-colors flex flex-col justify-between h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="p-3 bg-secondary-fixed-dim/20 rounded-full text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Status Sistema</span>
+</div>
+<div>
+<p class="font-headline-lg text-headline-lg font-bold text-on-surface">87</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Catálogos ativos</p>
+</div>
+</div>
+<!-- Summary Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm hover:border-primary transition-colors flex flex-col justify-between h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="p-3 bg-primary-fixed-dim/20 rounded-full text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">update</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sincronização</span>
+</div>
+<div>
+<p class="font-headline-md text-headline-md font-bold text-on-surface">Hoje</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Última atualização</p>
+</div>
+</div>
+<!-- CTA Card -->
+<div class="bg-primary-container border border-primary-container rounded-lg p-6 shadow-sm hover:border-secondary transition-colors flex flex-col justify-between h-full text-on-primary-container">
+<div class="flex items-start justify-between mb-4">
+<div class="p-3 bg-secondary rounded-full text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span>
+</div>
+</div>
+<div>
+<p class="font-headline-sm text-headline-sm font-bold text-on-primary mb-2">Suporte Técnico</p>
+<p class="font-body-md text-body-md mb-4">Dúvidas sobre compatibilidade?</p>
+<button class="flex items-center gap-2 text-secondary-fixed font-label-sm text-label-sm font-bold uppercase hover:underline">
+                            Falar no WhatsApp
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Recent Consultations List -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-sm text-headline-sm font-bold text-primary">Consultados recentemente</h3>
+<a class="font-label-sm text-label-sm font-bold text-secondary hover:underline" href="#">Ver todo histórico</a>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-low text-on-surface-variant">
+<th class="py-3 px-4 font-label-sm text-label-sm font-bold uppercase">Produto</th>
+<th class="py-3 px-4 font-label-sm text-label-sm font-bold uppercase">Código</th>
+<th class="py-3 px-4 font-label-sm text-label-sm font-bold uppercase">Fabricante</th>
+<th class="py-3 px-4 font-label-sm text-label-sm font-bold uppercase text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Filtro de Óleo</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Em Estoque</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 font-code-md text-code-md text-on-surface">PH2870A</td>
+<td class="py-3 px-4 text-on-surface-variant">Fram</td>
+<td class="py-3 px-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors" title="Copiar Código">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors bg-[#F9FAFB] group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Pastilha de Freio Dianteira</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Em Estoque</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 font-code-md text-code-md text-on-surface">PD/328</td>
+<td class="py-3 px-4 text-on-surface-variant">Fras-le</td>
+<td class="py-3 px-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors" title="Copiar Código">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Vela de Ignição</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Baixo Estoque</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 font-code-md text-code-md text-on-surface">BKR6E-11</td>
+<td class="py-3 px-4 text-on-surface-variant">NGK</td>
+<td class="py-3 px-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors" title="Copiar Código">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors bg-[#F9FAFB] group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Amortecedor Traseiro</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Em Estoque</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 font-code-md text-code-md text-on-surface">GB47094</td>
+<td class="py-3 px-4 text-on-surface-variant">Monroe</td>
+<td class="py-3 px-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors" title="Copiar Código">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Correia Dentada</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Sem Estoque</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 font-code-md text-code-md text-on-surface">CT1044</td>
+<td class="py-3 px-4 text-on-surface-variant">Contitech</td>
+<td class="py-3 px-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors" title="Copiar Código">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-tertiary-container w-full py-4 mt-auto border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-desktop ml-64">
+<div class="font-label-sm text-label-sm font-bold text-primary dark:text-tertiary-fixed mb-2 md:mb-0">© 2026 Log stica Automotiva S.A. - Todos os direitos reservados.</div>
+<ul class="flex items-center gap-4">
+<li class="">
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Termos de Uso</a>
+</li>
+<li class="">
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Privacidade</a>
+</li>
+<li class="">
+<a class="font-label-sm text-label-sm font-body-md text-body-md text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Suporte Técnico</a>
+</li>
+</ul>
+</footer>
+</body></html>

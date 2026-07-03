@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cadastro de Oficina - CRM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#d6e3ff",
+                      "primary-container": "#1b365d",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "secondary": "#006d2f",
+                      "on-surface": "#181c1e",
+                      "secondary-container": "#5dfd8a",
+                      "on-secondary-fixed-variant": "#005322",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-container": "#ebeef0",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "on-tertiary-container": "#a09f9e",
+                      "primary-fixed-dim": "#aec7f7",
+                      "background": "#f7fafc",
+                      "surface-variant": "#e0e3e5",
+                      "on-error": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-container": "#007232",
+                      "on-primary-fixed-variant": "#2e476f",
+                      "on-primary-fixed": "#001b3d",
+                      "tertiary-fixed": "#e4e2e1",
+                      "on-secondary-fixed": "#002109",
+                      "inverse-surface": "#2d3133",
+                      "tertiary": "#212121",
+                      "surface-bright": "#f7fafc",
+                      "surface": "#f7fafc",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-surface-variant": "#44474e",
+                      "secondary-fixed-dim": "#3de273",
+                      "surface-tint": "#465f88",
+                      "on-background": "#181c1e",
+                      "inverse-on-surface": "#eef1f3",
+                      "tertiary-container": "#363636",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-primary-container": "#87a0cd",
+                      "surface-dim": "#d7dadc",
+                      "surface-container-low": "#f1f4f6",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#aec7f7",
+                      "secondary-fixed": "#66ff8e",
+                      "primary": "#002046",
+                      "surface-container-high": "#e5e9eb",
+                      "on-secondary": "#ffffff",
+                      "outline-variant": "#c4c6cf",
+                      "outline": "#74777f",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "base": "8px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Inter"],
+                      "code-md": ["JetBrains Mono"],
+                      "headline-md": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "code-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom Stepper Styles */
+        .step-active .step-icon { @apply bg-primary text-on-primary border-primary; }
+        .step-completed .step-icon { @apply bg-secondary text-on-secondary border-secondary; }
+        .step-inactive .step-icon { @apply bg-surface border-outline-variant text-on-surface-variant; }
+        
+        /* Custom Checkbox/Radio */
+        .industrial-radio:checked + div { @apply border-primary bg-primary-fixed ring-1 ring-primary; }
+        .industrial-checkbox:checked + div { @apply border-primary bg-primary-fixed; }
+        .industrial-checkbox:checked + div svg { @apply opacity-100; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row antialiased">
+<!-- TopAppBar (Mobile Only - Hidden on Desktop per logic, though usually top app bar is everywhere, JSON says sticky top-0 w-full ml-64 for desktop. Adjusting for responsive) -->
+<header class="sticky top-0 w-full z-40 bg-surface dark:bg-surface-dim border-b border-outline-variant shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4 md:ml-64 md:w-[calc(100%-16rem)] flex-shrink-0 md:hidden">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant p-2 rounded hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary font-bold uppercase">CATÁLOGO INDUSTRIAL</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Permanent on Desktop) -->
+<nav class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-primary dark:bg-primary-container border-r border-outline-variant dark:border-outline py-6 px-4 z-50">
+<!-- Brand -->
+<div class="flex items-center gap-3 px-2 mb-8">
+<div class="w-10 h-10 bg-on-primary rounded-DEFAULT flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-weight="fill">storefront</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="font-headline-lg text-headline-lg font-black text-on-primary tracking-tighter truncate">AUTO-PEÇAS</span>
+<span class="font-label-sm text-label-sm text-primary-fixed-dim truncate">Unidade Matriz</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-headline-sm text-headline-sm">Início</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-headline-sm text-headline-sm">Busca</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="font-headline-sm text-headline-sm">Veículo</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-headline-sm text-headline-sm">Catálogos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-headline-sm text-headline-sm">Histórico</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-headline-sm text-headline-sm">CRM</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT bg-primary-fixed-dim text-on-primary-fixed font-bold border-l-4 border-secondary hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-weight="fill">settings</span>
+<span class="font-headline-sm text-headline-sm">Configurações</span>
+</a></div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow md:ml-64 flex flex-col w-full bg-background relative min-h-[calc(100vh-64px)] md:min-h-screen">
+<!-- Desktop TopAppBar -->
+<header class="hidden md:flex sticky top-0 w-full z-40 bg-surface dark:bg-surface-dim border-b border-outline-variant shadow-sm items-center justify-between px-margin-desktop py-4">
+<div class="flex items-center gap-4 w-1/3">
+<h1 class="font-headline-md text-headline-md text-primary font-bold uppercase">CATÁLOGO INDUSTRIAL</h1>
+</div>
+<!-- Search Bar placeholder from TopAppBar component logic -->
+<div class="w-1/3 flex justify-center">
+<div class="relative w-full max-w-md focus-within:ring-2 focus-within:ring-primary rounded-DEFAULT">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary focus:ring-0" placeholder="Buscar cliente, código..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2 w-1/3 justify-end">
+<button class="p-2 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-margin-mobile md:p-margin-desktop flex-grow flex justify-center">
+<div class="w-full max-w-4xl flex flex-col gap-6">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Novo Cliente (Oficina)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Cadastre uma nova oficina no sistema de CRM para gerenciamento de catálogos e orçamentos.</p>
+</div>
+<div class="flex gap-3 shrink-0">
+<button class="px-4 py-2 border border-outline text-on-surface rounded-DEFAULT font-label-sm text-label-sm uppercase tracking-wide hover:bg-surface-container-high transition-colors" type="button">
+                            Cancelar
+                        </button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded-DEFAULT font-label-sm text-label-sm uppercase tracking-wide hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2" form="registration-form" type="submit">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                            Salvar Cadastro
+                        </button>
+</div>
+</div>
+<!-- Registration Form Area (Bento Layout style) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Left Column: Stepper -->
+<div class="lg:col-span-3 sticky top-24 bg-surface rounded-DEFAULT border border-outline-variant p-4 shadow-sm hidden md:block">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-6">Progresso</h3>
+<div class="flex flex-col gap-6 relative">
+<!-- Line connecting steps -->
+<div class="absolute left-4 top-4 bottom-4 w-px bg-outline-variant z-0"></div>
+<!-- Step 1: Active -->
+<div class="relative z-10 flex gap-4 items-start step-completed">
+<div class="w-8 h-8 rounded-full border-2 bg-surface flex items-center justify-center shrink-0 step-icon mt-0.5"><span class="material-symbols-outlined text-[16px]">check</span></div>
+<div>
+<h4 class="font-label-sm text-label-sm uppercase text-primary">Dados Básicos</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-xs mt-0.5">CNPJ, Nome, Contato</p>
+</div>
+</div>
+<!-- Step 2: Inactive -->
+<div class="relative z-10 flex gap-4 items-start step-completed">
+<div class="w-8 h-8 rounded-full border-2 bg-surface flex items-center justify-center shrink-0 step-icon mt-0.5"><span class="material-symbols-outlined text-[16px]">check</span></div>
+<div>
+<h4 class="font-label-sm text-label-sm uppercase">Especialização</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-xs mt-0.5">Marcas e Frotas</p>
+</div>
+</div>
+<!-- Step 3: Inactive -->
+<div class="relative z-10 flex gap-4 items-start step-active">
+<div class="w-8 h-8 rounded-full border-2 bg-surface flex items-center justify-center shrink-0 step-icon mt-0.5"><span class="font-label-sm text-label-sm">3</span></div>
+<div>
+<h4 class="font-label-sm text-label-sm uppercase">Localização</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-xs mt-0.5">Endereço e Logística</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Form Sections -->
+<div class="lg:col-span-9 flex flex-col gap-6">
+<form class="flex flex-col gap-6" id="registration-form">
+<!-- Section 1: Basic Info -->
+<section class="bg-surface border border-outline-variant rounded-DEFAULT shadow-sm overflow-hidden" id="step-1">
+<div class="bg-surface-container-low border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">corporate_fare</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">1. Dados Básicos</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+<!-- Input Group: CNPJ -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2 lg:col-span-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="cnpj">CNPJ *</label>
+<div class="relative">
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-code-md text-code-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required="" type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-primary font-label-sm text-label-sm hover:underline" type="button">
+                                                Consultar Receita
+                                            </button>
+</div>
+</div>
+<!-- Input Group: Razão Social -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="razao_social">Razão Social *</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="razao_social" name="razao_social" placeholder="Auto Mecânica Silva Ltda" required="" type="text"/>
+</div>
+<!-- Input Group: Nome Fantasia -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="nome_fantasia">Nome Fantasia</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="nome_fantasia" name="nome_fantasia" placeholder="Mecânica do Silva" type="text"/>
+</div>
+<!-- Input Group: Telefone Principal -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="telefone">Telefone / WhatsApp *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">call</span>
+<input class="w-full h-10 pl-10 pr-3 bg-surface border border-outline-variant rounded-DEFAULT font-code-md text-code-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="telefone" name="telefone" placeholder="(11) 99999-9999" required="" type="tel"/>
+</div>
+</div>
+<!-- Input Group: Email -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="email">E-mail Corporativo</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">mail</span>
+<input class="w-full h-10 pl-10 pr-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="email" name="email" placeholder="contato@mecanica.com.br" type="email"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Specialization (Glass/Bento style for selection) -->
+<section class="bg-surface border border-outline-variant rounded-DEFAULT shadow-sm overflow-hidden" id="step-2">
+<div class="bg-surface-container-low border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">build</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">2. Especialização da Oficina</h3>
+</div>
+<div class="p-6 flex flex-col gap-6">
+<!-- Category Selection (Radio Buttons styled as cards) -->
+<div class="flex flex-col gap-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Perfil de Atendimento *</label>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<label class="relative cursor-pointer group">
+<input checked="" class="peer sr-only industrial-radio" name="perfil" type="radio" value="multimarcas"/>
+<div class="border border-outline-variant rounded-DEFAULT p-4 flex flex-col gap-2 items-center text-center hover:bg-surface-container-low transition-colors h-full">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">dashboard_customize</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Multimarcas</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">Atende todas as montadoras em geral.</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only industrial-radio" name="perfil" type="radio" value="especializada"/>
+<div class="border border-outline-variant rounded-DEFAULT p-4 flex flex-col gap-2 items-center text-center hover:bg-surface-container-low transition-colors h-full">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">verified</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Especializada</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">Foco em montadoras ou grupos específicos.</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only industrial-radio" name="perfil" type="radio" value="frota"/>
+<div class="border border-outline-variant rounded-DEFAULT p-4 flex flex-col gap-2 items-center text-center hover:bg-surface-container-low transition-colors h-full">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">local_shipping</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Linha Pesada</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">Caminhões, ônibus e frotas utilitárias.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Manufacturer Brands (Checkboxes as tags) -->
+<div class="flex flex-col gap-3 pt-4 border-t border-outline-variant">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Montadoras Principais</label>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">Selecione as mais frequentes</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<!-- Fiat -->
+<label class="relative cursor-pointer">
+<input class="peer sr-only industrial-checkbox" name="marca" type="checkbox" value="fiat"/>
+<div class="border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-surface-container-low transition-colors select-none">
+<span class="font-label-sm text-label-sm text-on-surface">Fiat</span>
+<svg class="w-3 h-3 text-primary opacity-0 transition-opacity" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</label>
+<!-- Jeep -->
+<label class="relative cursor-pointer">
+<input class="peer sr-only industrial-checkbox" name="marca" type="checkbox" value="jeep"/>
+<div class="border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-surface-container-low transition-colors select-none">
+<span class="font-label-sm text-label-sm text-on-surface">Jeep</span>
+<svg class="w-3 h-3 text-primary opacity-0 transition-opacity" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</label>
+<!-- VW -->
+<label class="relative cursor-pointer">
+<input class="peer sr-only industrial-checkbox" name="marca" type="checkbox" value="vw"/>
+<div class="border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-surface-container-low transition-colors select-none">
+<span class="font-label-sm text-label-sm text-on-surface">Volkswagen</span>
+<svg class="w-3 h-3 text-primary opacity-0 transition-opacity" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</label>
+<!-- GM -->
+<label class="relative cursor-pointer">
+<input class="peer sr-only industrial-checkbox" name="marca" type="checkbox" value="gm"/>
+<div class="border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-surface-container-low transition-colors select-none">
+<span class="font-label-sm text-label-sm text-on-surface">Chevrolet</span>
+<svg class="w-3 h-3 text-primary opacity-0 transition-opacity" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</label>
+<!-- Stellantis Group Tag -->
+<label class="relative cursor-pointer ml-auto">
+<input class="peer sr-only industrial-checkbox" name="grupo" type="checkbox" value="stellantis"/>
+<div class="border border-primary bg-surface-container px-4 py-1.5 flex items-center gap-2 hover:bg-surface-variant transition-colors select-none rounded-DEFAULT shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">account_tree</span>
+<span class="font-label-sm text-label-sm text-primary uppercase">Grupo Stellantis</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Location -->
+<section class="bg-surface border border-outline-variant rounded-DEFAULT shadow-sm overflow-hidden" id="step-3">
+<div class="bg-surface-container-low border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">pin_drop</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">3. Localização e Endereço</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
+<!-- Input Group: CEP -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="cep">CEP *</label>
+<div class="relative">
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-code-md text-code-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="cep" name="cep" placeholder="00000-000" required="" type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+</div>
+</div>
+<!-- Input Group: Logradouro -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="logradouro">Logradouro *</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-surface-container-lowest" id="logradouro" name="logradouro" placeholder="Av. Industrial" required="" type="text"/>
+</div>
+<!-- Input Group: Número -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="numero">Número *</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-code-md text-code-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="numero" name="numero" placeholder="1000" required="" type="text"/>
+</div>
+<!-- Input Group: Complemento -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="complemento">Complemento</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="complemento" name="complemento" placeholder="Galpão 3, Sala 2" type="text"/>
+</div>
+<!-- Input Group: Bairro -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="bairro">Bairro *</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-surface-container-lowest" id="bairro" name="bairro" placeholder="Distrito Industrial" required="" type="text"/>
+</div>
+<!-- Input Group: Cidade/UF -->
+<div class="flex flex-col gap-1.5 col-span-1 md:col-span-2 flex-row gap-4">
+<div class="flex-grow flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="cidade">Cidade *</label>
+<input class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-surface-container-lowest" id="cidade" name="cidade" placeholder="São Paulo" required="" type="text"/>
+</div>
+<div class="w-24 flex flex-col gap-1.5 shrink-0">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide" for="uf">UF *</label>
+<select class="w-full h-10 px-3 bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-surface-container-lowest appearance-none" id="uf" name="uf" required="">
+<option value="SP">SP</option>
+<option value="RJ">RJ</option>
+<option value="MG">MG</option>
+<!-- Add others as needed -->
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- Mobile Action Buttons (Sticky at bottom on small screens) -->
+<div class="md:hidden sticky bottom-0 bg-surface border-t border-outline-variant p-4 flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 -mx-margin-mobile px-margin-mobile mt-4">
+<button class="flex-1 py-3 border border-outline text-on-surface rounded-DEFAULT font-label-sm text-label-sm uppercase tracking-wide hover:bg-surface-container-high transition-colors text-center" type="button">
+                                    Cancelar
+                                </button>
+<button class="flex-1 py-3 bg-primary text-on-primary rounded-DEFAULT font-label-sm text-label-sm uppercase tracking-wide hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2" form="registration-form" type="submit">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                                    Salvar
+                                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full py-4 mt-auto border-t border-outline-variant bg-surface-container-low dark:bg-tertiary-container flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop">
+<div class="font-label-sm text-label-sm font-bold text-primary dark:text-tertiary-fixed mb-2 md:mb-0 text-center md:text-left">© 2026 Logística Automotiva S.A. - Todos os direitos reservados.</div>
+<div class="flex gap-4">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Termos de Uso</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Privacidade</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Suporte Técnico</a>
+</div>
+</footer>
+</main>
+<script>
+        // Lightweight interaction for focusing form sections to update stepper visually (desktop)
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const steps = document.querySelectorAll('.step-active, .step-inactive');
+            
+            // Simple observer to highlight current step based on scroll/focus
+            const options = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px',
+                threshold: 0.5
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        const id = entry.target.id;
+                        const stepIndex = parseInt(id.split('-')[1]) - 1;
+                        
+                        steps.forEach((step, idx) => {
+                            if(idx === stepIndex) {
+                                step.classList.remove('step-inactive', 'opacity-60');
+                                step.classList.add('step-active');
+                            } else if (idx < stepIndex) {
+                                step.classList.remove('step-active', 'step-inactive', 'opacity-60');
+                                step.classList.add('step-completed'); // Usually green/done state
+                                step.querySelector('.step-icon').innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+                            } else {
+                                step.classList.remove('step-active', 'step-completed');
+                                step.classList.add('step-inactive', 'opacity-60');
+                                step.querySelector('.step-icon').innerHTML = `<span class="font-label-sm text-label-sm">${idx + 1}</span>`;
+                            }
+                        });
+                    }
+                });
+            }, options);
+            
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body></html>

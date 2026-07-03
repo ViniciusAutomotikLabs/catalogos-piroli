@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Carrinho de Orçamento - AUTO-PEÇAS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e5e9eb",
+                        "on-surface-variant": "#44474e",
+                        "background": "#f7fafc",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed-variant": "#005322",
+                        "primary-container": "#1b365d",
+                        "on-secondary-fixed": "#002109",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#e4e2e1",
+                        "secondary-fixed-dim": "#3de273",
+                        "primary-fixed": "#d6e3ff",
+                        "on-primary-fixed-variant": "#2e476f",
+                        "tertiary-fixed-dim": "#c8c6c6",
+                        "secondary": "#006d2f",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#66ff8e",
+                        "surface-container-low": "#f1f4f6",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#aec7f7",
+                        "surface-tint": "#465f88",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c4c6cf",
+                        "surface": "#f7fafc",
+                        "secondary-container": "#5dfd8a",
+                        "primary": "#002046",
+                        "outline": "#74777f",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-bright": "#f7fafc",
+                        "tertiary": "#212121",
+                        "tertiary-container": "#363636",
+                        "on-secondary-container": "#007232",
+                        "on-tertiary-container": "#a09f9e",
+                        "on-primary-container": "#87a0cd",
+                        "inverse-surface": "#2d3133",
+                        "surface-dim": "#d7dadc",
+                        "surface-container": "#ebeef0",
+                        "inverse-on-surface": "#eef1f3",
+                        "primary-fixed-dim": "#aec7f7",
+                        "error": "#ba1a1a",
+                        "on-background": "#181c1e",
+                        "on-surface": "#181c1e",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001b3d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "base": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "code-md": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "code-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for data density areas */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f4f6; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4c6cf; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #74777f; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-primary border-r border-outline-variant py-6 px-4 z-50">
+<div class="mb-8 flex items-center gap-3 px-2">
+<div class="w-10 h-10 bg-surface rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-weight="fill">settings_applications</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-black text-on-primary tracking-tighter">AUTO-PEÇAS</h1>
+<p class="font-label-sm text-label-sm text-primary-fixed-dim">Unidade Matriz</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2"><a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-headline-sm text-headline-sm">Início</span>
+</a><a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-headline-sm text-headline-sm">Busca</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="font-headline-sm text-headline-sm">Veículo</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-headline-sm text-headline-sm">Catálogos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-headline-sm text-headline-sm">Histórico</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-headline-sm text-headline-sm">CRM</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-headline-sm text-headline-sm">Configurações</span>
+</a></nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col min-h-screen max-w-container-max mx-auto w-full">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-40 bg-surface border-b border-outline-variant shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-primary focus-within:ring-2 focus-within:ring-primary rounded p-1">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-md text-headline-md text-primary font-bold uppercase">CAT#193;LOGO INDUSTRIAL</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant mr-2 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md text-on-surface p-0 w-48 placeholder:text-on-surface-variant" placeholder="Adicionar por código..." type="text"/>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full focus-within:ring-2 focus-within:ring-primary">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 p-margin-mobile md:p-margin-desktop overflow-auto">
+<div class="flex flex-col lg:flex-row gap-6">
+<!-- Lista de Itens (Esquerda) -->
+<section class="flex-1 flex flex-col gap-4">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-background">Itens Selecionados (3)</h3>
+<button class="text-error font-label-sm text-label-sm hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">delete_sweep</span> Limpar Lista
+                        </button>
+</div>
+<!-- Item 1 -->
+<article class="bg-surface border border-outline-variant rounded-lg p-4 flex flex-col sm:flex-row gap-4 hover:border-primary transition-colors relative group shadow-sm">
+<div class="w-full sm:w-24 h-24 bg-surface-container-low border border-outline-variant rounded flex items-center justify-center shrink-0 overflow-hidden">
+<img alt="Amortecedor" class="object-cover w-full h-full mix-blend-multiply" data-alt="A highly detailed close-up shot of a pristine, metallic automotive shock absorber resting on a clean, stark white workbench in a brightly lit industrial warehouse setting. The lighting is cold, crisp, and high-key, emphasizing the polished steel textures and heavy-duty mechanical engineering. The aesthetic is modern industrial, fitting a professional auto parts catalog, with sharp focus and subtle reflections on the metallic surfaces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCWy5hvFK4E-cGgPReK6AmDgh6VL-UZ_MNA92necJxYFvI3Wm9IiMup0f2CRrfVZJ4ZVRKei9UynKAJ223mGMK6fW8-YtNxrcYbMiF-fCAPnNqycXhW7XJh1To11xrI9SUoG8Xb5Mx7x8rZGz3wo_Zn15Tz3ip0dFDKnyGhdcwRQQjjJk4SVD-I9t3oWFSH5EMR6JwhJmYKibneFS3F4KrhKWVKGeGp7fn5z0X--b85eHj5LpSdmzhgmgcfEZiiZvexSR2nbMihox8"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h4 class="font-body-lg text-body-lg font-bold text-primary">Amortecedor Dianteiro Direito</h4>
+<button class="text-outline hover:text-error transition-colors sm:opacity-0 group-hover:opacity-100 p-1">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-code-md text-code-md text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">MON-334345</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-container/20 px-2 py-0.5 rounded flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Estoque: 12</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase">Marca: Monroe | Ref: VW-0982</p>
+</div>
+<div class="flex items-end justify-between mt-4">
+<div class="flex items-center border border-outline-variant rounded overflow-hidden h-8">
+<button class="px-2 bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-code-md">-</button>
+<input class="w-12 text-center border-none focus:ring-0 font-code-md text-code-md h-full p-0 bg-surface" min="1" type="number" value="2"/>
+<button class="px-2 bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-code-md">+</button>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant">R$ 245,90 / un</p>
+<p class="font-headline-sm text-headline-sm text-on-background font-bold font-code-md tracking-tight">R$ 491,80</p>
+</div>
+</div>
+</div>
+</article>
+<!-- Item 2 -->
+<article class="bg-surface border border-outline-variant rounded-lg p-4 flex flex-col sm:flex-row gap-4 hover:border-primary transition-colors relative group shadow-sm">
+<div class="w-full sm:w-24 h-24 bg-surface-container-low border border-outline-variant rounded flex items-center justify-center shrink-0 overflow-hidden">
+<span class="material-symbols-outlined text-4xl text-outline-variant">inventory_2</span>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h4 class="font-body-lg text-body-lg font-bold text-primary">Kit Embreagem LUK 200mm</h4>
+<button class="text-outline hover:text-error transition-colors sm:opacity-0 group-hover:opacity-100 p-1">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-code-md text-code-md text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">LUK-620300</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-container/20 px-2 py-0.5 rounded flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Estoque: 4</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase">Marca: LuK | Ref: GM-443</p>
+</div>
+<div class="flex items-end justify-between mt-4">
+<div class="flex items-center border border-outline-variant rounded overflow-hidden h-8">
+<button class="px-2 bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-code-md">-</button>
+<input class="w-12 text-center border-none focus:ring-0 font-code-md text-code-md h-full p-0 bg-surface" min="1" type="number" value="1"/>
+<button class="px-2 bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-code-md">+</button>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant">R$ 580,00 / un</p>
+<p class="font-headline-sm text-headline-sm text-on-background font-bold font-code-md tracking-tight">R$ 580,00</p>
+</div>
+</div>
+</div>
+</article>
+<!-- Add Quick Item -->
+<button class="w-full border-2 border-dashed border-outline-variant rounded-lg p-4 flex items-center justify-center gap-2 text-primary hover:bg-surface-container-low hover:border-primary transition-colors mt-2">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-sm text-label-sm">Adicionar Item Avulso</span>
+</button>
+</section>
+<!-- Resumo e Ações (Direita) -->
+<aside class="w-full lg:w-96 flex flex-col gap-4">
+<div class="bg-surface border border-outline-variant rounded-lg p-6 sticky top-24 shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold border-b border-outline-variant pb-3 mb-4">Resumo do Orçamento</h3>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between font-body-md text-body-md text-on-surface-variant">
+<span class="">Subtotal (3 itens)</span>
+<span class="font-code-md">R$ 1.071,80</span>
+</div>
+<div class="flex justify-between font-body-md text-body-md text-on-surface-variant">
+<span class="">Desconto Comercial</span>
+<span class="font-code-md text-error">- R$ 0,00</span>
+</div>
+<div class="flex justify-between font-body-md text-body-md text-on-surface-variant">
+<span class="">Impostos Estimados</span>
+<span class="font-code-md">R$ 185,42</span>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-4 mb-6">
+<div class="flex justify-between items-end">
+<span class="font-body-lg text-body-lg font-bold text-on-background">Total Geral</span>
+<span class="font-headline-lg text-headline-lg font-bold text-primary font-code-md tracking-tighter">R$ 1.071,80</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 text-right">Válido por 5 dias úteis</p>
+</div>
+<div class="space-y-3">
+<button class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-sm text-label-sm uppercase tracking-wide py-3 px-4 rounded flex items-center justify-center gap-2 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">send</span>
+                                Gerar Resumo para WhatsApp
+                            </button>
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wide py-3 px-4 rounded flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">print</span>
+                                Imprimir PDF
+                            </button>
+<button class="w-full bg-surface-container-high hover:bg-surface-variant border border-outline-variant text-on-surface font-label-sm text-label-sm uppercase py-3 px-4 rounded transition-colors">
+                                Salvar como Rascunho
+                            </button>
+</div>
+<div class="mt-6 p-3 bg-surface-container-low border border-outline-variant rounded text-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Cliente Vinculado</label>
+<div class="flex items-center justify-between bg-surface border border-outline-variant rounded px-3 py-2 cursor-pointer hover:border-primary">
+<span class="font-code-md text-code-md text-primary">Oficina do João</span>
+<span class="material-symbols-outlined text-[16px] text-outline">edit</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full py-4 mt-auto bg-surface-container-low border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop">
+<span class="font-label-sm text-label-sm font-bold text-primary">© 2026 Logística Automotiva S.A. - Todos os direitos reservados.</span>
+<div class="flex gap-4 mt-2 md:mt-0">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Termos de Uso</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Privacidade</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity" href="#">Suporte Técnico</a>
+</div>
+</footer>
+</main>
+<!-- Mobile Bottom NavBar -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface border-t border-outline-variant flex justify-around items-center py-2 z-50 shadow-[0_-2px_4px_rgba(0,0,0,0.05)] pb-safe">
+<a class="flex flex-col items-center p-2 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-bold mt-1">Busca</span>
+</a>
+<a class="flex flex-col items-center p-2 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] font-bold mt-1">Catálogo</span>
+</a>
+<a class="flex flex-col items-center p-2 text-primary" href="#">
+<div class="relative">
+<span class="material-symbols-outlined" data-weight="fill">shopping_cart</span>
+<span class="absolute -top-1 -right-2 bg-error text-on-error text-[10px] font-bold px-1.5 rounded-full">3</span>
+</div>
+<span class="text-[10px] font-bold mt-1">Orçamento</span>
+</a>
+<a class="flex flex-col items-center p-2 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold mt-1">Perfil</span>
+</a>
+</nav>
+</body></html>

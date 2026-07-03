@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Catálogos na Nuvem - Auto-Peças</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#212121",
+                      "primary": "#002046",
+                      "surface-container-low": "#f1f4f6",
+                      "surface": "#f7fafc",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#66ff8e",
+                      "on-tertiary-container": "#a09f9e",
+                      "surface-tint": "#465f88",
+                      "surface-container-highest": "#e0e3e5",
+                      "background": "#f7fafc",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed": "#002109",
+                      "tertiary-container": "#363636",
+                      "outline-variant": "#c4c6cf",
+                      "on-primary-container": "#87a0cd",
+                      "surface-bright": "#f7fafc",
+                      "primary-container": "#1b365d",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "on-background": "#181c1e",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "on-secondary-container": "#007232",
+                      "surface-dim": "#d7dadc",
+                      "surface-container": "#ebeef0",
+                      "primary-fixed": "#d6e3ff",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "tertiary-fixed": "#e4e2e1",
+                      "secondary-container": "#5dfd8a",
+                      "inverse-on-surface": "#eef1f3",
+                      "on-surface": "#181c1e",
+                      "primary-fixed-dim": "#aec7f7",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-high": "#e5e9eb",
+                      "inverse-surface": "#2d3133",
+                      "on-surface-variant": "#44474e",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#005322",
+                      "on-primary-fixed-variant": "#2e476f",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed-dim": "#3de273",
+                      "outline": "#74777f",
+                      "inverse-primary": "#aec7f7",
+                      "secondary": "#006d2f",
+                      "on-primary-fixed": "#001b3d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "margin-mobile": "16px",
+                      "base": "8px",
+                      "margin-desktop": "32px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "code-md": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "code-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+          font-variation-settings: 'FILL' 1;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="bg-primary dark:bg-primary-container h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col py-6 px-4 z-50">
+<div class="mb-8 px-2 flex items-center gap-3">
+<img alt="Store Logo" class="w-10 h-10 rounded bg-surface object-cover" data-alt="A small, professional auto parts store logo symbol, high contrast, industrial modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASsNWiIdWJRRSeZIiKP9jVUW017mvtATMcIg3r7WxHM-SySu-Y2iTOcDb6PmNOewNTTmQbvax-yCBoSydJ2ZLgA9rMMpgoM8GqAARBa8gtOJdEP-8qi8h9uLffCw2FyRw2VHZWIvOrGEu2mJaWfxwUTbxoPGGz4VN6YpW3PhYS7zisOHG1VjUUO2nW8H4Dqv0D6ijX48QmqkL3T6Ou7nJ7tlWCf-otSkS6pvrU3XCZ5oCW3H97RwovNecCJy_lkvJP2qcsOs8PyRgI"/>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-black text-on-primary tracking-tighter">AUTO-PEÇAS</h1>
+<p class="font-label-sm text-label-sm text-on-primary-container">Unidade Matriz</p>
+</div>
+</div>
+<ul class="flex-1 space-y-2"><li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">In cio</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Busca</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Veículo</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded bg-primary-fixed-dim text-on-primary-fixed font-bold border-l-4 border-secondary hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined filled" data-icon="menu_book">menu_book</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Catálogos</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Histórico</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">CRM</span>
+</a>
+</li><li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-primary-container dark:text-primary-fixed-dim hover:bg-primary-fixed-dim/20 transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-headline-sm text-headline-sm font-label-sm text-label-sm">Configurações</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim sticky top-0 w-full z-40 border-b border-outline-variant shadow-sm flex items-center justify-between px-margin-desktop py-4 focus-within:ring-2 focus-within:ring-primary">
+<div class="flex items-center gap-4 flex-1 max-w-2xl">
+<h2 class="font-headline-md text-headline-md text-primary font-bold uppercase hidden md:block">Catálogo Industrial</h2>
+<div class="relative w-full max-w-md ml-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant" placeholder="Buscar catálogos..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-margin-desktop bg-background">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Catálogos na Nuvem</h1>
+<p class="text-on-surface-variant">Gerencie suas fontes de dados e sincronizações automáticas.</p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-sm text-label-sm flex items-center gap-2 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    NOVO CATÁLOGO
+                </button>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
+<!-- Card 1: Disauto -->
+<div class="bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors group p-4 flex flex-col h-full shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-low rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="database">database</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">Disauto</h3>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-secondary-container/20 border border-secondary-container">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-label-sm text-on-secondary-container uppercase">OK</span>
+</div>
+</div>
+<div class="space-y-3 mb-6 flex-1">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Produtos</span>
+<span class="font-code-md text-code-md text-on-surface">45.201</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Imagens</span>
+<span class="font-code-md text-code-md text-on-surface">38.900</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Última Sinc.</span>
+<span class="font-body-md text-body-md text-on-surface">Há 2h</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 bg-surface-container-high hover:bg-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded transition-colors text-center border border-outline-variant">
+                            Detalhes
+                        </button>
+<button class="p-2 bg-surface-container-high hover:bg-outline-variant rounded border border-outline-variant text-on-surface transition-colors" title="Forçar Sincronização">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Iguaçu -->
+<div class="bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors group p-4 flex flex-col h-full shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-low rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="database">database</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">Iguaçu</h3>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-[#fff8e1] border border-[#ffe082]">
+<div class="w-2 h-2 rounded-full bg-[#fbc02d]"></div>
+<span class="font-label-sm text-label-sm text-[#f57f17] uppercase">Processando</span>
+</div>
+</div>
+<div class="space-y-3 mb-6 flex-1">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Produtos</span>
+<span class="font-code-md text-code-md text-on-surface">12.850</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Imagens</span>
+<span class="font-code-md text-code-md text-on-surface">10.120</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Progresso</span>
+<div class="w-24 bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-[#fbc02d] h-full w-3/4"></div>
+</div>
+</div>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 bg-surface-container-high hover:bg-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded transition-colors text-center border border-outline-variant">
+                            Detalhes
+                        </button>
+<button class="p-2 bg-surface-container-high hover:bg-outline-variant rounded border border-outline-variant text-on-surface-variant transition-colors cursor-not-allowed opacity-50" disabled="" title="Sincronização em andamento">
+<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Kit&Cia -->
+<div class="bg-surface rounded-lg border border-error hover:border-error transition-colors group p-4 flex flex-col h-full shadow-sm relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-error-container/30 rounded flex items-center justify-center border border-error-container">
+<span class="material-symbols-outlined text-error" data-icon="error">error</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Kit&amp;Cia</h3>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-error-container border border-error/20">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-label-sm text-label-sm text-on-error-container uppercase">Erro</span>
+</div>
+</div>
+<div class="space-y-3 mb-6 flex-1">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Produtos</span>
+<span class="font-code-md text-code-md text-on-surface">8.400</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Imagens</span>
+<span class="font-code-md text-code-md text-on-surface">7.900</span>
+</div>
+<div class="p-2 bg-error-container/20 rounded border border-error/20 mt-2">
+<span class="font-label-sm text-label-sm text-error block mb-1">Falha de Autenticação</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">Token expirado na última tentativa (Ontem, 23:40).</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 bg-surface-container-high hover:bg-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded transition-colors text-center border border-outline-variant">
+                            Ver Logs
+                        </button>
+<button class="p-2 bg-primary text-on-primary hover:bg-primary/90 rounded border border-primary transition-colors" title="Tentar Novamente">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Bosch -->
+<div class="bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors group p-4 flex flex-col h-full shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-low rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="api">api</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">Bosch</h3>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-secondary-container/20 border border-secondary-container">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-label-sm text-on-secondary-container uppercase">OK</span>
+</div>
+</div>
+<div class="space-y-3 mb-6 flex-1">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Produtos</span>
+<span class="font-code-md text-code-md text-on-surface">115.000</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Imagens</span>
+<span class="font-code-md text-code-md text-on-surface">98.500</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Última Sinc.</span>
+<span class="font-body-md text-body-md text-on-surface">Hoje, 06:00</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 bg-surface-container-high hover:bg-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded transition-colors text-center border border-outline-variant">
+                            Detalhes
+                        </button>
+<button class="p-2 bg-surface-container-high hover:bg-outline-variant rounded border border-outline-variant text-on-surface transition-colors" title="Forçar Sincronização">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-tertiary-container w-full py-4 mt-auto border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-desktop">
+<span class="font-label-sm text-label-sm font-bold text-primary dark:text-tertiary-fixed mb-2 md:mb-0">  2026 Log stica Automotiva S.A. - Todos os direitos reservados.</span>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity font-label-sm text-label-sm font-body-md text-body-md" href="#">Termos de Uso</a>
+<a class="text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity font-label-sm text-label-sm font-body-md text-body-md" href="#">Privacidade</a>
+<a class="text-on-surface-variant hover:text-primary underline opacity-80 hover:opacity-100 transition-opacity font-label-sm text-label-sm font-body-md text-body-md" href="#">Suporte Técnico</a>
+</div>
+</footer>
+</div>
+</body></html>
