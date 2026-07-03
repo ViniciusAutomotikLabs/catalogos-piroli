@@ -76,6 +76,9 @@ Revenda consulta **dezenas de catálogos de fabricantes** num só lugar: busca r
 - Pagamento
 - NF / PDV
 - Lojista subir catálogo PDF (continua sendo vocês no 1.0)
+- **Carrinho de orçamento sincronizado** — no 1.0 o carrinho vive no `localStorage`
+  do navegador (não sincroniza entre dispositivos nem entre usuários da mesma loja).
+  Persistência server-side do rascunho de orçamento entra no MVP 2.0 (ver § 5).
 
 ### Infra (suficiente)
 

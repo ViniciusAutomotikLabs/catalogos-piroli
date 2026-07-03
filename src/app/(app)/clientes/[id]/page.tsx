@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 import { FormCliente } from "@/components/clientes/form-cliente";
 import { atualizarCliente } from "@/lib/actions/clientes";
+import { buildContatoLojaUrl } from "@/lib/whatsapp";
 
 const ESPECIALIDADES: Record<string, string> = {
   multimarcas: "Multimarcas",
@@ -17,7 +18,7 @@ type ItemOrcamento = {
   descricao_avulsa: string | null;
   produtos: {
     id: number;
-    codigo: string;
+    codigo_produto_interno: string;
     descricao: string | null;
     foto_url: string | null;
   } | null;
@@ -54,7 +55,7 @@ function agregarProdutos(orcamentos: OrcamentoRow[]): ProdutoResumo[] {
       const atual = map.get(key) ?? {
         key,
         produtoId: produto?.id ?? null,
-        codigo: produto?.codigo ?? "—",
+        codigo: produto?.codigo_produto_interno ?? "—",
         descricao: produto?.descricao ?? item.descricao_avulsa ?? "Peça avulsa",
         totalQtd: 0,
         vezes: 0,
@@ -98,7 +99,7 @@ export default async function ClientePerfilPage({
       id, status, criado_em,
       orcamento_itens (
         quantidade, preco_unitario, descricao_avulsa,
-        produtos ( id, codigo, descricao, foto_url )
+        produtos ( id, codigo_produto_interno, descricao, foto_url )
       )
     `
     )
@@ -143,7 +144,7 @@ export default async function ClientePerfilPage({
               </div>
               {cliente.telefone_whatsapp && (
                 <a
-                  href={`https://wa.me/55${cliente.telefone_whatsapp.replace(/\D/g, "")}`}
+                  href={buildContatoLojaUrl(cliente.telefone_whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 rounded bg-secondary text-on-secondary text-label-sm uppercase hover:bg-on-secondary-container transition-colors"
@@ -257,7 +258,7 @@ export default async function ClientePerfilPage({
                       <ul className="space-y-1 text-body-md text-on-surface-variant">
                         {orc.orcamento_itens.map((item, idx) => {
                           const desc = item.produtos?.descricao ?? item.descricao_avulsa ?? "Peça";
-                          const codigo = item.produtos?.codigo ?? "—";
+                          const codigo = item.produtos?.codigo_produto_interno ?? "—";
                           return (
                             <li key={idx}>
                               {item.quantidade}x {desc}{" "}

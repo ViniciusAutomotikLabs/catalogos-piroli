@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
+import { buildContatoLojaUrl } from "@/lib/whatsapp";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -119,7 +120,7 @@ export default async function DashboardPage() {
             <p className="text-headline-sm font-bold text-on-primary mb-2">Suporte Técnico</p>
             <p className="text-body-md mb-4">Dúvidas sobre compatibilidade?</p>
             <a
-              href={`https://wa.me/${(contexto?.loja?.telefone_whatsapp ?? "").replace(/\D/g, "")}`}
+              href={buildContatoLojaUrl(contexto?.loja?.telefone_whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-secondary-fixed text-label-sm uppercase hover:underline"

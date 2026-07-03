@@ -1,5 +1,12 @@
 // Template MVP 1.0 (sem preço) — Telas_MVP.md § 14
 
+/**
+ * Número de WhatsApp padrão da plataforma, usado quando a loja ainda não
+ * cadastrou o próprio telefone (ex.: card de suporte no dashboard).
+ * Formato E.164 sem "+": DDI 55 + DDD + número.
+ */
+export const WHATSAPP_PADRAO = "5561998117002";
+
 export type ProdutoMensagem = {
   descricao: string | null;
   codigo: string;
@@ -22,11 +29,24 @@ export function buildProdutoMensagem(p: ProdutoMensagem, incluirFoto = true) {
   return linhas.join("\n");
 }
 
-export function buildWhatsAppUrl(message: string, phone?: string | null) {
+/** Normaliza um telefone para o formato aceito pelo wa.me (DDI 55 + dígitos). */
+export function normalizarTelefoneWhatsApp(phone?: string | null): string {
   const digits = (phone ?? "").replace(/\D/g, "");
-  if (!digits) return `https://wa.me/?text=${encodeURIComponent(message)}`;
-  const full = digits.startsWith("55") ? digits : `55${digits}`;
+  if (!digits) return "";
+  return digits.startsWith("55") ? digits : `55${digits}`;
+}
+
+export function buildWhatsAppUrl(message: string, phone?: string | null) {
+  const full = normalizarTelefoneWhatsApp(phone);
+  if (!full) return `https://wa.me/?text=${encodeURIComponent(message)}`;
   return `https://wa.me/${full}?text=${encodeURIComponent(message)}`;
+}
+
+/** Link direto para conversar com uma loja (ou com o número padrão da plataforma). */
+export function buildContatoLojaUrl(phone?: string | null, message?: string) {
+  const full = normalizarTelefoneWhatsApp(phone) || WHATSAPP_PADRAO;
+  const base = `https://wa.me/${full}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
 export type OrcamentoMensagemItem = {

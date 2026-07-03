@@ -16,10 +16,15 @@ export const getContextoLoja = cache(async () => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // MVP 1.0: 1 usuário = 1 loja. O modelo (membros_loja) já é multi-tenant;
+  // ordenamos por loja_id para que a escolha seja determinística caso um
+  // usuário venha a pertencer a mais de uma loja no futuro (troca de loja
+  // vira uma feature de UI no MVP 2.0+).
   const { data } = await supabase
     .from("membros_loja")
     .select("loja_id, papel, lojas(id, nome, cnpj, telefone_whatsapp, logo_url)")
     .eq("user_id", user.id)
+    .order("loja_id", { ascending: true })
     .limit(1)
     .maybeSingle();
 

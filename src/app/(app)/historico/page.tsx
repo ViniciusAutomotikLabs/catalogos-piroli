@@ -153,7 +153,7 @@ export default async function HistoricoPage({
                               ? `/produtos/${c.produtos.id}`
                               : "/busca"
                         }
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase opacity-0 group-hover:opacity-100"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
                       >
                         <span className="material-symbols-outlined text-[16px]">replay</span>
                         Repetir

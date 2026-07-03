@@ -9,6 +9,15 @@ function sanitize(q: string) {
   return q.replace(/[,()%]/g, " ").trim();
 }
 
+/**
+ * Variante do termo para busca por código: remove separadores comuns
+ * (espaço, ponto, hífen, barra). Ajuda no caso de balcão em que o vendedor
+ * digita "201.0813" mas o código está gravado como "2010813" (ou vice-versa).
+ */
+function apenasCodigo(q: string) {
+  return q.replace(/[\s./-]/g, "");
+}
+
 export default async function BuscaPage({
   searchParams,
 }: {
@@ -16,6 +25,7 @@ export default async function BuscaPage({
 }) {
   const params = await searchParams;
   const q = sanitize(params.q ?? "");
+  const qCodigo = apenasCodigo(q);
   const catalogo = params.catalogo ?? "";
   const comFoto = params.foto === "1";
   const ordem = params.ordem ?? "relevancia";
@@ -31,13 +41,15 @@ export default async function BuscaPage({
     .order("produtos_count", { ascending: false })
     .limit(6);
 
-  // Busca também por referência cruzada
+  // Busca também por referência cruzada (termo original + variante só-código)
   let idsPorReferencia: number[] = [];
   if (q) {
+    const refPartes = [`numero_referencia.ilike.%${q}%`];
+    if (qCodigo && qCodigo !== q) refPartes.push(`numero_referencia.ilike.%${qCodigo}%`);
     const { data: refs } = await supabase
       .from("referencias_cruzadas")
       .select("produto_id")
-      .ilike("numero_referencia", `%${q}%`)
+      .or(refPartes.join(","))
       .limit(100);
     idsPorReferencia = (refs ?? [])
       .map((r) => r.produto_id)
@@ -58,6 +70,11 @@ export default async function BuscaPage({
       `numero_produto.ilike.${pattern}`,
       `descricao.ilike.${pattern}`,
     ];
+    if (qCodigo && qCodigo !== q) {
+      const patternCodigo = `%${qCodigo}%`;
+      orParts.push(`codigo_produto_interno.ilike.${patternCodigo}`);
+      orParts.push(`numero_produto.ilike.${patternCodigo}`);
+    }
     if (idsPorReferencia.length > 0) {
       orParts.push(`id.in.(${idsPorReferencia.join(",")})`);
     }
@@ -221,7 +238,7 @@ export default async function BuscaPage({
                     </span>
                   </td>
                   <td className="px-4 py-1 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2">
                       <WhatsAppRowButton
                         produto={{
                           descricao: p.descricao,
@@ -235,7 +252,8 @@ export default async function BuscaPage({
                       <Link
                         href={`/produtos/${p.id}`}
                         className="w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center border border-transparent hover:border-primary"
-                        title="Ver Detalhes"
+                        title="Ver detalhes"
+                        aria-label="Ver detalhes do produto"
                       >
                         <span className="material-symbols-outlined text-[20px]">visibility</span>
                       </Link>

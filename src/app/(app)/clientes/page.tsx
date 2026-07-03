@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { buildContatoLojaUrl } from "@/lib/whatsapp";
 
 const ESPECIALIDADES: Record<string, string> = {
   multimarcas: "Multimarcas",
@@ -191,16 +192,18 @@ export default async function ClientesPage({
                         href={`/clientes/${c.id}`}
                         className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-primary transition-colors items-center justify-center border border-transparent hover:border-primary"
                         title="Ver perfil"
+                        aria-label="Ver perfil do cliente"
                       >
                         <span className="material-symbols-outlined text-[18px]">person</span>
                       </Link>
                     {c.telefone_whatsapp && (
                       <a
-                        href={`https://wa.me/55${c.telefone_whatsapp.replace(/\D/g, "")}`}
+                        href={buildContatoLojaUrl(c.telefone_whatsapp)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors items-center justify-center border border-transparent hover:border-secondary opacity-0 group-hover:opacity-100"
+                        className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors items-center justify-center border border-transparent hover:border-secondary"
                         title="Chamar no WhatsApp"
+                        aria-label="Chamar no WhatsApp"
                       >
                         <span className="material-symbols-outlined text-[18px]">chat</span>
                       </a>

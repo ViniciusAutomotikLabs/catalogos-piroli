@@ -19,7 +19,27 @@ export async function salvarOrcamento(
   if (!contexto?.lojaId) return { ok: false, erro: "Conta sem loja vinculada." };
   if (itens.length === 0) return { ok: false, erro: "O orçamento está vazio." };
 
+  // Saneia os itens: quantidade mínima 1, preço nunca negativo.
+  const itensSaneados = itens.map((i) => ({
+    produtoId: i.produtoId,
+    descricao: i.descricao,
+    quantidade: Math.max(1, Math.trunc(Number(i.quantidade) || 1)),
+    precoUnitario: Math.max(0, Number(i.precoUnitario) || 0),
+  }));
+
   const supabase = await createClient();
+
+  // Garante que o cliente informado pertence à loja do usuário antes de vincular.
+  if (clienteId) {
+    const { data: cliente } = await supabase
+      .from("clientes")
+      .select("id")
+      .eq("id", clienteId)
+      .eq("loja_id", contexto.lojaId)
+      .maybeSingle();
+    if (!cliente) return { ok: false, erro: "Cliente inválido para esta loja." };
+  }
+
   const agora = new Date().toISOString();
   const { data: orcamento, error } = await supabase
     .from("orcamentos")
@@ -37,7 +57,7 @@ export async function salvarOrcamento(
   }
 
   const { error: itensErro } = await supabase.from("orcamento_itens").insert(
-    itens.map((i) => ({
+    itensSaneados.map((i) => ({
       orcamento_id: orcamento.id,
       produto_id: i.produtoId,
       descricao_avulsa: i.produtoId ? null : i.descricao,
@@ -46,7 +66,11 @@ export async function salvarOrcamento(
     }))
   );
 
-  if (itensErro) return { ok: false, erro: itensErro.message };
+  if (itensErro) {
+    // Rollback manual: sem transação (PostgREST), removemos o cabeçalho órfão.
+    await supabase.from("orcamentos").delete().eq("id", orcamento.id);
+    return { ok: false, erro: itensErro.message };
+  }
 
   if (clienteId) {
     await supabase

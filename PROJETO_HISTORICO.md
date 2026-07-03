@@ -3,7 +3,7 @@
 Documento vivo com o que foi feito, como executar e decisões técnicas.  
 **Projeto Supabase:** `oxqojsmlbptmofmhyfea` · URL: `https://oxqojsmlbptmofmhyfea.supabase.co`
 
-**MVP 100 catálogos (WhatsApp HD):** ver `MVP_VALIDACAO.md` · **Roadmap produto:** `docs/ROADMAP_MVP.md` · Escala: `ARQUITETURA_ESCALA.md`
+**MVP 100 catálogos (WhatsApp HD):** ver `MVP_VALIDACAO.md` · **Roadmap produto:** `docs/ROADMAP_MVP.md` · **UX balcão:** `docs/UX_MELHORIAS_BALCAO.md` · Escala: `ARQUITETURA_ESCALA.md`
 
 ---
 
@@ -21,6 +21,11 @@ Consolidar mais de 300 catálogos de autopeças (PDFs e planilhas) em um banco P
 
 ```text
 Projeto Leo/
+├── src/                    # App web Next.js 15 (App Router)
+│   ├── app/                # rotas (login + área autenticada)
+│   ├── components/         # UI (shell, busca, orçamento, catálogos…)
+│   ├── lib/                # Supabase, actions, whatsapp, cart, loja
+│   └── middleware.ts       # refresh de sessão Supabase SSR
 ├── catalogos/              # entrada (PDF/XLSX aguardando)
 ├── catalogos_extraidos/    # processados com sucesso
 ├── catalogos_erro/         # falhas (opcional)
@@ -28,8 +33,9 @@ Projeto Leo/
 │   ├── main2.py            # orquestrador MVP
 │   ├── catalogo_utils.py   # fila por pasta + inferência de layout
 │   └── project_paths.py    # caminhos da raiz do projeto
-├── sql/                    # schema.sql, schema_mvp.sql
-├── .env
+├── sql/                    # schema tenant + RLS
+├── docs/                   # roadmap, UX, validação
+├── .env.example            # placeholders (sem secrets reais)
 └── README.md
 ```
 
@@ -271,7 +277,128 @@ O MCP **não substitui** a senha do Postgres para o Python: o `main2.py` conecta
 | 2026-05-21 | Bucket `produtos-imagens`; ~3,4k fotos PDF comprimidas (~5 MB) |
 | 2026-05-21 | MVP: `catalogos`+`ingestao_jobs`, fila JSON, cap imagens/catálogo |
 | 2026-05-21 | Pastas: `scripts/`, `catalogos/`, `catalogos_extraidos/`; main2 por pasta |
+| 2026-07-02 | **App web:** code review, correções de bugs/segurança, middleware, testes — ver § 12 |
 
 ---
 
-*Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing).*
+## 12. App Web — sessão 02/07/2026
+
+### Contexto
+
+Revisão profunda do app Next.js (`src/`) após o MVP 1.0 de telas. Objetivo: corrigir bugs bloqueadores, endurecer segurança/sessão, alinhar documentação e registrar decisões de produto antes de implementar as melhorias de UX do balcão (`docs/UX_MELHORIAS_BALCAO.md` — **futuro**, não nesta sessão).
+
+**Stack validada:** Next.js `15.5.19` + React 19 + Supabase SSR + Tailwind 4.
+
+### Decisões de produto (alinhadas com o autor)
+
+| Tópico | Decisão | Motivo |
+|--------|---------|--------|
+| `.env.example` | Chaves reais **não** foram commitadas; arquivo corrigido com placeholders | Evitar vazamento; pipeline e app usam vars diferentes |
+| Multi-loja | **Modelo já é multi-tenant** (`lojas` + `membros_loja` + RLS); UX de **1 loja por usuário** no MVP 1.0 | Várias revendas podem usar o mesmo catálogo central; troca de loja fica para MVP 2.0+ |
+| Carrinho de orçamento | Permanece em **`localStorage`** no MVP 1.0 | Menos complexidade; sync server-side documentada no `ROADMAP_MVP.md` § 3 |
+| WhatsApp suporte | Fallback **`5561998117002`** quando loja sem telefone | Card "Suporte Técnico" no dashboard sempre funcional |
+| Busca por relevância | Melhoria incremental: **normalização de código** (tolerância a `.`, `-`, espaço); FTS real fica no roadmap | Caso típico de balcão: `201.0813` vs `2010813` |
+| UX balcão | Pesquisa em `docs/UX_MELHORIAS_BALCAO.md` — implementação **posterior** | Foco desta sessão: código estável, não redesign |
+
+### Correções aplicadas
+
+#### Segurança e sessão
+
+| Mudança | Arquivo(s) | Motivo |
+|---------|------------|--------|
+| **`src/middleware.ts` criado (runtime Node.js)** | `middleware.ts` → `lib/supabase/proxy.ts`; `next.config.ts` | `updateSession` existia mas não estava ligado. **Atenção:** o middleware foi removido em commits anteriores porque o **edge runtime** falhava com o Supabase SSR na Vercel (`MIDDLEWARE_INVOCATION_FAILED`). Reintroduzido com `runtime: "nodejs"` + `experimental.nodeMiddleware: true`, que evita o edge. Confirmado no build: `middleware-manifest.json` vazio e artefato `.next/server/middleware.js` (Node) |
+| **`.env.example` com placeholders** | `.env.example` | Separar vars públicas (`NEXT_PUBLIC_*`) das do pipeline (`SERVICE_ROLE_KEY`, `DATABASE_URL` comentadas) |
+| **Guard de dono no upload** | `catalogos/upload/page.tsx` + `components/catalogos/upload-form.tsx` | Só `papel === "dono"` vê o formulário; RLS já bloqueava, mas UX evitava página inútil |
+| **Validação de tamanho de arquivo** | `upload-form.tsx` | UI prometia 50 MB; código não validava |
+
+**Impacto do middleware / decisão de runtime:** Next instalado é `15.5.19`. A primeira tentativa (edge, padrão) gerava `ƒ Middleware` no build — exatamente o caminho que quebrou antes na Vercel. Trocado para **runtime Node.js** via `runtime: "nodejs"` no middleware + `experimental.nodeMiddleware: true` no `next.config.ts`. O flag é aceito em runtime pelo Next 15.5.19 (aparece em "Experiments ✓ nodeMiddleware"), mas ainda não está tipado em `ExperimentalConfig` — daí o `@ts-expect-error` no `next.config.ts` e um warning benigno de schema no build. **Risco residual:** `nodeMiddleware` é experimental; validar no primeiro deploy da Vercel. Se falhar, alternativa é remover o middleware e manter proteção via `(app)/layout.tsx`.
+
+#### Bugs
+
+| Bug | Correção | Arquivo |
+|-----|----------|---------|
+| Query usava coluna `codigo` inexistente | Trocado para `codigo_produto_interno` | `clientes/[id]/page.tsx` |
+| Orçamento órfão se insert de itens falha | Rollback manual: `delete` no cabeçalho | `lib/actions/orcamentos.ts` |
+| `clienteId` sem checagem de tenant | Valida `clientes.id` + `loja_id` antes de vincular | `lib/actions/orcamentos.ts` |
+| Quantidade/preço inválidos | Saneamento: qtd ≥ 1, preço ≥ 0 | `lib/actions/orcamentos.ts` |
+| WhatsApp dashboard sem DDI `55` | Helpers centralizados + fallback padrão | `lib/whatsapp.ts`, `page.tsx` |
+| Links `wa.me` duplicados no CRM | Uso de `buildContatoLojaUrl` | `clientes/page.tsx`, `clientes/[id]/page.tsx` |
+| `eslint.config.mjs` quebrado | Reescrito com `FlatCompat` (ESLint 9) | `eslint.config.mjs` |
+| `getContextoLoja` não determinístico | `.order("loja_id")` antes de `.limit(1)` | `lib/loja.ts` |
+
+#### Busca
+
+- Função `apenasCodigo()` remove separadores (`.`, `-`, espaço, `/`) para match adicional em `codigo_produto_interno`, `numero_produto` e `referencias_cruzadas`.
+- Ranking por relevância textual (FTS) permanece no roadmap; esta melhoria cobre o caso de código digitado com formatação diferente.
+
+#### Acessibilidade (quick wins)
+
+| Mudança | Onde | Motivo |
+|---------|------|--------|
+| Removido `opacity-0 group-hover:opacity-100` | `busca`, `historico`, `clientes` | Ações invisíveis para teclado e leitores de tela |
+| `aria-label` em botões só-ícone | `busca`, `clientes`, `whatsapp-row-button` | WCAG: ícone sem texto acessível |
+
+**Pendente (UX doc):** layout mobile (sidebar fixa `w-64`), modais com focus trap, busca reestruturada — ver `docs/UX_MELHORIAS_BALCAO.md` Fases A–F.
+
+#### Testes
+
+- **Vitest** adicionado (`vitest.config.ts`, `npm test`).
+- **`src/lib/whatsapp.test.ts`**: 13 testes cobrindo normalização de telefone, URLs, mensagens de produto/orçamento.
+- Primeira suíte automatizada do app web.
+
+#### Documentação
+
+| Arquivo | O que mudou |
+|---------|-------------|
+| `README.md` | Reescrito para estrutura real na raiz (removido monorepo `app/` e `vercel.json`) |
+| `docs/ROADMAP_MVP.md` | Nota explícita: carrinho em `localStorage` no 1.0; persistência server-side no 2.0 |
+| `docs/UX_MELHORIAS_BALCAO.md` | Criado (pesquisa UX balcão — referência futura) |
+| `PROJETO_HISTORICO.md` | Esta seção § 12 |
+
+### Arquivos novos nesta sessão
+
+```
+src/middleware.ts
+src/components/catalogos/upload-form.tsx
+src/lib/whatsapp.test.ts
+vitest.config.ts
+docs/UX_MELHORIAS_BALCAO.md
+```
+
+### Como validar localmente
+
+```bash
+npm install
+cp .env.example .env.local   # preencher NEXT_PUBLIC_SUPABASE_*
+npm run lint                 # 0 erros (2 warnings de Google Fonts pré-existentes)
+npm test                     # 13 testes whatsapp
+npm run build                # inclui Middleware compilado
+npm run dev
+```
+
+### Próximos passos sugeridos (app web)
+
+- [ ] Implementar quick wins de UX (`docs/UX_MELHORIAS_BALCAO.md` § 5 — Fase A)
+- [ ] Testes das server actions (`orcamentos`, `clientes`) com Supabase local ou mocks
+- [ ] Layout responsivo (sidebar colapsável, barras fixas sem `left-64` em mobile)
+- [ ] RPC Postgres transacional para `salvarOrcamento` (substituir rollback manual)
+- [ ] Full-text search no Postgres ou Meilisearch (ranking real de relevância)
+- [ ] UI de troca de loja (quando usuário pertencer a múltiplas revendas)
+
+### Changelog app web (detalhe)
+
+| Data | Arquivo / área | Ação |
+|------|----------------|------|
+| 2026-07-02 | `middleware.ts` | Sessão Supabase SSR + guards de rota |
+| 2026-07-02 | `clientes/[id]/page.tsx` | Fix `codigo_produto_interno` |
+| 2026-07-02 | `orcamentos.ts` | Validação cliente, saneamento itens, rollback |
+| 2026-07-02 | `whatsapp.ts` | `WHATSAPP_PADRAO`, normalização, `buildContatoLojaUrl` |
+| 2026-07-02 | `busca/page.tsx` | Normalização de código na busca |
+| 2026-07-02 | `catalogos/upload` | Guard dono + componente client extraído |
+| 2026-07-02 | `eslint.config.mjs` | FlatCompat ESLint 9 |
+| 2026-07-02 | `whatsapp.test.ts` | 13 testes unitários |
+| 2026-07-02 | `busca`, `historico`, `clientes` | Acessibilidade: ações sempre visíveis |
+
+---
+
+*Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web).*
