@@ -432,4 +432,68 @@ Validação: `npm run build` ✓, `npm test` ✓ 13/13, `npm run lint` ✓ 0 err
 
 ---
 
+## 13. Backend — normalização, busca com ranking e orçamento transacional (03/07/2026)
+
+Sessão de implementação do handoff `docs/HANDOFF_BACKEND_MELHORIAS.md` (P0 + P1 + BE-09). Migrations aplicadas no Supabase `oxqojsmlbptmofmhyfea`.
+
+### Migrations aplicadas
+
+| Arquivo | Entrega |
+|---------|---------|
+| `sql/migrations/001_produto_normalizacao.sql` | Colunas estruturadas em `produtos` + índices `pg_trgm` |
+| `sql/migrations/002_buscar_produtos.sql` | RPC `buscar_produtos` com ranking por `match_tipo` / `score` |
+| `sql/migrations/003_salvar_orcamento.sql` | RPC `salvar_orcamento` transacional |
+
+### Pipeline de normalização (BE-01 / BE-02)
+
+| Componente | Arquivo |
+|------------|---------|
+| Normalizador | `src/lib/produto-normalizador.ts` (+ 6 testes Vitest) |
+| Helpers UI | `src/lib/produto-campos.ts` (`tituloExibicao`, `codigoExibicao`, `labelMatchTipo`) |
+| Backfill | `scripts/backfill-normalizacao.ts` — `npm run backfill:normalizacao` |
+| Parser display (fallback) | `src/lib/descricao-parser.ts` (mantido) |
+
+**Regras principais:**
+- `descricao_original` preserva texto bruto; `titulo_normalizado` limpa ruído de PDF
+- `codigo_principal` escolhido com regras de confiança; corrige `codigo_produto_interno` só com confiança alta
+- Se correção viola `UNIQUE (codigo_produto_interno, origem_catalogo)`, grava só `codigo_principal`
+- `normalizacao_status`: `ok` \| `parcial` \| `revisar`
+
+### Busca e orçamento integrados no app
+
+| Área | Mudança | Arquivo |
+|------|---------|---------|
+| Busca | RPC `buscar_produtos` + badges `match_tipo`; fallback legado | `lib/busca-produtos.ts`, `busca/page.tsx` |
+| Detalhe | `codigo_principal`, `aplicacao_resumo`, `descricao_original` | `produtos/[id]/page.tsx` |
+| Orçamento | RPC `salvar_orcamento` atômica; fallback manual | `lib/actions/orcamentos.ts` |
+| Types | Colunas novas + assinaturas RPC | `lib/supabase/types.ts` |
+
+### Backfill em produção
+
+Execução iniciada em 03/07/2026 (~86.442 produtos). Piloto 500: `ok=500`, `codigos_corrigidos=1`, `erros=1` (conflito unique — corrigido no script).
+
+Consultar progresso:
+
+```sql
+SELECT count(*) FILTER (WHERE normalizado_em IS NOT NULL) AS normalizados,
+       count(*) FILTER (WHERE normalizado_em IS NULL) AS pendentes,
+       count(*) FROM produtos;
+SELECT normalizacao_status, count(*) FROM produtos WHERE normalizado_em IS NOT NULL GROUP BY 1;
+```
+
+### Validação
+
+- `npm test` ✓ 35/35
+- `npm run build` ✓
+- RPCs verificadas: `buscar_produtos`, `salvar_orcamento`
+
+### Handoff frontend
+
+Documento de retorno: `docs/HANDOFF_BACKEND_MELHORIAS.md`  
+Tarefas frontend prioritárias: **FE-09** (highlight match), **FE-16** (dashboard/histórico), **FE-17** (medidas no detalhe).
+
+**Pendente backend (P2/P3):** BE-06 aplicações estruturadas, BE-07 equivalências tipadas, BE-08 estoque/preço, hook na ingestão Python.
+
+---
+
 *Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web).*

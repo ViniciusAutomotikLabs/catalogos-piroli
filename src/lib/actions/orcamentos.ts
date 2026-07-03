@@ -19,7 +19,6 @@ export async function salvarOrcamento(
   if (!contexto?.lojaId) return { ok: false, erro: "Conta sem loja vinculada." };
   if (itens.length === 0) return { ok: false, erro: "O orçamento está vazio." };
 
-  // Saneia os itens: quantidade mínima 1, preço nunca negativo.
   const itensSaneados = itens.map((i) => ({
     produtoId: i.produtoId,
     descricao: i.descricao,
@@ -29,7 +28,6 @@ export async function salvarOrcamento(
 
   const supabase = await createClient();
 
-  // Garante que o cliente informado pertence à loja do usuário antes de vincular.
   if (clienteId) {
     const { data: cliente } = await supabase
       .from("clientes")
@@ -40,7 +38,33 @@ export async function salvarOrcamento(
     if (!cliente) return { ok: false, erro: "Cliente inválido para esta loja." };
   }
 
-  const agora = new Date().toISOString();
+  // BE-09: transação atômica via RPC (fallback manual se migration pendente)
+  const { data: rpcData, error: rpcError } = await supabase.rpc("salvar_orcamento", {
+    p_loja_id: contexto.lojaId,
+    p_cliente_id: clienteId ?? undefined,
+    p_criado_por: contexto.user.id,
+    p_itens: itensSaneados.map((i) => ({
+      produto_id: i.produtoId,
+      descricao: i.descricao,
+      quantidade: i.quantidade,
+      preco_unitario: i.precoUnitario,
+    })),
+  });
+
+  if (!rpcError && rpcData?.[0]) {
+    const row = rpcData[0];
+    if (row.ok && row.orcamento_id) {
+      if (clienteId) {
+        revalidatePath("/clientes");
+        revalidatePath(`/clientes/${clienteId}`);
+      }
+      revalidatePath("/orcamento");
+      return { ok: true, orcamentoId: row.orcamento_id };
+    }
+    return { ok: false, erro: row.erro ?? "Falha ao salvar orçamento." };
+  }
+
+  // Fallback legado (dois inserts + rollback manual)
   const { data: orcamento, error } = await supabase
     .from("orcamentos")
     .insert({
@@ -67,7 +91,6 @@ export async function salvarOrcamento(
   );
 
   if (itensErro) {
-    // Rollback manual: sem transação (PostgREST), removemos o cabeçalho órfão.
     await supabase.from("orcamentos").delete().eq("id", orcamento.id);
     return { ok: false, erro: itensErro.message };
   }
@@ -75,7 +98,7 @@ export async function salvarOrcamento(
   if (clienteId) {
     await supabase
       .from("clientes")
-      .update({ ultima_compra_em: agora })
+      .update({ ultima_compra_em: new Date().toISOString() })
       .eq("id", clienteId)
       .eq("loja_id", contexto.lojaId);
     revalidatePath("/clientes");

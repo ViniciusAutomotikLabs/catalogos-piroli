@@ -3,12 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { RegistrarConsulta } from "@/components/registrar-consulta";
 import { WhatsAppRowButton } from "@/components/busca/whatsapp-row-button";
 import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento-button";
+import { AtalhosBusca } from "@/components/busca/atalhos-busca";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
+import { buscarProdutos } from "@/lib/busca-produtos";
+import { codigoExibicao, labelMatchTipo, tituloExibicao } from "@/lib/produto-campos";
 
 const POR_PAGINA = 25;
 const MAX_CHIPS_REFERENCIA = 3;
 
-/** Chips das referências cruzadas do produto (ou o próprio nº, ou estado discreto). */
 function ReferenciaChips({
   refs,
   numeroProduto,
@@ -49,11 +51,6 @@ function sanitize(q: string) {
   return q.replace(/[,()%]/g, " ").trim();
 }
 
-/**
- * Variante do termo para busca por código: remove separadores comuns
- * (espaço, ponto, hífen, barra). Ajuda no caso de balcão em que o vendedor
- * digita "201.0813" mas o código está gravado como "2010813" (ou vice-versa).
- */
 function apenasCodigo(q: string) {
   return q.replace(/[\s./-]/g, "");
 }
@@ -73,7 +70,6 @@ export default async function BuscaPage({
 
   const supabase = await createClient();
 
-  // Catálogos para os chips de filtro
   const { data: catalogos } = await supabase
     .from("catalogos")
     .select("slug, nome_exibicao")
@@ -81,79 +77,22 @@ export default async function BuscaPage({
     .order("produtos_count", { ascending: false })
     .limit(6);
 
-  // Busca também por referência cruzada (termo original + variante só-código)
-  let idsPorReferencia: number[] = [];
-  if (q) {
-    const refPartes = [`numero_referencia.ilike.%${q}%`];
-    if (qCodigo && qCodigo !== q) refPartes.push(`numero_referencia.ilike.%${qCodigo}%`);
-    const { data: refs } = await supabase
-      .from("referencias_cruzadas")
-      .select("produto_id")
-      .or(refPartes.join(","))
-      .limit(100);
-    idsPorReferencia = (refs ?? [])
-      .map((r) => r.produto_id)
-      .filter((id): id is number => id !== null);
-  }
+  const { produtos, total } = await buscarProdutos({
+    q,
+    catalogo,
+    comFoto,
+    pagina,
+    limite: POR_PAGINA,
+  });
 
-  let query = supabase
-    .from("produtos")
-    .select(
-      "id, codigo_produto_interno, numero_produto, descricao, foto_url, origem_catalogo, unidade, fabricantes(nome_fabricante), referencias_cruzadas(numero_referencia)",
-      { count: "exact" }
-    );
-
-  if (q) {
-    const pattern = `%${q}%`;
-    const orParts = [
-      `codigo_produto_interno.ilike.${pattern}`,
-      `numero_produto.ilike.${pattern}`,
-      `descricao.ilike.${pattern}`,
-    ];
-    if (qCodigo && qCodigo !== q) {
-      const patternCodigo = `%${qCodigo}%`;
-      orParts.push(`codigo_produto_interno.ilike.${patternCodigo}`);
-      orParts.push(`numero_produto.ilike.${patternCodigo}`);
-    }
-    if (idsPorReferencia.length > 0) {
-      orParts.push(`id.in.(${idsPorReferencia.join(",")})`);
-    }
-    query = query.or(orParts.join(","));
-  }
-  if (catalogo) query = query.eq("origem_catalogo", catalogo);
-  if (comFoto) query = query.not("foto_url", "is", null);
-
-  query =
+  const produtosOrdenados =
     ordem === "codigo"
-      ? query.order("codigo_produto_interno", { ascending: true })
-      : query.order("id", { ascending: true });
+      ? [...produtos].sort((a, b) =>
+          codigoExibicao(a).localeCompare(codigoExibicao(b), "pt-BR")
+        )
+      : produtos;
 
-  const de = (pagina - 1) * POR_PAGINA;
-  const { data: produtos, count } = await query.range(de, de + POR_PAGINA - 1);
-
-  const total = count ?? 0;
   const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
-
-  // Um item foi encontrado "via referência" quando está no conjunto de matches
-  // por referência cruzada mas o termo não aparece nos campos textuais dele.
-  const refSet = new Set(idsPorReferencia);
-  const viaReferencia = (p: {
-    id: number;
-    codigo_produto_interno: string | null;
-    numero_produto: string | null;
-    descricao: string | null;
-  }) => {
-    if (!q || !refSet.has(p.id)) return false;
-    const ql = q.toLowerCase();
-    const qc = qCodigo.toLowerCase();
-    for (const campo of [p.codigo_produto_interno, p.numero_produto, p.descricao]) {
-      if (!campo) continue;
-      const cl = campo.toLowerCase();
-      if (cl.includes(ql)) return false;
-      if (qCodigo && qCodigo !== q && apenasCodigo(cl).includes(qc)) return false;
-    }
-    return true;
-  };
 
   const buildUrl = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
@@ -167,9 +106,9 @@ export default async function BuscaPage({
 
   return (
     <div className="space-y-6 -mt-2">
+      <AtalhosBusca targetId="busca-input" />
       {q && <RegistrarConsulta termo={q} />}
 
-      {/* Busca + filtros */}
       <div className="flex flex-col gap-4">
         <form
           action="/busca"
@@ -180,12 +119,17 @@ export default async function BuscaPage({
               search
             </span>
             <input
+              id="busca-input"
               type="text"
               name="q"
               defaultValue={q}
+              autoFocus
               placeholder="Buscar por código, descrição ou referência..."
-              className="w-full bg-transparent text-body-lg text-on-surface placeholder:text-outline py-2.5 pl-12 pr-2 focus:outline-none"
+              className="w-full bg-transparent text-body-lg text-on-surface placeholder:text-outline py-2.5 pl-12 pr-12 focus:outline-none"
             />
+            <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 select-none items-center rounded border border-outline-variant bg-surface-container px-1.5 py-0.5 font-mono text-[11px] leading-none text-on-surface-variant sm:inline-flex">
+              /
+            </kbd>
           </div>
           {catalogo && <input type="hidden" name="catalogo" value={catalogo} />}
           <button
@@ -245,9 +189,8 @@ export default async function BuscaPage({
         </div>
       </div>
 
-      {/* Tabela */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-        {produtos && produtos.length > 0 ? (
+        {produtosOrdenados.length > 0 ? (
           <table className="w-full text-left border-collapse">
             <thead className="bg-surface-container-high border-b border-outline-variant text-on-surface-variant text-label-sm tracking-wide">
               <tr>
@@ -259,11 +202,13 @@ export default async function BuscaPage({
               </tr>
             </thead>
             <tbody className="text-body-md text-on-surface">
-              {produtos.map((p, i) => {
-                const refs = (p.referencias_cruzadas ?? [])
-                  .map((r) => r.numero_referencia)
-                  .filter((r): r is string => Boolean(r));
-                const marcadoRef = viaReferencia(p);
+              {produtosOrdenados.map((p, i) => {
+                const refs = p.referencias;
+                const titulo = tituloExibicao(p);
+                const codigo = codigoExibicao(p);
+                const matchLabel = labelMatchTipo(p.match_tipo);
+                const descricaoParaAcao = p.descricao ?? titulo;
+
                 return (
                   <tr
                     key={p.id}
@@ -277,7 +222,7 @@ export default async function BuscaPage({
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={p.foto_url}
-                            alt={p.descricao ?? ""}
+                            alt={titulo}
                             className="w-10 h-10 object-contain"
                             loading="lazy"
                           />
@@ -296,22 +241,20 @@ export default async function BuscaPage({
                     <td className="px-3 py-2.5">
                       <Link
                         href={`/produtos/${p.id}`}
+                        title={p.descricao_original ?? p.descricao ?? undefined}
                         className="font-semibold text-on-surface hover:text-primary hover:underline line-clamp-2"
                       >
-                        {p.descricao ?? "Sem descrição"}
+                        {titulo}
                       </Link>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                        <span className="font-mono text-code-md text-primary">
-                          {p.codigo_produto_interno}
-                        </span>
-                        {marcadoRef && (
+                        <span className="font-mono text-code-md text-primary">{codigo}</span>
+                        {matchLabel && (
                           <span className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant">
                             <span className="material-symbols-outlined text-[14px]">swap_horiz</span>
-                            via referência
+                            {matchLabel}
                           </span>
                         )}
                       </div>
-                      {/* Referências no mobile (coluna dedicada oculta em telas pequenas) */}
                       <div className="md:hidden mt-1.5">
                         <ReferenciaChips refs={refs} numeroProduto={p.numero_produto} />
                       </div>
@@ -330,18 +273,18 @@ export default async function BuscaPage({
                         <AdicionarOrcamentoButton
                           item={{
                             produtoId: p.id,
-                            codigo: p.codigo_produto_interno,
-                            descricao: p.descricao ?? "Peça",
-                            fabricante: p.fabricantes?.nome_fabricante,
+                            codigo,
+                            descricao: descricaoParaAcao,
+                            fabricante: p.fabricante ?? undefined,
                             fotoUrl: p.foto_url,
                           }}
                         />
                         <WhatsAppRowButton
                           produto={{
-                            descricao: p.descricao,
-                            codigo: p.codigo_produto_interno,
+                            descricao: descricaoParaAcao,
+                            codigo,
                             numeroProduto: p.numero_produto,
-                            fabricante: p.fabricantes?.nome_fabricante,
+                            fabricante: p.fabricante ?? undefined,
                             catalogo: p.origem_catalogo,
                             fotoUrl: p.foto_url,
                           }}
@@ -417,12 +360,12 @@ export default async function BuscaPage({
           </div>
         )}
 
-        {/* Paginação */}
         <div className="bg-surface-container-low border-t border-outline-variant px-4 py-3 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
           <span className="text-body-md text-on-surface-variant">
             Mostrando{" "}
             <span className="font-bold text-on-surface">
-              {total === 0 ? 0 : de + 1}–{Math.min(de + POR_PAGINA, total)}
+              {total === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1}–
+              {Math.min(pagina * POR_PAGINA, total)}
             </span>{" "}
             de <span className="font-bold text-on-surface">{total}</span>
           </span>

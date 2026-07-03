@@ -384,39 +384,66 @@ export type Database = {
       }
       produtos: {
         Row: {
+          aplicacao_resumo: string | null
+          codigo_principal: string | null
           codigo_produto_interno: string
+          codigo_produto_interno_anterior: string | null
+          codigos_extraidos: string[] | null
           criado_em: string | null
           descricao: string | null
+          descricao_original: string | null
           fabricante_id: number | null
           foto_url: string | null
           id: number
+          medidas_extraidas: string[] | null
+          normalizacao_status: string | null
+          normalizado_em: string | null
           numero_produto: string | null
           observacoes: string | null
           origem_catalogo: string
+          titulo_normalizado: string | null
           unidade: string | null
         }
         Insert: {
+          aplicacao_resumo?: string | null
+          codigo_principal?: string | null
           codigo_produto_interno: string
+          codigo_produto_interno_anterior?: string | null
+          codigos_extraidos?: string[] | null
           criado_em?: string | null
           descricao?: string | null
+          descricao_original?: string | null
           fabricante_id?: number | null
           foto_url?: string | null
           id?: number
+          medidas_extraidas?: string[] | null
+          normalizacao_status?: string | null
+          normalizado_em?: string | null
           numero_produto?: string | null
           observacoes?: string | null
           origem_catalogo: string
+          titulo_normalizado?: string | null
           unidade?: string | null
         }
         Update: {
+          aplicacao_resumo?: string | null
+          codigo_principal?: string | null
           codigo_produto_interno?: string
+          codigo_produto_interno_anterior?: string | null
+          codigos_extraidos?: string[] | null
           criado_em?: string | null
           descricao?: string | null
+          descricao_original?: string | null
           fabricante_id?: number | null
           foto_url?: string | null
           id?: number
+          medidas_extraidas?: string[] | null
+          normalizacao_status?: string | null
+          normalizado_em?: string | null
           numero_produto?: string | null
           observacoes?: string | null
           origem_catalogo?: string
+          titulo_normalizado?: string | null
           unidade?: string | null
         }
         Relationships: [
@@ -463,7 +490,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      buscar_produtos: {
+        Args: {
+          p_termo?: string
+          p_catalogo?: string
+          p_com_foto?: boolean
+          p_pagina?: number
+          p_limite?: number
+        }
+        Returns: {
+          codigo_principal: string
+          codigo_produto_interno: string
+          descricao: string
+          descricao_original: string
+          fabricante: string
+          foto_url: string
+          id: number
+          match_tipo: string
+          match_valor: string
+          numero_produto: string
+          origem_catalogo: string
+          referencias: string[]
+          score: number
+          titulo_normalizado: string
+          total_count: number
+          unidade: string
+        }[]
+      }
+      salvar_orcamento: {
+        Args: {
+          p_loja_id: number
+          p_cliente_id?: number
+          p_criado_por?: string
+          p_itens?: Json
+        }
+        Returns: {
+          erro: string
+          ok: boolean
+          orcamento_id: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

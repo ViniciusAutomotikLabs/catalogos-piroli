@@ -6,7 +6,7 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 
 **Documentos relacionados:** `Telas_MVP.md`, `docs/ROADMAP_MVP.md`, `PROJETO_HISTORICO.md` (§ UX balcão + redesign visual)
 
-**Última atualização:** 03/07/2026 — consolida pesquisa original (02/07), implementação P0 parcial, redesign visual e auditoria pós-redesign para handoff frontend.
+**Última atualização:** 03/07/2026 — backend P0/P1 aplicado no Supabase; handoff de retorno em `docs/HANDOFF_BACKEND_MELHORIAS.md`.
 
 ---
 
@@ -26,14 +26,15 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 | Área | Status | Próximo passo |
 |------|--------|---------------|
 | Shell responsivo (drawer mobile) | ✅ | Focus trap no drawer/modais |
-| Busca — estrutura de linha | 🟡 | Parser de descrição; match destacado |
+| Busca — estrutura de linha | 🟡 | Campos normalizados do backend disponíveis; polish visual pendente |
 | Busca — ações na linha | ✅ | Considerar ícones + row click → drawer |
-| Detalhe do produto | 🟡 | Drawer lateral; similares; aplicação real |
+| Detalhe do produto | 🟡 | `aplicacao_resumo` quando extraível; drawer/similares pendentes |
 | WhatsApp editável | ✅ | — |
-| Dashboard repaginado | ✅ | Compactar hero; remover redundâncias |
+| Dashboard repaginado | ✅ | Compactar hero; usar `titulo_normalizado` no histórico — **FE-16** |
 | Redesign visual (paleta, sidebar dark) | ✅ | Simplificar acentos; polir telas secundárias |
-| Parser de descrições | ⬜ | Alta prioridade — dados brutos do PDF |
-| Match exato + atalhos teclado | ⬜ | Fase D |
+| Parser de descrições (display) | ✅ | Fallback; preferir campos do backend quando `normalizado_em` preenchido |
+| Match exato (ranking) | ✅ | RPC `buscar_produtos` + badges `match_tipo` na busca |
+| Atalho de teclado `/` | ✅ | Foca a busca; `A`/`W` dependem de seleção de linha (Fase B) |
 | Busca por veículo | ⬜ | Fase F |
 | Estoque/preço | ⬜ | MVP 2.0 |
 
@@ -58,7 +59,7 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 5. Manter histórico por oficina/cliente
 
 **Dores atuais**
-- Descrições técnicas longas e difíceis de comparar *(ainda presente — parser pendente)*
+- ~~Descrições técnicas longas e difíceis de comparar~~ → mitigado com `titulo_normalizado` (backfill em andamento)
 - Falta de foto, aplicação e fabricante reduz confiança
 - Alternância entre catálogo, ERP, WhatsApp e memória
 - Pressão de tempo com cliente na linha
@@ -87,7 +88,7 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 
 | Tela | Problema (pesquisa 02/07) | Status hoje | O que falta |
 |------|---------------------------|-------------|-------------|
-| **Busca** | Descrição longa concatenada | 🟡 | `line-clamp-1` corta mas não estrutura; parser pendente |
+| **Busca** | Descrição longa concatenada | 🟡 | `titulo_normalizado` na busca ✅; dashboard/histórico ainda com parser — **FE-16** |
 | **Busca** | Coluna `Fabricante` vazia | ✅ | Substituída por Aplicação/Referências |
 | **Busca** | Placeholder de foto repetido | ✅ | Ícone discreto quando sem foto |
 | **Busca** | Coluna `Ação` vazia | ✅ | Orçamento + WhatsApp + Ver detalhes |
@@ -111,8 +112,8 @@ O legado é visualmente ultrapassado, mas entrega **densidade operacional**. O v
 |-----------------------|----------------------|---------------|-------------|
 | **Similares e agregados** | Equivalente quando código original indisponível | ⬜ | Seção no detalhe com grau de confiança |
 | **Estoque por filial** | Fechar venda na hora | ⬜ | Placeholder "Consultar no ERP" → integração MVP 2.0 |
-| **Aplicação por veículo** | Confirmar que serve (Randon, ano, eixo) | 🟡 | Placeholder intencional no detalhe; dados reais pendentes |
-| **Códigos técnicos separados** | Interno, fabricante, refs, equivalentes | 🟡 | Chips copiáveis ✅; parser para extrair do texto bruto ⬜ |
+| **Aplicação por veículo** | Confirmar que serve (Randon, ano, eixo) | 🟡 | `aplicacao_resumo` no detalhe quando extraível; tabela estruturada ⬜ BE-06 |
+| **Códigos técnicos separados** | Interno, fabricante, refs, equivalentes | 🟡 | `codigo_principal` + chips ✅; equivalências tipadas ⬜ BE-07 |
 | **Preço e estoque na mesma tela** | Sem alternar sistemas | ⬜ | MVP 2.0 |
 
 **Princípio:** clareza visual do app novo + densidade útil do legado. **Não copiar** o visual verde denso do SS Plus — copiar a **estrutura da informação**.
@@ -138,13 +139,13 @@ Cada linha deve permitir decisão em segundos:
 
 | Requisito | Status | Arquivo |
 |-----------|--------|---------|
-| Título curto normalizado | ⬜ | `src/lib/descricao-parser.ts` (criar) |
-| Código principal em destaque | ✅ | `busca/page.tsx` |
+| Título curto normalizado | ✅ | `titulo_normalizado` (backend) + fallback `produto-campos.ts` |
+| Código principal em destaque | ✅ | `codigo_principal` na busca e detalhe |
 | Chips de referências cruzadas | ✅ | `busca/page.tsx` |
-| Aplicação resumida em uma linha | ⬜ | Depende de dados/parser |
+| Aplicação resumida em uma linha | 🟡 | `aplicacao_resumo` no detalhe; na linha da busca ⬜ **FE-17** |
 | Badge do catálogo/fornecedor | 🟡 | Filtros por catálogo existem; badge na linha ⬜ |
 | Ações rápidas na linha | ✅ | `adicionar-orcamento-button.tsx`, `whatsapp-row-button.tsx` |
-| Destaque de match (código/ref) | ⬜ | `busca/page.tsx` |
+| Destaque de match (código/ref) | 🟡 | Badges via `match_tipo` ✅; destacar `match_valor` no código ⬜ **FE-09** |
 
 #### 4.2 Drawer/tela de detalhe do produto — 🟡 PARCIAL
 
@@ -154,25 +155,17 @@ Cada linha deve permitir decisão em segundos:
 | Chips copiáveis de códigos | ✅ | `produto/codigo-chip.tsx` |
 | Drawer lateral (row click) | ⬜ | Novo: `produto/drawer-produto.tsx` |
 | Equivalências e similares | ⬜ | Quando dados existirem |
-| Aplicações estruturadas | 🟡 | Placeholder no detalhe |
-| Texto original colapsável | ⬜ | `produtos/[id]/page.tsx` |
+| Aplicações estruturadas | 🟡 | `aplicacao_resumo` quando backend extrai; tabela por veículo ⬜ BE-06 |
+| Texto original colapsável | ✅ | `descricao_original` + fallback parser |
 | Estoque/preço | ⬜ | MVP 2.0 |
 
-#### 4.3 Melhorar legibilidade das descrições — ⬜ PENDENTE (alta prioridade)
+#### 4.3 Melhorar legibilidade das descrições — ✅ BACKEND + 🟡 FRONTEND
 
-- **Na tabela:** versão normalizada e escaneável
-- **No detalhe:** descrição bruta em "Texto original do catálogo"
-- Parser para extrair: título, códigos (`COD:`, padrões numéricos), aplicação, medidas
-- Tratar casos reais: `RANDON COD: 537 COD: 2456...`, `CÓDIGO DESCRIÇÃO CONECTOR...`
+- **No banco:** `titulo_normalizado`, `codigos_extraidos`, `descricao_original` via pipeline backend
+- **Na UI:** `produto-campos.ts` com fallback para `descricao-parser.ts`
+- **Pendente frontend:** propagar campos normalizados ao dashboard/histórico (**FE-16**); chips de medidas (**FE-17**)
 
-**Exemplos de saída do parser:**
-
-| Entrada (bruta) | Título exibido | Chips extraídos |
-|-----------------|----------------|-----------------|
-| `RANDON COD: 537 COD: 2456 BAL TR CAVALO...` | BAL TR CAVALO RANDON Ø50 | `537`, `2456`, `641` |
-| `CÓDIGO DESCRIÇÃO 1386677 CONECTOR FILTRO` | Conector filtro RACOR Ø12 | `1386677` |
-
-**Arquivos:** `src/lib/descricao-parser.ts` (novo), `busca/page.tsx`, `page.tsx` (dashboard), `historico/page.tsx`
+**Arquivos:** `produto-normalizador.ts`, `produto-campos.ts`, `descricao-parser.ts`, `busca/page.tsx`, `produtos/[id]/page.tsx`
 
 #### 4.4 Adaptar colunas vazias — ✅ FEITO
 
@@ -191,7 +184,7 @@ Prévia editável no modal de orçamento e produto; `buildWhatsAppUrl` usa texto
 
 | Item | Status | Descrição |
 |------|--------|-----------|
-| Busca por código exato priorizado | 🟡 | Normalização ✅; ranking e badge "match exato" ⬜ |
+| Busca por código exato priorizado | ✅ | RPC `buscar_produtos` + badges `match_tipo`; refinamento visual **FE-09** |
 | Autocomplete e histórico | ⬜ | Sugerir códigos recentes, peças mais buscadas |
 | Atalhos de teclado | ⬜ | `/` foca busca · `A` orçamento · `W` WhatsApp |
 | Estados vazios | ✅ | Sugestões na busca sem resultado |
@@ -216,9 +209,9 @@ Prévia editável no modal de orçamento e produto; `buildWhatsAppUrl` usa texto
 | # | Item | Status | Arquivos |
 |---|------|--------|----------|
 | 1 | Trocar coluna `Fabricante` por `Referências` | ✅ | `busca/page.tsx` |
-| 2 | Título curto + chips de códigos + texto secundário | ⬜ | `descricao-parser.ts` |
+| 2 | Título curto + chips de códigos + texto secundário | ✅ | Backend + `produto-campos.ts`; dashboard/histórico ⬜ FE-16 |
 | 3 | Botão `+ Orçamento` na linha | ✅ | `adicionar-orcamento-button.tsx` |
-| 4 | Destacar match (código/referência) | ⬜ | `busca/page.tsx` |
+| 4 | Destacar match (código/referência) | 🟡 | Badges `match_tipo` ✅; highlight `match_valor` ⬜ FE-09 |
 | 5 | Drawer de detalhe (Códigos · Aplicação · Similares · Texto original) | 🟡 | Página existe; drawer ⬜ |
 | 6 | Template WhatsApp editável | ✅ | `barra-acoes.tsx`, `acoes.tsx` |
 | 7 | Últimas buscas com termo + produto | ✅ | `page.tsx`, `historico/page.tsx` |
@@ -271,7 +264,7 @@ Auditoria sistemática após o redesign "SaaS moderno" (`globals.css`, sidebar d
 
 | # | Problema | Recomendação | Prioridade |
 |---|----------|--------------|------------|
-| V10 | Descrições brutas do PDF (`RANDON COD: 537...`) sem estrutura | Parser (§4.3) — mesma prioridade funcional e visual | **P0** | `descricao-parser.ts` |
+| V10 | Descrições brutas do PDF | Backend normaliza em `titulo_normalizado`; frontend deve preferir campo do banco | **P0** | `produto-campos.ts`, FE-16 |
 | V11 | Métricas do dashboard ("Consultas hoje: 0") com sinal fraco | Barra de status fina: `sync · catálogos · consultas` | **P2** | `page.tsx` |
 
 #### Consistência entre telas
@@ -324,11 +317,13 @@ Ordem de implementação sugerida. Cada item tem critério de aceite testável.
 
 ### Sprint funcional-visual 3 — Dados legíveis (P0 funcional)
 
-| ID | Tarefa | Critério de aceite | Arquivos |
-|----|--------|-------------------|----------|
-| FE-07 | Parser de descrição | Função pura com testes; título + chips extraídos dos exemplos §4.3 | `descricao-parser.ts`, `descricao-parser.test.ts` |
-| FE-08 | Aplicar parser na busca e listas | Linha mostra título limpo + chips; tooltip com texto bruto | `busca/page.tsx`, `page.tsx`, `historico/page.tsx` |
-| FE-09 | Badge de match | Selo "Código exato" / "Via referência" / "Texto" na linha | `busca/page.tsx` |
+| ID | Tarefa | Critério de aceite | Arquivos | Status |
+|----|--------|-------------------|----------|--------|
+| FE-07 | Parser de descrição | Função pura com testes; título + chips extraídos dos exemplos §4.3 | `descricao-parser.ts`, `descricao-parser.test.ts` | ✅ 16 testes |
+| FE-08 | Aplicar parser na busca e listas | Linha mostra título limpo + chips; tooltip com texto bruto | `busca/page.tsx`, `page.tsx`, `historico/page.tsx` | ✅ |
+| FE-09 | Badge de match | Selo por `match_tipo`; destacar `match_valor` quando código | `busca/page.tsx` | 🟡 badges ✅, highlight ⬜ |
+| FE-16 | Campos normalizados no dashboard/histórico | Usar `tituloExibicao` / `codigoExibicao` | `page.tsx`, `historico/page.tsx` | ⬜ |
+| FE-17 | Chips de medidas no detalhe | Exibir `medidas_extraidas` | `produtos/[id]/page.tsx` | ⬜ |
 
 ### Sprint polish 4 — Consistência (P2)
 
@@ -340,11 +335,11 @@ Ordem de implementação sugerida. Cada item tem critério de aceite testável.
 
 ### Sprint avançado 5 — Densidade SS Plus (P1/P2 funcional)
 
-| ID | Tarefa | Arquivos |
-|----|--------|----------|
-| FE-13 | Drawer de produto (row click na busca) | Novo componente + integração em `busca/page.tsx` |
-| FE-14 | Atalhos de teclado `/`, `A`, `W` | Hook `use-atalhos-busca.ts` |
-| FE-15 | Texto original colapsável no detalhe | `produtos/[id]/page.tsx` |
+| ID | Tarefa | Arquivos | Status |
+|----|--------|----------|--------|
+| FE-13 | Drawer de produto (row click na busca) | Novo componente + integração em `busca/page.tsx` | ⬜ |
+| FE-14 | Atalho de teclado `/` (foca busca) | `components/busca/atalhos-busca.tsx` | ✅ (`A`/`W` dependem de FE-13) |
+| FE-15 | Texto original colapsável no detalhe | `produtos/[id]/page.tsx` | ✅ + chips de código extraído |
 
 ---
 
@@ -357,7 +352,7 @@ Ordem de implementação sugerida. Cada item tem critério de aceite testável.
 ```
 Cliente liga com código
   → Vendedor pressiona / e digita código          [FE-14 ⬜]
-  → Match exato no topo ("encontrado por código")  [FE-09 ⬜]
+  → Match exato no topo ("encontrado por código")  [FE-09 🟡]
   → Abre detalhe/drawer, confirma aplicação       [FE-13 ⬜]
   → Adiciona ao orçamento                         [✅]
   → Revisa mensagem WhatsApp e envia              [✅]
@@ -368,7 +363,7 @@ Cliente liga com código
 ```
 Cliente: "preciso de um pino tensor Randon M24"
   → Busca por descrição
-  → Resultados com título legível (não bruto PDF)  [FE-07/08 ⬜]
+  → Resultados com título legível (não bruto PDF)  [FE-16 ⬜ no dashboard/histórico]
   → Filtra por catálogo
   → Abre detalhe, compara similares                [⬜]
   → Envia orçamento                                [✅]
@@ -403,16 +398,17 @@ Oficina que já comprou antes
 - [x] Nova estrutura de linha na tabela de busca (código + refs + ações)
 - [x] Coluna `Referências` no lugar de `Fabricante`
 - [x] Botão `+ Orçamento` na linha
-- [ ] Parser de descrição (título + códigos + aplicação) — **FE-07**
-- [ ] Destaque de match por código/referência — **FE-09**
+- [x] Parser de descrição (título + códigos) — **FE-07/08**
+- [x] Destaque de match por código/referência — **FE-09** (badges via RPC; highlight pendente)
 
 ### Fase B — Detalhe do produto
 
 - [x] Página de detalhe com chips copiáveis
+- [x] Chips de código extraído da descrição — **FE-15**
+- [x] Texto original colapsável — **FE-15**
 - [ ] Drawer lateral ao clicar na linha — **FE-13**
-- [ ] Seção de aplicação estruturada (dados reais)
+- [ ] Seção de aplicação estruturada por veículo (tabela — BE-06)
 - [ ] Seção de equivalências/similares
-- [ ] Texto original colapsável — **FE-15**
 
 ### Fase C — Orçamento e WhatsApp
 
@@ -424,9 +420,9 @@ Oficina que já comprou antes
 ### Fase D — Busca avançada
 
 - [x] Normalização de código (hífen, espaço, ponto)
-- [ ] Match exato priorizado no ranking
+- [x] Match exato priorizado no ranking — RPC `buscar_produtos`
 - [ ] Autocomplete / sugestões
-- [ ] Atalhos de teclado — **FE-14**
+- [x] Atalho de teclado `/` (foca busca) — **FE-14** · `A`/`W` pendentes (dependem de FE-13)
 - [x] Estados vazios melhorados
 
 ### Fase E — CRM e histórico
@@ -477,7 +473,7 @@ Oficina que já comprou antes
 
 A prioridade não é adicionar muitas telas — é **melhorar a qualidade da informação na busca** e criar um **detalhe de produto forte**, porque é ali que a confiança da venda acontece.
 
-**Estado em 03/07/2026:** base visual moderna entregue; próximo salto = **parser de descrições** (funcional) + **header com busca** e **hero compacto** (visual) + **drawer de produto** (fluxo balcão).
+**Estado em 03/07/2026:** backend de normalização e busca com ranking aplicado no Supabase; próximo salto frontend = **FE-09/16/17** (aproveitar campos do banco) + **header com busca** e **hero compacto** (visual) + **drawer de produto** (fluxo balcão). Ver `docs/HANDOFF_BACKEND_MELHORIAS.md`.
 
 ---
 
@@ -488,15 +484,16 @@ A prioridade não é adicionar muitas telas — é **melhorar a qualidade da inf
 | Design tokens | `src/app/globals.css` |
 | Shell | `src/components/shell/nav-shell.tsx`, `sidebar.tsx`, `header.tsx`, `footer.tsx`, `(app)/layout.tsx` |
 | Dashboard | `src/app/(app)/page.tsx`, `components/dashboard/atalho-orcamento.tsx` |
-| Busca | `src/app/(app)/busca/page.tsx`, `components/busca/adicionar-orcamento-button.tsx`, `whatsapp-row-button.tsx` |
+| Busca | `src/app/(app)/busca/page.tsx`, `components/busca/adicionar-orcamento-button.tsx`, `whatsapp-row-button.tsx`, `atalhos-busca.tsx` |
 | Produto | `src/app/(app)/produtos/[id]/page.tsx`, `components/produto/codigo-chip.tsx`, `acoes.tsx` |
 | Orçamento | `src/app/(app)/orcamento/page.tsx`, `components/orcamento/barra-acoes.tsx` |
 | WhatsApp | `src/lib/whatsapp.ts`, `whatsapp.test.ts` |
-| Parser (criar) | `src/lib/descricao-parser.ts` |
+| Parser / campos produto | `descricao-parser.ts`, `produto-campos.ts`, `produto-normalizador.ts`, `busca-produtos.ts` |
+| Backend handoff | `docs/HANDOFF_BACKEND_MELHORIAS.md`, `sql/migrations/001–003` |
 | Histórico | `src/app/(app)/historico/page.tsx` |
 | CRM | `src/app/(app)/clientes/page.tsx`, `components/clientes/form-cliente.tsx` |
 | Telas sem polish | `veiculo/page.tsx`, `configuracoes/page.tsx`, `catalogos/upload/page.tsx`, `clientes/[id]/page.tsx`, `clientes/novo/page.tsx` |
 
 ---
 
-*Pesquisa original: 02/07/2026. Implementação P0 parcial + redesign: 02–03/07/2026. Auditoria visual consolidada: 03/07/2026.*
+*Pesquisa original: 02/07/2026. Implementação P0 parcial + redesign: 02–03/07/2026. Backend normalização + RPC busca: 03/07/2026. Handoff frontend: `docs/HANDOFF_BACKEND_MELHORIAS.md`.*

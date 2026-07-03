@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { tituloDescricao } from "@/lib/descricao-parser";
 
 type Consulta = {
   id: number;
@@ -133,12 +134,13 @@ export default async function HistoricoPage({
                       {c.produtos ? (
                         <Link
                           href={`/produtos/${c.produtos.id}`}
+                          title={c.produtos.descricao ?? undefined}
                           className="text-primary hover:underline"
                         >
                           <span className="font-mono text-code-md">
                             {c.produtos.codigo_produto_interno}
                           </span>{" "}
-                          · {c.produtos.descricao ?? ""}
+                          · {tituloDescricao(c.produtos.descricao)}
                         </Link>
                       ) : (
                         <span className="text-on-surface-variant">—</span>

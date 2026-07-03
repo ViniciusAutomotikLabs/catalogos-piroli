@@ -4,6 +4,7 @@ import { getContextoLoja } from "@/lib/loja";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento-button";
 import { OrcamentoStatusChip } from "@/components/dashboard/atalho-orcamento";
+import { parseDescricao } from "@/lib/descricao-parser";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -124,6 +125,7 @@ export default async function DashboardPage() {
                   const p = r.produtos;
                   if (!p) return null;
                   const fabricante = p.fabricantes?.nome_fabricante;
+                  const desc = parseDescricao(p.descricao);
                   return (
                     <li
                       key={r.id}
@@ -154,8 +156,11 @@ export default async function DashboardPage() {
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="line-clamp-1 font-semibold text-on-surface">
-                            {p.descricao ?? "Sem descrição"}
+                          <p
+                            className="line-clamp-1 font-semibold text-on-surface"
+                            title={desc.textoOriginal || undefined}
+                          >
+                            {desc.titulo}
                           </p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                             <span className="font-mono text-code-md text-primary">

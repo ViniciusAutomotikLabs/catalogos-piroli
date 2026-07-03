@@ -5,6 +5,12 @@ import { getContextoLoja } from "@/lib/loja";
 import { RegistrarConsulta } from "@/components/registrar-consulta";
 import { ProdutoAcoes } from "@/components/produto/acoes";
 import { CodigoChip } from "@/components/produto/codigo-chip";
+import {
+  codigoExibicao,
+  descricaoOriginalExibicao,
+  parseDescricaoComFallback,
+  tituloExibicao,
+} from "@/lib/produto-campos";
 
 export default async function ProdutoPage({
   params,
@@ -21,7 +27,7 @@ export default async function ProdutoPage({
   const { data: produto } = await supabase
     .from("produtos")
     .select(
-      "id, codigo_produto_interno, numero_produto, descricao, unidade, foto_url, observacoes, origem_catalogo, fabricantes(nome_fabricante), referencias_cruzadas(id, numero_referencia, fabricante_referencia)"
+      "id, codigo_produto_interno, codigo_principal, numero_produto, descricao, descricao_original, titulo_normalizado, codigos_extraidos, medidas_extraidas, aplicacao_resumo, normalizacao_status, unidade, foto_url, observacoes, origem_catalogo, fabricantes(nome_fabricante), referencias_cruzadas(id, numero_referencia, fabricante_referencia)"
     )
     .eq("id", produtoId)
     .maybeSingle();
@@ -36,6 +42,12 @@ export default async function ProdutoPage({
 
   const nomeCatalogo = catalogoInfo?.nome_exibicao ?? produto.origem_catalogo;
   const fabricante = produto.fabricantes?.nome_fabricante ?? null;
+  const desc = parseDescricaoComFallback(produto);
+  const titulo = tituloExibicao(produto);
+  const codigo = codigoExibicao(produto);
+  const textoOriginal = descricaoOriginalExibicao(produto);
+  const codigosExtra =
+    produto.codigos_extraidos?.length ? produto.codigos_extraidos : desc.codigos;
 
   return (
     <div className="pb-24">
@@ -51,8 +63,8 @@ export default async function ProdutoPage({
           Busca
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-        <span className="text-on-surface font-semibold">
-          {produto.descricao ?? produto.codigo_produto_interno}
+        <span className="text-on-surface font-semibold line-clamp-1">
+          {desc.alterado || produto.titulo_normalizado ? titulo : codigo}
         </span>
       </nav>
 
@@ -100,16 +112,20 @@ export default async function ProdutoPage({
         {/* Dados */}
         <div className="lg:col-span-3 space-y-6">
           <div>
-            <h1 className="text-headline-lg text-on-surface">
-              {produto.descricao ?? "Sem descrição"}
-            </h1>
+            <h1 className="text-headline-lg text-on-surface">{titulo}</h1>
 
-            {/* Códigos como chips copiáveis */}
             <div className="flex flex-wrap items-stretch gap-2 mt-3">
-              <CodigoChip label="Código interno" value={produto.codigo_produto_interno} />
+              <CodigoChip label="Código principal" value={codigo} />
+              {produto.codigo_principal &&
+                produto.codigo_principal !== produto.codigo_produto_interno && (
+                  <CodigoChip label="Código interno (legado)" value={produto.codigo_produto_interno} />
+                )}
               {produto.numero_produto && (
                 <CodigoChip label="Nº / Referência" value={produto.numero_produto} />
               )}
+              {codigosExtra.map((codigoExtra) => (
+                <CodigoChip key={codigoExtra} label="Código no catálogo" value={codigoExtra} />
+              ))}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
@@ -160,19 +176,25 @@ export default async function ProdutoPage({
           </section>
 
           {/* Aplicações */}
-          <section className="bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl overflow-hidden shadow-sm">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <h2 className="text-headline-sm text-primary px-4 py-3 border-b border-outline-variant flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px]">directions_car</span>
               Aplicações
-              <span className="ml-auto text-label-sm text-on-surface-variant uppercase bg-surface-container-high rounded-full px-2 py-0.5">
-                Em breve
-              </span>
+              {!produto.aplicacao_resumo && (
+                <span className="ml-auto text-label-sm text-on-surface-variant uppercase bg-surface-container-high rounded-full px-2 py-0.5">
+                  Em breve
+                </span>
+              )}
             </h2>
-            <p className="px-4 py-4 text-body-md text-on-surface-variant flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">schedule</span>
-              Dados de aplicação por veículo (montadora, modelo, ano, eixo) serão
-              exibidos aqui.
-            </p>
+            {produto.aplicacao_resumo ? (
+              <p className="px-4 py-4 text-body-md text-on-surface">{produto.aplicacao_resumo}</p>
+            ) : (
+              <p className="px-4 py-4 text-body-md text-on-surface-variant flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">schedule</span>
+                Dados de aplicação por veículo (montadora, modelo, ano, eixo) serão
+                exibidos aqui.
+              </p>
+            )}
           </section>
 
           {/* Observações */}
@@ -184,14 +206,29 @@ export default async function ProdutoPage({
               <p className="text-body-md text-on-surface-variant">{produto.observacoes}</p>
             </section>
           )}
+
+          {/* Texto original do catálogo — colapsável, só quando a limpeza alterou */}
+          {(desc.alterado || textoOriginal !== titulo) && textoOriginal && (
+            <details className="group rounded-xl border border-outline-variant bg-surface-container-low shadow-sm">
+              <summary className="flex cursor-pointer items-center gap-2 px-4 py-3 text-body-md text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+                <span className="material-symbols-outlined text-[18px] transition-transform group-open:rotate-90">
+                  chevron_right
+                </span>
+                Texto original do catálogo
+              </summary>
+              <p className="border-t border-outline-variant px-4 py-3 font-mono text-code-md leading-relaxed text-on-surface-variant">
+                {textoOriginal}
+              </p>
+            </details>
+          )}
         </div>
       </div>
 
       <ProdutoAcoes
         produto={{
           produtoId: produto.id,
-          descricao: produto.descricao,
-          codigo: produto.codigo_produto_interno,
+          descricao: produto.descricao ?? titulo,
+          codigo,
           numeroProduto: produto.numero_produto,
           fabricante,
           catalogo: nomeCatalogo,
