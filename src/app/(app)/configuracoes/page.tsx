@@ -13,29 +13,29 @@ export default async function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h1 className="text-headline-lg text-primary font-bold">Configurações</h1>
+      <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Configurações</h1>
 
       {/* Loja */}
-      <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">storefront</span>
           Loja
         </h2>
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-body-md">
           <div>
-            <dt className="text-label-sm text-on-surface-variant uppercase">Nome</dt>
+            <dt className="text-label-sm text-on-surface-variant">Nome</dt>
             <dd className="font-semibold text-on-surface mt-1">
               {contexto?.loja?.nome ?? "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-label-sm text-on-surface-variant uppercase">CNPJ</dt>
+            <dt className="text-label-sm text-on-surface-variant">CNPJ</dt>
             <dd className="font-mono text-code-md text-on-surface mt-1">
               {contexto?.loja?.cnpj ?? "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-label-sm text-on-surface-variant uppercase">
+            <dt className="text-label-sm text-on-surface-variant">
               WhatsApp da loja
             </dt>
             <dd className="font-mono text-code-md text-on-surface mt-1">
@@ -43,7 +43,7 @@ export default async function ConfiguracoesPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-label-sm text-on-surface-variant uppercase">Seu papel</dt>
+            <dt className="text-label-sm text-on-surface-variant">Seu papel</dt>
             <dd className="mt-1">
               <span className="inline-flex px-2 py-0.5 rounded border border-primary/30 bg-primary-fixed/30 text-label-sm text-primary uppercase">
                 {contexto?.papel ?? "—"}
@@ -54,17 +54,17 @@ export default async function ConfiguracoesPage() {
       </section>
 
       {/* Usuários */}
-      <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">group</span>
           Usuários da loja
         </h2>
         <table className="w-full text-left border-collapse text-body-md">
-          <thead className="text-label-sm text-on-surface-variant uppercase">
+          <thead className="text-label-sm text-on-surface-variant">
             <tr>
-              <th className="py-2">Usuário</th>
-              <th className="py-2 w-32">Papel</th>
-              <th className="py-2 w-40">Desde</th>
+              <th className="py-2 font-semibold">Usuário</th>
+              <th className="py-2 w-32 font-semibold">Papel</th>
+              <th className="py-2 w-40 font-semibold">Desde</th>
             </tr>
           </thead>
           <tbody>
@@ -93,7 +93,7 @@ export default async function ConfiguracoesPage() {
       </section>
 
       {/* Sobre + sair */}
-      <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex items-center justify-between">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-headline-sm text-primary flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">info</span>
@@ -106,7 +106,7 @@ export default async function ConfiguracoesPage() {
         <form action={sair}>
           <button
             type="submit"
-            className="flex items-center gap-2 px-4 py-2.5 rounded border border-error/40 text-error hover:bg-error hover:text-on-error transition-colors text-label-sm uppercase"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-error/40 text-error hover:bg-error hover:text-on-error transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">logout</span>
             Sair

@@ -54,7 +54,7 @@ export default async function HistoricoPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-headline-lg text-primary font-bold">Histórico de Consultas</h1>
+        <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Histórico de Consultas</h1>
         <form action="/historico" className="flex items-center gap-2">
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">
@@ -70,7 +70,7 @@ export default async function HistoricoPage({
           </div>
           <button
             type="submit"
-            className="px-4 py-2 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
+            className="px-4 py-2 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Filtrar
           </button>
@@ -78,7 +78,7 @@ export default async function HistoricoPage({
       </div>
 
       {grupos.size === 0 && (
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg py-16 flex flex-col items-center gap-2">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl py-16 flex flex-col items-center gap-2">
           <span className="material-symbols-outlined text-outline text-5xl">history</span>
           <p className="text-headline-sm text-on-surface">Nenhuma consulta registrada</p>
           <p className="text-body-md text-on-surface-variant">
@@ -89,18 +89,18 @@ export default async function HistoricoPage({
 
       {[...grupos.entries()].map(([grupo, itens]) => (
         <section key={grupo}>
-          <h2 className="text-label-sm text-on-surface-variant uppercase mb-2 flex items-center gap-2">
+          <h2 className="text-label-sm text-on-surface-variant mb-2 flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px]">calendar_today</span>
             {grupo}
           </h2>
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-surface-container-low text-on-surface-variant text-label-sm uppercase">
+              <thead className="bg-surface-container-high text-on-surface-variant text-label-sm tracking-wide">
                 <tr>
-                  <th className="py-3 px-4 w-24">Hora</th>
-                  <th className="py-3 px-4">Termo Buscado / Código</th>
-                  <th className="py-3 px-4">Produto Aberto</th>
-                  <th className="py-3 px-4 w-28 text-right">Ação</th>
+                  <th className="py-3 px-4 w-24 font-semibold">Hora</th>
+                  <th className="py-3 px-4 font-semibold">Termo buscado / código</th>
+                  <th className="py-3 px-4 font-semibold">Produto aberto</th>
+                  <th className="py-3 px-4 w-28 text-right font-semibold">Ação</th>
                 </tr>
               </thead>
               <tbody className="text-body-md">
@@ -153,7 +153,7 @@ export default async function HistoricoPage({
                               ? `/produtos/${c.produtos.id}`
                               : "/busca"
                         }
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       >
                         <span className="material-symbols-outlined text-[16px]">replay</span>
                         Repetir

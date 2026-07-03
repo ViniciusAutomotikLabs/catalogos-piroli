@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 import { RegistrarConsulta } from "@/components/registrar-consulta";
 import { ProdutoAcoes } from "@/components/produto/acoes";
+import { CodigoChip } from "@/components/produto/codigo-chip";
 
 export default async function ProdutoPage({
   params,
@@ -58,7 +59,7 @@ export default async function ProdutoPage({
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Foto */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-outline-variant rounded-lg p-4 flex items-center justify-center aspect-[4/3] sticky top-24">
+          <div className="bg-white border border-outline-variant rounded-xl p-4 flex items-center justify-center aspect-[4/3] sticky top-24 shadow-sm">
             {produto.foto_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -99,13 +100,19 @@ export default async function ProdutoPage({
         {/* Dados */}
         <div className="lg:col-span-3 space-y-6">
           <div>
-            <p className="font-mono text-code-md text-primary text-[20px] leading-7">
-              {produto.codigo_produto_interno}
-            </p>
-            <h1 className="text-headline-lg text-on-surface mt-1">
+            <h1 className="text-headline-lg text-on-surface">
               {produto.descricao ?? "Sem descrição"}
             </h1>
-            <div className="flex flex-wrap items-center gap-3 mt-3">
+
+            {/* Códigos como chips copiáveis */}
+            <div className="flex flex-wrap items-stretch gap-2 mt-3">
+              <CodigoChip label="Código interno" value={produto.codigo_produto_interno} />
+              {produto.numero_produto && (
+                <CodigoChip label="Nº / Referência" value={produto.numero_produto} />
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
               {fabricante && (
                 <span className="text-body-md text-on-surface-variant">
                   Fabricante: <span className="font-semibold text-on-surface">{fabricante}</span>
@@ -120,43 +127,31 @@ export default async function ProdutoPage({
                 Catálogo: {nomeCatalogo}
               </span>
             </div>
-            {produto.numero_produto && (
-              <p className="text-body-md text-on-surface-variant mt-2">
-                Nº / Referência:{" "}
-                <span className="font-mono text-code-md text-on-surface">
-                  {produto.numero_produto}
-                </span>
-              </p>
-            )}
           </div>
 
           {/* Referências cruzadas */}
-          <section className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
-            <h2 className="text-headline-sm text-primary px-4 py-3 border-b border-outline-variant flex items-center gap-2">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+            <h2 className="text-headline-sm text-on-surface font-semibold px-4 py-3 border-b border-outline-variant flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px]">swap_horiz</span>
               Referências Cruzadas
+              {produto.referencias_cruzadas.length > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-primary-container text-on-primary-container text-label-sm">
+                  {produto.referencias_cruzadas.length}
+                </span>
+              )}
             </h2>
             {produto.referencias_cruzadas.length > 0 ? (
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-surface-container-low text-on-surface-variant text-label-sm uppercase">
-                  <tr>
-                    <th className="px-4 py-2">Número</th>
-                    <th className="px-4 py-2">Marca</th>
-                  </tr>
-                </thead>
-                <tbody className="text-body-md">
-                  {produto.referencias_cruzadas.map((ref) => (
-                    <tr key={ref.id} className="border-t border-outline-variant">
-                      <td className="px-4 py-2 font-mono text-code-md text-primary">
-                        {ref.numero_referencia}
-                      </td>
-                      <td className="px-4 py-2 text-on-surface-variant">
-                        {ref.fabricante_referencia ?? "—"}
-                      </td>
-                    </tr>
+              <div className="p-4 flex flex-wrap gap-2">
+                {produto.referencias_cruzadas
+                  .filter((ref) => ref.numero_referencia)
+                  .map((ref) => (
+                    <CodigoChip
+                      key={ref.id}
+                      label={ref.fabricante_referencia ?? "Referência"}
+                      value={ref.numero_referencia as string}
+                    />
                   ))}
-                </tbody>
-              </table>
+              </div>
             ) : (
               <p className="px-4 py-4 text-body-md text-on-surface-variant">
                 Nenhuma referência cruzada cadastrada para este item.
@@ -165,21 +160,25 @@ export default async function ProdutoPage({
           </section>
 
           {/* Aplicações */}
-          <section className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+          <section className="bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <h2 className="text-headline-sm text-primary px-4 py-3 border-b border-outline-variant flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px]">directions_car</span>
               Aplicações
+              <span className="ml-auto text-label-sm text-on-surface-variant uppercase bg-surface-container-high rounded-full px-2 py-0.5">
+                Em breve
+              </span>
             </h2>
             <p className="px-4 py-4 text-body-md text-on-surface-variant flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">schedule</span>
-              Em breve — dados de aplicação por veículo.
+              Dados de aplicação por veículo (montadora, modelo, ano, eixo) serão
+              exibidos aqui.
             </p>
           </section>
 
           {/* Observações */}
           {produto.observacoes && (
             <section>
-              <h2 className="text-label-sm text-on-surface-variant uppercase mb-1">
+              <h2 className="text-label-sm text-on-surface-variant mb-1">
                 Observações
               </h2>
               <p className="text-body-md text-on-surface-variant">{produto.observacoes}</p>

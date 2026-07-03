@@ -126,10 +126,10 @@ export default async function ClientePerfilPage({
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2 space-y-6">
-          <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-headline-lg text-primary font-bold">{nomeExibicao}</h1>
+                <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">{nomeExibicao}</h1>
                 <p className="text-body-md text-on-surface-variant mt-1">{cliente.razao_social}</p>
                 <div className="flex items-center gap-2 flex-wrap mt-3">
                   <span className="inline-flex px-2 py-0.5 rounded border border-primary/30 bg-primary-fixed/30 text-label-sm text-primary uppercase">
@@ -147,7 +147,7 @@ export default async function ClientePerfilPage({
                   href={buildContatoLojaUrl(cliente.telefone_whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded bg-secondary text-on-secondary text-label-sm uppercase hover:bg-on-secondary-container transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-secondary text-on-secondary text-label-sm uppercase hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2"
                 >
                   <span className="material-symbols-outlined text-[18px]">chat</span>
                   WhatsApp
@@ -156,26 +156,26 @@ export default async function ClientePerfilPage({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-              <div className="bg-surface-container-low rounded p-4">
+              <div className="bg-surface-container-low rounded-lg p-4">
                 <p className="text-headline-md font-bold text-on-surface font-mono">{totalOrcamentos}</p>
-                <p className="text-label-sm text-on-surface-variant uppercase">Orçamentos</p>
+                <p className="text-label-sm text-on-surface-variant">Orçamentos</p>
               </div>
-              <div className="bg-surface-container-low rounded p-4">
+              <div className="bg-surface-container-low rounded-lg p-4">
                 <p className="text-headline-md font-bold text-on-surface font-mono">{totalItens}</p>
-                <p className="text-label-sm text-on-surface-variant uppercase">Itens pedidos</p>
+                <p className="text-label-sm text-on-surface-variant">Itens pedidos</p>
               </div>
-              <div className="bg-surface-container-low rounded p-4">
+              <div className="bg-surface-container-low rounded-lg p-4">
                 <p className="text-headline-md font-bold text-on-surface">
                   {cliente.ultima_compra_em
                     ? new Date(cliente.ultima_compra_em).toLocaleDateString("pt-BR")
                     : "—"}
                 </p>
-                <p className="text-label-sm text-on-surface-variant uppercase">Última compra</p>
+                <p className="text-label-sm text-on-surface-variant">Última compra</p>
               </div>
             </div>
           </section>
 
-          <section className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <div className="px-6 py-4 border-b border-outline-variant">
               <h2 className="text-headline-sm text-primary">O que costuma comprar</h2>
               <p className="text-body-md text-on-surface-variant mt-1">
@@ -190,12 +190,12 @@ export default async function ClientePerfilPage({
               </div>
             ) : (
               <table className="w-full text-left">
-                <thead className="bg-surface-container-high border-b border-outline-variant text-label-sm uppercase text-on-surface">
+                <thead className="bg-surface-container-high border-b border-outline-variant text-label-sm text-on-surface-variant tracking-wide">
                   <tr>
-                    <th className="px-4 py-3">Peça</th>
-                    <th className="px-4 py-3 w-28">Qtd total</th>
-                    <th className="px-4 py-3 w-28">Vezes</th>
-                    <th className="px-4 py-3 w-24 text-right">Ação</th>
+                    <th className="px-4 py-3 font-semibold">Peça</th>
+                    <th className="px-4 py-3 w-28 font-semibold">Qtd total</th>
+                    <th className="px-4 py-3 w-28 font-semibold">Vezes</th>
+                    <th className="px-4 py-3 w-24 text-right font-semibold">Ação</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -226,7 +226,7 @@ export default async function ClientePerfilPage({
             )}
           </section>
 
-          <section className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <div className="px-6 py-4 border-b border-outline-variant">
               <h2 className="text-headline-sm text-primary">Histórico de orçamentos</h2>
             </div>

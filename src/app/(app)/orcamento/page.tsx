@@ -87,7 +87,7 @@ export default function OrcamentoPage() {
     <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-headline-lg text-primary font-bold">Carrinho de Orçamento</h1>
+          <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Carrinho de Orçamento</h1>
           <p className="text-body-md text-on-surface-variant mt-1">
             {itens.length} item(ns) — preços manuais até o módulo de estoque (MVP 2.0)
           </p>
@@ -95,7 +95,7 @@ export default function OrcamentoPage() {
         {itens.length > 0 && (
           <button
             onClick={() => clearCart()}
-            className="flex items-center gap-2 px-4 py-2 rounded border border-outline-variant text-on-surface-variant hover:border-error hover:text-error transition-colors text-label-sm uppercase"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:border-error hover:text-error transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
           >
             <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
             Limpar Lista
@@ -118,7 +118,7 @@ export default function OrcamentoPage() {
       )}
 
       {itens.length === 0 ? (
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg py-16 flex flex-col items-center gap-2">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl py-16 flex flex-col items-center gap-2 shadow-sm">
           <span className="material-symbols-outlined text-outline text-5xl">shopping_cart_off</span>
           <p className="text-headline-sm text-on-surface">Orçamento vazio</p>
           <p className="text-body-md text-on-surface-variant">
@@ -139,7 +139,7 @@ export default function OrcamentoPage() {
             {itens.map((item, idx) => (
               <div
                 key={`${item.produtoId}-${idx}`}
-                className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center gap-4 hover:border-primary transition-colors"
+                className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex items-center gap-4 hover:border-primary hover:shadow-sm transition-all"
               >
                 <div className="w-16 h-16 bg-white border border-outline-variant rounded flex items-center justify-center overflow-hidden shrink-0">
                   {item.fotoUrl ? (
@@ -209,8 +209,8 @@ export default function OrcamentoPage() {
           </div>
 
           {/* Resumo */}
-          <aside className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 space-y-4 sticky top-24">
-            <h2 className="text-headline-sm text-primary">Resumo do Orçamento</h2>
+          <aside className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 space-y-4 sticky top-24 shadow-sm">
+            <h2 className="text-headline-sm text-on-surface font-semibold">Resumo do Orçamento</h2>
 
             <div className="flex flex-col gap-2">
               <label className="text-label-sm text-on-surface-variant" htmlFor="cliente">

@@ -65,7 +65,7 @@ export function FormCliente({
     <div className="space-y-6 max-w-4xl">
       {(titulo || subtitulo) && (
         <div>
-          {titulo && <h1 className="text-headline-lg text-primary font-bold">{titulo}</h1>}
+          {titulo && <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">{titulo}</h1>}
           {subtitulo && <p className="text-body-md text-on-surface-variant mt-1">{subtitulo}</p>}
         </div>
       )}
@@ -73,7 +73,7 @@ export function FormCliente({
       <form action={formAction} className="space-y-6">
         {cliente?.id && <input type="hidden" name="id" value={cliente.id} />}
 
-        <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
           <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">badge</span>
             Dados Básicos
@@ -127,7 +127,7 @@ export function FormCliente({
           )}
         </section>
 
-        <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
           <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">build</span>
             Especialização
@@ -180,7 +180,7 @@ export function FormCliente({
           </div>
         </section>
 
-        <section className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
           <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">location_on</span>
             Localização
@@ -224,14 +224,14 @@ export function FormCliente({
         <div className="flex items-center justify-end gap-3">
           <Link
             href={cancelHref}
-            className="px-5 py-2.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
+            className="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             Cancelar
           </Link>
           <button
             type="submit"
             disabled={pendente}
-            className="flex items-center gap-2 px-5 py-2.5 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             {pendente ? "Salvando…" : submitLabel}
@@ -274,7 +274,7 @@ function Campo({
         placeholder={placeholder}
         maxLength={maxLength}
         defaultValue={defaultValue ?? ""}
-        className={`px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${
+        className={`px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors ${
           mono ? "font-mono text-code-md" : ""
         }`}
       />

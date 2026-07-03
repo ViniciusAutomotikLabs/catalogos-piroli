@@ -399,6 +399,37 @@ npm run dev
 | 2026-07-02 | `whatsapp.test.ts` | 13 testes unitários |
 | 2026-07-02 | `busca`, `historico`, `clientes` | Acessibilidade: ações sempre visíveis |
 
+### UX balcão — quick wins P0 (02/07/2026)
+
+Implementação das prioridades P0 de `docs/UX_MELHORIAS_BALCAO.md` para dar "cara de software de verdade", sem tocar em auth/middleware/server actions.
+
+| Item (doc) | O que foi feito | Arquivos |
+|------------|-----------------|----------|
+| Shell responsivo | Sidebar vira **drawer** no mobile (hambúrguer no header, backdrop, fecha no Escape/rota); fixa em `lg+`. `ml-64`/`left-64` → `lg:`. Estado coordenado por client wrapper `NavShell` (layout segue server component) | `components/shell/nav-shell.tsx` (novo), `sidebar.tsx`, `header.tsx`, `footer.tsx`, `(app)/layout.tsx`, `produto/acoes.tsx`, `orcamento/barra-acoes.tsx` |
+| Linha de busca (§4.1) | Título (descrição) + código destacado + chips de referências cruzadas; coluna `Fabricante` vazia → **Aplicação/Referências**; botão **+ Orçamento** na linha; selo "via referência"; placeholder de foto discreto; colunas secundárias colapsam no mobile | `busca/page.tsx`, `components/busca/adicionar-orcamento-button.tsx` (novo) |
+| Detalhe do produto (§4.2) | Códigos em **chips copiáveis**; referências como chips; seção Aplicações com placeholder intencional | `produtos/[id]/page.tsx`, `components/produto/codigo-chip.tsx` (novo) |
+| WhatsApp (§4.5) | **Prévia editável** (`<textarea>`) no modal de orçamento e de produto; envio usa o texto editado (`buildWhatsAppUrl`); "Enviar WhatsApp" como ação primária | `orcamento/barra-acoes.tsx`, `produto/acoes.tsx` |
+| P1 | Estado vazio da busca com sugestões (remover hífens, só código, suporte); login/footer sem `href="#"` quebrado | `busca/page.tsx`, `login/page.tsx`, `footer.tsx` |
+
+Validação: `npm run build` ✓, `npm test` ✓ 13/13, `npm run lint` ✓ 0 erros.
+
+**Pendente (próximo incremento UX):** focus trap real nos modais e no drawer; match exato priorizado + autocomplete/atalhos de teclado (`/`, `A`, `W`) na busca; dados de aplicação por veículo e estoque/preço (MVP 2.0).
+
+### Redesign visual "SaaS moderno" (03/07/2026)
+
+Feedback do dono: a UI ainda tinha "cara de software datado" (navy chapado + cinzas), lembrando o ERP legado (SS Plus v12). Redesign para estética moderna (referências Linear/Vercel/Stripe), mantendo densidade operacional e toda a funcionalidade.
+
+| Área | Mudança |
+|------|---------|
+| Paleta (`globals.css` `@theme`) | Neutros **slate**; primária **azul `#2563eb`** (era navy `#002046`); acento **esmeralda `#059669`** (CTA/WhatsApp — aceno sutil ao verde do SS Plus); tertiary slate; error moderno. Nomes dos tokens preservados → propaga por todo o app |
+| Sidebar | **Slate escuro `#0f172a`** (não usa mais `bg-primary`), item ativo com realce esmeralda + `aria-current`, badge do carrinho esmeralda |
+| Componentes/telas | `rounded-xl` em containers, sombras suaves, hover elevando, `focus-visible:ring` consistente; header com `backdrop-blur`; **paginação da busca em pílula** (Anterior/Próxima + "Página X de Y"); login repaginado; modais com `role="dialog"` |
+| Acessibilidade | Contrastes AA/AAA verificados (branco/slate-900 ~15:1; azul/branco ~4.6:1; esmeralda/branco ~4.5:1); foco de teclado visível |
+
+Validação: `npm run build` ✓, `npm test` ✓ 13/13, `npm run lint` ✓ 0 erros.
+
+**Pendente:** polish de `veiculo`, `configuracoes`, `catalogos/upload`, `clientes/[id]`, `clientes/novo` (herdam a paleta via tokens, mas sem `rounded-xl`/sombras ainda); dark mode completo (só a sidebar é dark).
+
 ---
 
 *Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web).*

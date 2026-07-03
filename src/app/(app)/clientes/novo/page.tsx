@@ -28,7 +28,7 @@ export default function NovoClientePage() {
               <span className="w-6 h-6 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">
                 {s.numero}
               </span>
-              <span className="text-label-sm text-primary uppercase">{s.titulo}</span>
+              <span className="text-label-sm text-primary">{s.titulo}</span>
             </div>
             {i < SECOES.length - 1 && (
               <span className="material-symbols-outlined text-outline text-[18px]">chevron_right</span>

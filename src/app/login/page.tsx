@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { buildContatoLojaUrl } from "@/lib/whatsapp";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,23 +31,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="bg-surface min-h-screen flex flex-col justify-center items-center text-on-surface p-4 md:p-0 flex-1"
-      style={{
-        backgroundImage:
-          "linear-gradient(to right, rgba(196,198,207,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(196,198,207,0.2) 1px, transparent 1px)",
-        backgroundSize: "32px 32px",
-      }}
-    >
-      <main className="w-full max-w-[400px] flex flex-col items-center">
-        <div className="w-full bg-surface-container-lowest border border-outline-variant rounded p-8 shadow-[0_4px_12px_rgba(0,32,70,0.05)] flex flex-col gap-8">
+    <div className="relative min-h-screen flex flex-col justify-center items-center text-on-surface p-4 md:p-0 flex-1 overflow-hidden bg-background">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50"
+        style={{
+          backgroundImage:
+            "radial-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(to bottom, #f8fafc, #eef2f7)",
+          backgroundSize: "24px 24px, 100% 100%",
+        }}
+      />
+      <main className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
+        <div className="w-full bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 shadow-lg flex flex-col gap-8">
           <header className="flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 bg-primary rounded flex items-center justify-center mb-4 shadow-sm">
-              <span className="material-symbols-outlined filled text-on-primary text-[28px]">
+            <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-md">
+              <span className="material-symbols-outlined filled text-on-primary text-[30px]">
                 precision_manufacturing
               </span>
             </div>
-            <h1 className="text-headline-lg font-black text-primary tracking-tighter uppercase">
+            <h1 className="text-headline-lg font-black text-on-surface tracking-tight">
               AutoPeças
             </h1>
             <p className="text-label-sm text-on-surface-variant uppercase mt-1 tracking-widest">
@@ -70,7 +72,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="usuario@loja.com.br"
-                  className="w-full pl-10 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -82,7 +84,12 @@ export default function LoginPage() {
                 </label>
                 <a
                   className="text-label-sm text-primary hover:text-primary-container transition-colors underline decoration-primary/30 underline-offset-2"
-                  href="#"
+                  href={buildContatoLojaUrl(
+                    null,
+                    "Olá, preciso de ajuda para recuperar meu acesso ao Catálogo Industrial."
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Esqueci minha senha
                 </a>
@@ -98,13 +105,13 @@ export default function LoginPage() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors tracking-widest"
+                  className="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors tracking-widest"
                 />
               </div>
             </div>
 
             {erro && (
-              <p className="text-body-md text-error bg-error-container/50 border border-error/30 rounded px-3 py-2">
+              <p className="text-body-md text-error bg-error-container/50 border border-error/30 rounded-lg px-3 py-2">
                 {erro}
               </p>
             )}
@@ -112,7 +119,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={carregando}
-              className="w-full mt-2 bg-primary hover:bg-primary-container disabled:opacity-60 text-on-primary text-label-sm uppercase py-3 rounded border border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-primary outline-none transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-2 bg-primary hover:bg-primary-container disabled:opacity-60 text-on-primary text-label-sm uppercase py-3 rounded-lg border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary outline-none transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               {carregando ? "Entrando…" : "Entrar"}
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

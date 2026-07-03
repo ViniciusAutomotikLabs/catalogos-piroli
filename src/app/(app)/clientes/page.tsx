@@ -50,7 +50,7 @@ export default async function ClientesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-headline-lg text-primary font-bold">Gestão de Clientes</h1>
+          <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Gestão de Clientes</h1>
           <p className="text-body-md text-on-surface-variant mt-1">
             Oficinas e parceiros da sua loja — {clientes?.length ?? 0} cadastros
           </p>
@@ -70,7 +70,7 @@ export default async function ClientesPage({
           </form>
           <Link
             href="/clientes/novo"
-            className="flex items-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             Novo Cadastro
@@ -80,7 +80,7 @@ export default async function ClientesPage({
 
       {/* Filtros */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-label-sm text-on-surface-variant uppercase mr-1">Filtros:</span>
+        <span className="text-label-sm text-on-surface-variant mr-1">Filtros:</span>
         {Object.entries(ESPECIALIDADES).map(([key, label]) => (
           <Link
             key={key}
@@ -113,17 +113,17 @@ export default async function ClientesPage({
         ))}
       </div>
 
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         {clientes && clientes.length > 0 ? (
           <table className="w-full text-left border-collapse">
-            <thead className="bg-surface-container-high border-b-2 border-outline-variant text-on-surface text-label-sm uppercase">
+            <thead className="bg-surface-container-high border-b border-outline-variant text-on-surface-variant text-label-sm tracking-wide">
               <tr>
-                <th className="px-4 py-3">Oficina / Contato</th>
-                <th className="px-4 py-3 w-44">CNPJ / Cód.</th>
-                <th className="px-4 py-3">Especialidade / Marcas</th>
-                <th className="px-4 py-3 w-36">Última Compra</th>
-                <th className="px-4 py-3 w-24">Orçamentos</th>
-                <th className="px-4 py-3 w-28 text-right">Ação</th>
+                <th className="px-4 py-3 font-semibold">Oficina / contato</th>
+                <th className="px-4 py-3 w-44 font-semibold">CNPJ / cód.</th>
+                <th className="px-4 py-3 font-semibold">Especialidade / marcas</th>
+                <th className="px-4 py-3 w-36 font-semibold">Última compra</th>
+                <th className="px-4 py-3 w-24 font-semibold">Orçamentos</th>
+                <th className="px-4 py-3 w-28 text-right font-semibold">Ação</th>
               </tr>
             </thead>
             <tbody className="text-body-md text-on-surface">
@@ -132,7 +132,7 @@ export default async function ClientesPage({
                 return (
                 <tr
                   key={c.id}
-                  className={`border-b border-outline-variant hover:bg-surface-container transition-colors group h-16 ${
+                  className={`border-b border-outline-variant hover:bg-primary-fixed/40 transition-colors group h-16 ${
                     i % 2 === 1 ? "bg-surface-container-low" : ""
                   }`}
                 >
@@ -190,7 +190,7 @@ export default async function ClientesPage({
                     <div className="inline-flex items-center gap-1">
                       <Link
                         href={`/clientes/${c.id}`}
-                        className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-primary transition-colors items-center justify-center border border-transparent hover:border-primary"
+                        className="inline-flex w-8 h-8 rounded-lg bg-surface-container hover:bg-primary hover:text-on-primary text-primary transition-colors items-center justify-center border border-transparent hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         title="Ver perfil"
                         aria-label="Ver perfil do cliente"
                       >
@@ -201,7 +201,7 @@ export default async function ClientesPage({
                         href={buildContatoLojaUrl(c.telefone_whatsapp)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors items-center justify-center border border-transparent hover:border-secondary"
+                        className="inline-flex w-8 h-8 rounded-lg bg-surface-container hover:bg-secondary hover:text-on-secondary text-secondary transition-colors items-center justify-center border border-transparent hover:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                         title="Chamar no WhatsApp"
                         aria-label="Chamar no WhatsApp"
                       >
@@ -224,7 +224,7 @@ export default async function ClientesPage({
             </p>
             <Link
               href="/clientes/novo"
-              className="mt-2 flex items-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
+              className="mt-2 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
               Novo Cadastro

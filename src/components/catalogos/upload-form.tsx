@@ -98,7 +98,7 @@ export function UploadCatalogoForm() {
       </nav>
 
       <div>
-        <h1 className="text-headline-lg text-primary font-bold">Upload de Base de Dados</h1>
+        <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Upload de base de dados</h1>
         <p className="text-body-md text-on-surface-variant mt-1">
           Envie o catálogo do fabricante (CSV, Excel ou PDF). O processamento é feito pela fila
           de ingestão — o catálogo entra como <strong>pendente</strong>.
@@ -107,7 +107,7 @@ export function UploadCatalogoForm() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 space-y-4">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-label-sm text-on-surface-variant" htmlFor="fabricante">
@@ -119,12 +119,12 @@ export function UploadCatalogoForm() {
                   value={fabricante}
                   onChange={(e) => setFabricante(e.target.value)}
                   placeholder="Ex.: NGK, Bosch, Fram"
-                  className="px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-label-sm text-on-surface-variant" htmlFor="nome">
-                  Nome do Catálogo *
+                  Nome do catálogo *
                 </label>
                 <input
                   id="nome"
@@ -133,7 +133,7 @@ export function UploadCatalogoForm() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Ex.: Tabela NGK 2026"
-                  className="px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -201,27 +201,27 @@ export function UploadCatalogoForm() {
             <div className="flex items-center justify-end gap-3">
               <Link
                 href="/catalogos"
-                className="px-4 py-2.5 rounded border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
+                className="px-4 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={!arquivo || !nome || enviando}
-                className="flex items-center gap-2 px-5 py-2.5 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <span className="material-symbols-outlined text-[18px]">upload</span>
-                {enviando ? "Enviando…" : "Enviar Base"}
+                {enviando ? "Enviando…" : "Enviar base"}
               </button>
             </div>
           </div>
         </form>
 
         {/* Estrutura requerida */}
-        <aside className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 h-fit">
+        <aside className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm h-fit">
           <h2 className="text-headline-sm text-primary mb-3 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">table_chart</span>
-            Estrutura Requerida
+            Estrutura requerida
           </h2>
           <p className="text-body-md text-on-surface-variant mb-3">
             Para planilhas (CSV/XLSX), as colunas mínimas são:

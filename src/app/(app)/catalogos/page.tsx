@@ -62,7 +62,7 @@ export default async function CatalogosPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-headline-lg text-primary font-bold">Catálogos na Nuvem</h1>
+          <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Catálogos na Nuvem</h1>
           <p className="text-body-md text-on-surface-variant mt-1">
             Fontes consolidadas no catálogo central — {catalogos?.length ?? 0} bases
           </p>
@@ -83,7 +83,7 @@ export default async function CatalogosPage({
           {ehDono && (
             <Link
               href="/catalogos/upload"
-              className="flex items-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               Novo Catálogo
@@ -93,7 +93,7 @@ export default async function CatalogosPage({
       </div>
 
       {!catalogos || catalogos.length === 0 ? (
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg py-16 flex flex-col items-center gap-2">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl py-16 flex flex-col items-center gap-2">
           <span className="material-symbols-outlined text-outline text-5xl">cloud_off</span>
           <p className="text-headline-sm text-on-surface">Nenhum catálogo encontrado</p>
         </div>
@@ -104,18 +104,18 @@ export default async function CatalogosPage({
             return (
               <div
                 key={c.id}
-                className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm hover:border-primary transition-colors flex flex-col gap-4"
+                className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm hover:-translate-y-0.5 hover:border-primary hover:shadow-md transition-all flex flex-col gap-4"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-fixed-dim/20 rounded flex items-center justify-center text-primary">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                       <span className="material-symbols-outlined">{cfg.icon}</span>
                     </div>
                     <div>
                       <h2 className="text-headline-sm text-on-surface">
                         {c.nome_exibicao ?? c.slug}
                       </h2>
-                      <p className="text-label-sm text-on-surface-variant uppercase">
+                      <p className="text-label-sm text-on-surface-variant">
                         {c.tipo_fonte ?? "pdf"} · {c.slug}
                       </p>
                     </div>
@@ -129,17 +129,17 @@ export default async function CatalogosPage({
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-surface-container-low rounded p-3">
+                  <div className="bg-surface-container-low rounded-lg p-3">
                     <p className="text-headline-md font-bold text-on-surface font-mono">
                       {(c.produtos_count ?? 0).toLocaleString("pt-BR")}
                     </p>
-                    <p className="text-label-sm text-on-surface-variant uppercase">Produtos</p>
+                    <p className="text-label-sm text-on-surface-variant">Produtos</p>
                   </div>
-                  <div className="bg-surface-container-low rounded p-3">
+                  <div className="bg-surface-container-low rounded-lg p-3">
                     <p className="text-headline-md font-bold text-on-surface font-mono">
                       {(c.imagens_count ?? 0).toLocaleString("pt-BR")}
                     </p>
-                    <p className="text-label-sm text-on-surface-variant uppercase">Imagens</p>
+                    <p className="text-label-sm text-on-surface-variant">Imagens</p>
                   </div>
                 </div>
 

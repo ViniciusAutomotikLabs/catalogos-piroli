@@ -13,7 +13,7 @@ export function WhatsAppRowButton({ produto }: { produto: ProdutoMensagem }) {
     <button
       type="button"
       onClick={handleClick}
-      className="w-8 h-8 rounded bg-surface-container hover:bg-secondary hover:text-on-primary text-secondary transition-colors flex items-center justify-center border border-transparent hover:border-secondary"
+      className="w-8 h-8 rounded-lg bg-surface-container hover:bg-secondary hover:text-on-secondary text-secondary transition-colors flex items-center justify-center border border-transparent hover:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
       title="Compartilhar WhatsApp"
       aria-label="Compartilhar no WhatsApp"
     >
