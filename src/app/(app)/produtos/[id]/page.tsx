@@ -11,6 +11,8 @@ import {
   parseDescricaoComFallback,
   tituloExibicao,
 } from "@/lib/produto-campos";
+import { listarAgregadosDoProduto } from "@/lib/agregados";
+import { AdicionarAgregadosButton } from "@/components/agregados/adicionar-agregados-button";
 
 export default async function ProdutoPage({
   params,
@@ -48,6 +50,7 @@ export default async function ProdutoPage({
   const textoOriginal = descricaoOriginalExibicao(produto);
   const codigosExtra =
     produto.codigos_extraidos?.length ? produto.codigos_extraidos : desc.codigos;
+  const agregados = await listarAgregadosDoProduto(produto.id);
 
   return (
     <div className="pb-24">
@@ -172,6 +175,68 @@ export default async function ProdutoPage({
               <p className="px-4 py-4 text-body-md text-on-surface-variant">
                 Nenhuma referência cruzada cadastrada para este item.
               </p>
+            )}
+          </section>
+
+          {/* Agregados da montagem */}
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+            <h2 className="text-headline-sm text-on-surface font-semibold px-4 py-3 border-b border-outline-variant flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px]">construction</span>
+              Itens da montagem
+              {agregados.length > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-primary-container text-on-primary-container text-label-sm">
+                  {agregados.length}
+                </span>
+              )}
+            </h2>
+            {agregados.length > 0 ? (
+              <div className="p-4 space-y-3">
+                <ul className="space-y-2">
+                  {agregados.map((a) => (
+                    <li
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <Link
+                          href={`/produtos/${a.produtoRelacionadoId}`}
+                          className="font-medium text-on-surface hover:text-primary hover:underline line-clamp-1"
+                        >
+                          {a.titulo}
+                        </Link>
+                        <p className="font-mono text-code-md text-primary">{a.codigo}</p>
+                        <div className="flex gap-2 mt-0.5">
+                          {a.obrigatorio && (
+                            <span className="text-label-sm text-primary">Obrigatório</span>
+                          )}
+                          {a.quantidadeSugerida > 1 && (
+                            <span className="text-label-sm text-on-surface-variant">
+                              Qtd. {a.quantidadeSugerida}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <AdicionarAgregadosButton
+                  principal={{
+                    produtoId: produto.id,
+                    codigo,
+                    descricao: produto.descricao ?? titulo,
+                    fabricante,
+                    fotoUrl: produto.foto_url,
+                  }}
+                  agregados={agregados}
+                />
+              </div>
+            ) : (
+              <div className="px-4 py-4 text-body-md text-on-surface-variant space-y-2">
+                <p>Nenhum agregado cadastrado para esta peça.</p>
+                <Link href={`/agregados?principal=${produto.id}`} className="text-primary hover:underline">
+                  Cadastrar agregados
+                </Link>
+              </div>
             )}
           </section>
 

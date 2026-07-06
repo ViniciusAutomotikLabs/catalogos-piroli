@@ -12,6 +12,7 @@ const ITEMS = [
   { href: "/orcamento", icon: "shopping_cart", label: "Orçamento", showCartBadge: true },
   { href: "/veiculo", icon: "directions_car", label: "Veículo" },
   { href: "/catalogos", icon: "menu_book", label: "Catálogos" },
+  { href: "/agregados", icon: "construction", label: "Agregados" },
   { href: "/historico", icon: "history", label: "Histórico" },
   { href: "/clientes", icon: "group", label: "CRM" },
   { href: "/configuracoes", icon: "settings", label: "Configurações" },

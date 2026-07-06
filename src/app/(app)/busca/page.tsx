@@ -6,6 +6,8 @@ import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento
 import { AtalhosBusca } from "@/components/busca/atalhos-busca";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { buscarProdutos } from "@/lib/busca-produtos";
+import { listarAgregadosPorProdutos } from "@/lib/agregados";
+import { AgregadosBuscaRow } from "@/components/agregados/agregados-busca-row";
 import { codigoExibicao, labelMatchTipo, tituloExibicao } from "@/lib/produto-campos";
 
 const POR_PAGINA = 25;
@@ -91,6 +93,10 @@ export default async function BuscaPage({
           codigoExibicao(a).localeCompare(codigoExibicao(b), "pt-BR")
         )
       : produtos;
+
+  const agregadosPorProduto = await listarAgregadosPorProdutos(
+    produtosOrdenados.map((p) => p.id)
+  );
 
   const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
@@ -208,6 +214,7 @@ export default async function BuscaPage({
                 const codigo = codigoExibicao(p);
                 const matchLabel = labelMatchTipo(p.match_tipo);
                 const descricaoParaAcao = p.descricao ?? titulo;
+                const agregados = agregadosPorProduto.get(p.id) ?? [];
 
                 return (
                   <tr
@@ -255,6 +262,16 @@ export default async function BuscaPage({
                           </span>
                         )}
                       </div>
+                      <AgregadosBuscaRow
+                        agregados={agregados}
+                        principal={{
+                          produtoId: p.id,
+                          codigo,
+                          descricao: descricaoParaAcao,
+                          fabricante: p.fabricante,
+                          fotoUrl: p.foto_url,
+                        }}
+                      />
                       <div className="md:hidden mt-1.5">
                         <ReferenciaChips refs={refs} numeroProduto={p.numero_produto} />
                       </div>

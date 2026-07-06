@@ -485,6 +485,66 @@ export type Database = {
           },
         ]
       }
+      produto_relacoes: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          fonte: string
+          id: number
+          obrigatorio: boolean
+          observacao: string | null
+          ordem: number
+          produto_principal_id: number
+          produto_relacionado_id: number
+          quantidade_sugerida: number
+          tipo: string
+          atualizado_em: string
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          fonte?: string
+          id?: never
+          obrigatorio?: boolean
+          observacao?: string | null
+          ordem?: number
+          produto_principal_id: number
+          produto_relacionado_id: number
+          quantidade_sugerida?: number
+          tipo?: string
+          atualizado_em?: string
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          fonte?: string
+          id?: never
+          obrigatorio?: boolean
+          observacao?: string | null
+          ordem?: number
+          produto_principal_id?: number
+          produto_relacionado_id?: number
+          quantidade_sugerida?: number
+          tipo?: string
+          atualizado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_relacoes_produto_principal_id_fkey"
+            columns: ["produto_principal_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produto_relacoes_produto_relacionado_id_fkey"
+            columns: ["produto_relacionado_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
