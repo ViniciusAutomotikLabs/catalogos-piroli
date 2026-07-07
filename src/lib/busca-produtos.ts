@@ -13,6 +13,7 @@ export type BuscaProdutoResultado = {
   unidade: string | null;
   fabricante: string | null;
   referencias: string[];
+  aplicacao_resumo: string | null;
   match_tipo: string | null;
   match_valor: string | null;
   score: number;
@@ -70,6 +71,7 @@ export async function buscarProdutos(opts: {
         unidade: r.unidade,
         fabricante: r.fabricante,
         referencias: r.referencias ?? [],
+        aplicacao_resumo: r.aplicacao_resumo ?? null,
         match_tipo: r.match_tipo,
         match_valor: r.match_valor,
         score: Number(r.score) || 0,
@@ -119,7 +121,7 @@ async function buscarProdutosLegado(opts: {
   let query = supabase
     .from("produtos")
     .select(
-      "id, codigo_produto_interno, codigo_principal, numero_produto, descricao, descricao_original, titulo_normalizado, foto_url, origem_catalogo, unidade, fabricantes(nome_fabricante), referencias_cruzadas(numero_referencia)",
+      "id, codigo_produto_interno, codigo_principal, numero_produto, descricao, descricao_original, titulo_normalizado, aplicacao_resumo, foto_url, origem_catalogo, unidade, fabricantes(nome_fabricante), referencias_cruzadas(numero_referencia)",
       { count: "exact" }
     );
 
@@ -179,6 +181,7 @@ async function buscarProdutosLegado(opts: {
         unidade: p.unidade,
         fabricante: p.fabricantes?.nome_fabricante ?? null,
         referencias: refs,
+        aplicacao_resumo: p.aplicacao_resumo,
         match_tipo: viaRef ? "referencia_exata" : "texto",
         match_valor: null,
         score: 0,

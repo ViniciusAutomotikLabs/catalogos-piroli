@@ -2,7 +2,7 @@
 
 Documento de retorno do backend após implementação das melhorias estruturais.
 
-**Data:** 03/07/2026  
+**Data:** 03/07/2026 · **Atualizado:** 06/07/2026 (FE-09/16/17 entregues; migration 005)  
 **Status:** P0 + P1 (busca/orçamento) **entregues e aplicados no Supabase**  
 **Documento base:** `docs/UX_MELHORIAS_BALCAO.md`  
 **Histórico técnico:** `PROJETO_HISTORICO.md` §13
@@ -34,6 +34,8 @@ Migrations em `sql/migrations/` (aplicadas em 03/07/2026 no projeto `oxqojsmlbpt
 | `001_produto_normalizacao.sql` | Colunas estruturadas + índices trigram |
 | `002_buscar_produtos.sql` | RPC de busca com ranking |
 | `003_salvar_orcamento.sql` | RPC transacional de orçamento |
+| `004_produto_relacoes.sql` | Agregados de montagem (06/07/2026) |
+| `005_buscar_produtos_aplicacao.sql` | RPC retorna `aplicacao_resumo` + casts `::TEXT` (06/07/2026) |
 
 ### Novos campos em `produtos`
 
@@ -89,11 +91,12 @@ const { data } = await supabase.rpc("buscar_produtos", {
 | Campo | Exemplo | Uso |
 |-------|---------|-----|
 | `match_tipo` | `codigo_exato` | Badge na linha |
-| `match_valor` | `1386677` | Tooltip / destaque |
+| `match_valor` | `1386677` | Destaque do código/chip que casou (**FE-09 ✅**) |
 | `score` | `1000` | Ordenação (já aplicada na RPC) |
 | `referencias` | `["804062","478"]` | Chips (array, não join) |
 | `fabricante` | `EIXOSUL` | Subtítulo |
 | `total_count` | `42` | Paginação (repetido em cada linha) |
+| `aplicacao_resumo` | `Randon` | Texto secundário na linha (migration 005) |
 
 **Valores de `match_tipo`:**
 
@@ -147,12 +150,13 @@ await supabase.rpc("salvar_orcamento", {
 
 ### P0 — Aproveitar dados do backend
 
-| ID | Tarefa | Critério de aceite | Arquivos |
-|----|--------|-------------------|----------|
-| FE-09 | Badge de match completo | Exibir todos os `match_tipo`; destacar `match_valor` no código quando `codigo_exato` ou `codigo_normalizado` | `busca/page.tsx` |
-| FE-16 | Dashboard/histórico com campos normalizados | Usar `tituloExibicao` / `codigoExibicao` em `page.tsx` e `historico/page.tsx` (hoje ainda usam só parser) | `page.tsx`, `historico/page.tsx` |
-| FE-17 | Chips de medidas no detalhe | Exibir `medidas_extraidas` quando existirem | `produtos/[id]/page.tsx` |
-| FE-18 | Indicador `normalizacao_status` (opcional) | Ícone discreto `revisar` para equipe interna | detalhe ou admin |
+| ID | Tarefa | Status | Arquivos |
+|----|--------|--------|----------|
+| FE-09 | Badge de match completo + destaque `match_valor` | ✅ 06/07/2026 — código com destaque quando `codigo_exato`/`codigo_normalizado`; chip de referência destacado e reordenado quando match por referência (helper `normalizarCodigo` em `produto-campos.ts`) | `busca/page.tsx` |
+| FE-16 | Dashboard/histórico com campos normalizados | ✅ 06/07/2026 — selects com `titulo_normalizado`/`codigo_principal`; helpers com fallback ao parser | `page.tsx`, `historico/page.tsx` |
+| FE-17 | Chips de medidas no detalhe | ✅ 06/07/2026 — chips neutros com ícone `straighten` | `produtos/[id]/page.tsx` |
+| E4 | `aplicacao_resumo` na linha da busca | ✅ 06/07/2026 — RPC atualizada (migration 005) + exibição `line-clamp-1` | `busca/page.tsx`, `busca-produtos.ts` |
+| FE-18 | Indicador `normalizacao_status` (opcional) | ⬜ | detalhe ou admin |
 
 ### P1 — UX avançada (inalterado do doc UX)
 

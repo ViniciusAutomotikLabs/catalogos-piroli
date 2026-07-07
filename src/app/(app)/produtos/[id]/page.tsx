@@ -50,6 +50,7 @@ export default async function ProdutoPage({
   const textoOriginal = descricaoOriginalExibicao(produto);
   const codigosExtra =
     produto.codigos_extraidos?.length ? produto.codigos_extraidos : desc.codigos;
+  const medidas = produto.medidas_extraidas ?? [];
   const agregados = await listarAgregadosDoProduto(produto.id);
 
   return (
@@ -130,6 +131,22 @@ export default async function ProdutoPage({
                 <CodigoChip key={codigoExtra} label="Código no catálogo" value={codigoExtra} />
               ))}
             </div>
+
+            {medidas.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                {medidas.map((medida) => (
+                  <span
+                    key={medida}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-outline-variant bg-surface px-3 py-1.5 text-body-md text-on-surface-variant"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      straighten
+                    </span>
+                    {medida}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
               {fabricante && (

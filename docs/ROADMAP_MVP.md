@@ -11,7 +11,13 @@ Guia passo a passo para evoluir o produto **sem tentar construir um Mercado Livr
 |-----------|----------|
 | `Telas_MVP.md` | Telas e UX do **MVP 1.0** (consulta) |
 | `docs/MVP_VALIDACAO.md` | Pipeline 100 catálogos no Supabase |
+| `docs/UX_MELHORIAS_BALCAO.md` | Pesquisa UX balcão + status por tela |
+| `docs/HANDOFF_BACKEND_MELHORIAS.md` | Contratos backend → frontend (RPC, campos) |
+| `docs/PRD_AGREGADOS.md` | Agregados de montagem (regras globais) |
+| `PROJETO_HISTORICO.md` | Log operacional e sessões de implementação |
 | `ARQUITETURA_ESCALA.md` | Escala de dados (500+ catálogos, infra) |
+
+**Última revisão:** 06/07/2026 — alinhamento de produto (reunião Vinícius / Léo / equipe).
 
 ---
 
@@ -31,7 +37,7 @@ Guia passo a passo para evoluir o produto **sem tentar construir um Mercado Livr
 ## 2. Mapa das fases (resumo)
 
 ```text
-MVP 1.0  Catálogo consultável     ← VOCÊ ESTÁ AQUI (dados + telas)
+MVP 1.0  Catálogo consultável     ← VOCÊ ESTÁ AQUI (~70% — busca/código OK; veículo pendente)
     ↓
 MVP 2.0  Loja + preço + estoque    ← lojista cadastra “a minha loja”
     ↓
@@ -41,6 +47,58 @@ MVP 3.0  Checkout + pagamento      ← compra na plataforma
     ↓
 MVP 4.0  Escala nacional           ← busca dedicada, réplicas, filas, app
 ```
+
+### Status consolidado MVP 1.0 (06/07/2026)
+
+| Área | Status | Notas |
+|------|--------|-------|
+| Ingestão + ~86k produtos | 🟡 | Backfill normalização concluído; qualidade/amarração de catálogos em revisão |
+| Busca por código / ref. cruzada | ✅ | RPC `buscar_produtos` + ranking por `match_tipo` |
+| Busca por descrição | 🟡 | `pg_trgm` + texto; semântica fica para 1.2+ |
+| Busca por veículo (ano/motor) | ⬜ | `/veiculo` placeholder; depende BE-06 + API placa |
+| Detalhe + ref. cruzada + WhatsApp | ✅ | Fluxo balcão operacional |
+| Agregados de montagem | 🟡 | MVP demo (`/agregados`); seed e restrição `dono` pendentes |
+| Auth + multi-tenant loja | ✅ | Supabase Auth + RLS básico |
+| Piloto em loja real | ⬜ | Aguarda fechamento 1.0.x |
+
+---
+
+## 2.1 Alinhamento de produto — reunião 06/07/2026
+
+Fonte: reunião de alinhamento (tldv). Decisões que **repriorizam** o que vem antes do MVP 2.0.
+
+### Princípios de busca (consenso)
+
+| # | Decisão | Implicação técnica |
+|---|---------|-------------------|
+| 1 | **Código original (OEM)** é a métrica principal de identificação | Manter ranking: código exato → ref. → código normalizado; evoluir para OEM tipado (BE-07) |
+| 2 | **Aplicação + ano + motorização** são critérios de desempate | Exigir `produto_aplicacoes` (BE-06) e filtros na busca quando termo for genérico |
+| 3 | Uma peça pode ter **vários códigos originais** (por montadora), mas código **não se repete** entre peças diferentes | Modelar equivalências com confiança; fila de revisão para amarrações erradas dos catálogos |
+| 4 | Ferramenta precisa da **relação código original ↔ conversões de catálogo** | `referencias_cruzadas` hoje é genérica; enriquecer com fonte OEM + docs Partes Link / código do pai |
+| 5 | **Busca simples** é preferível a filtros complexos na UI principal | Wizard/filtros avançados como segundo passo, não como barreira na busca |
+| 6 | **Busca por placa** → chassi → equipamentos pode eliminar filtros manuais | Épico veículo (Fase F); Leonardo pesquisa API |
+| 7 | **Busca semântica** ajuda nomenclaturas diferentes, mas **depois** de código + veículo | P2 — não antecipar embeddings antes de BE-06 |
+| 8 | **Normalização de números** (parser/backfill) tem **prioridade baixa** frente a veículo/OEM | Trabalho já feito melhora display; próximo salto = aplicação + catálogo, não mais parser |
+
+### Dores de dados (bloqueadores)
+
+| Problema | Ação |
+|----------|------|
+| Catálogos com erros de amarração entre peças | Auditoria + fila `sugestoes_correcao`; não confiar cegamente em rede de catálogos |
+| `slug` vs `nome_exibicao` duplicados/incorretos | Auditar `catalogos` ↔ `produtos.origem_catalogo` (Fase A7) |
+| Catálogos “não puxando corretamente” no sistema | Revisar ingestão + amostra Partes Link quando Leandro enviar docs |
+| Termo genérico (“amortecedor”) gera confusão | Filtro por veículo/ano/motor + agregados de montagem |
+
+### Itens de ação da reunião
+
+| Responsável | Ação | Desbloqueia |
+|-------------|------|-------------|
+| **Vinícius** | Roadmap atualizado + próximos passos executáveis | Este documento § 4 e § 13 |
+| **Leonardo** | Pesquisar API placa/chassi | Fase F — busca por placa |
+| **Leandro** | Docs Partes Link + catálogo via WhatsApp | Ingestão OEM + qualidade de amarração |
+| **Gustavo** | Documentação código original do pai | Mapeamento OEM como fonte de verdade |
+
+---
 
 | Fase | Venda online? | Pagamento | Quem cadastra o quê |
 |------|---------------|-----------|---------------------|
@@ -61,12 +119,17 @@ Revenda consulta **dezenas de catálogos de fabricantes** num só lugar: busca r
 ### O que entra
 
 - [x] Pipeline de ingestão (`main2.py` → Supabase)
-- [ ] App web responsiva + mobile-friendly (telas do `Telas_MVP.md`)
-- [ ] Busca por código, descrição, veículo (quando houver aplicação)
-- [ ] Detalhe do produto + foto + referências cruzadas
-- [ ] “Enviar no WhatsApp” (texto + link/imagem)
-- [ ] Login básico por loja (mesmo que simples no início)
+- [x] App web responsiva + mobile-friendly (Next.js — telas do `Telas_MVP.md`)
+- [x] Busca por código e descrição com ranking (`buscar_produtos`)
+- [ ] Busca por veículo — aplicação, ano, motorização (Fase F)
+- [x] Detalhe do produto + foto + referências cruzadas
+- [x] “Enviar no WhatsApp” (texto + link/imagem)
+- [x] Login básico por loja (Supabase Auth)
+- [x] Normalização de exibição (`titulo_normalizado`, `codigo_principal`) — backfill ~86k
+- [x] Agregados de montagem — MVP demo (`produto_relacoes`, `/agregados`)
+- [ ] Autocomplete e guia visual de busca para vendedor novato (Fase E2)
 - [ ] Validação com **100 catálogos** (`MVP_VALIDACAO.md`)
+- [ ] Piloto 1–3 lojas no balcão (Fase C4)
 
 ### O que fica de fora (explícito)
 
@@ -98,46 +161,82 @@ Revenda consulta **dezenas de catálogos de fabricantes** num só lugar: busca r
 
 ## 4. Passo a passo — MVP 1.0
 
-Ordem sugerida. Cada passo pode virar card/tarefa no board.
+Ordem sugerida **após alinhamento 06/07/2026**. Cada passo pode virar card no board.
 
-### Fase A — Dados (já em andamento)
+### Fase A — Dados e qualidade de catálogo
 
-| # | Passo | Entregável |
-|---|--------|------------|
-| A1 | Finalizar ingestão 100 catálogos | `catalogos` com status ok/erro |
-| A2 | Tabela `catalogos` + `ingestao_jobs` | Rastreio por catálogo |
-| A3 | Fotos perfil WhatsApp (640 px) | Storage dentro da quota |
-| A4 | Smoke test de busca no SQL | Query por código e descrição aceitável |
+| # | Passo | Status | Entregável |
+|---|--------|--------|------------|
+| A1 | Finalizar ingestão 100 catálogos | 🟡 | `catalogos` com status ok/erro |
+| A2 | Tabela `catalogos` + `ingestao_jobs` | ✅ | Rastreio por catálogo |
+| A3 | Fotos perfil WhatsApp (640 px) | 🟡 | Storage dentro da quota |
+| A4 | RPC `buscar_produtos` com ranking | ✅ | `sql/migrations/002_*.sql` |
+| A5 | Normalização de produtos + backfill | ✅ | `001_*.sql`, `scripts/backfill-normalizacao.ts` |
+| A6 | Agregados de montagem | 🟡 | `004_produto_relacoes.sql`, `/agregados` |
+| A7 | Auditar `slug` / `origem_catalogo` / `nome_exibicao` | ⬜ | Relatório SQL + correções na ingestão |
+| A8 | Piloto ingestão Partes Link + código OEM | ⬜ | Depende docs Leandro / Gustavo |
+| A9 | BE-06 — tabela `produto_aplicacoes` | ⬜ | Montadora, modelo, ano, motorização |
 
-### Fase B — Produto (telas)
+### Fase B — Produto (telas e UX balcão)
 
-| # | Passo | Entregável |
-|---|--------|------------|
-| B1 | Protótipo Stitch (web + mobile) | Fluxo validado com Léo |
-| B2 | Projeto front (Next.js ou similar) | Repo app consumindo Supabase |
-| B3 | Tela busca + lista + filtros | Chips montadora/modelo/ano |
-| B4 | Tela detalhe + ref. cruzada | Bottom sheet mobile |
-| B5 | Ação “Copiar” + “WhatsApp” | Deep link / share API |
-| B6 | Tela config mínima (nome loja, logo) | Persona Roberto |
+| # | Passo | Status | Entregável |
+|---|--------|--------|------------|
+| B1 | Protótipo Stitch (web + mobile) | ✅ | Fluxo validado |
+| B2 | Projeto front Next.js + Supabase | ✅ | Repo app em produção (Vercel) |
+| B3 | Tela busca + lista + filtros catálogo | 🟡 | Falta filtro veículo/ano na busca |
+| B4 | Tela detalhe + ref. cruzada | ✅ | `produtos/[id]` |
+| B5 | Copiar + WhatsApp + orçamento | ✅ | `localStorage` + RPC `salvar_orcamento` |
+| B6 | Config mínima (nome loja, logo) | 🟡 | Tela existe; polish pendente |
+| B7 | Agregados na busca e orçamento | 🟡 | Chips + “+ Agregados”; seed demo pendente |
 
 ### Fase C — Acesso e piloto
 
-| # | Passo | Entregável |
-|---|--------|------------|
-| C1 | Auth Supabase (email ou magic link) | 1 tenant = 1 revenda |
-| C2 | RLS: usuário só vê dados da própria loja | Políticas testadas |
-| C3 | Deploy produção (URL fixa) | HTTPS |
-| C4 | Piloto 1–3 lojas | Feedback escrito + métricas de uso |
+| # | Passo | Status | Entregável |
+|---|--------|--------|------------|
+| C1 | Auth Supabase | ✅ | 1 tenant = 1 revenda |
+| C2 | RLS por loja | ✅ | Políticas em uso |
+| C3 | Deploy produção | ✅ | HTTPS Vercel |
+| C4 | Piloto 1–3 lojas | ⬜ | Feedback escrito + métricas de uso |
 
 ### Fase D — Fechamento 1.0
 
-| # | Passo | Entregável |
-|---|--------|------------|
-| D1 | Corrigir top 10 dores do piloto | Lista priorizada |
-| D2 | Documentar “como subir catálogo novo” | Runbook para vocês |
-| D3 | Decisão go/no-go MVP 2.0 | Reunião com Léo |
+| # | Passo | Status | Entregável |
+|---|--------|--------|------------|
+| D1 | Corrigir top 10 dores do piloto | ⬜ | Lista priorizada |
+| D2 | Runbook “como subir catálogo novo” | 🟡 | Parcial em `PROJETO_HISTORICO.md` |
+| D3 | Decisão go/no-go MVP 2.0 | ⬜ | Reunião com Léo |
 
-**Duração indicativa:** 2–4 meses (depende de quantas pessoas codam e quantos layouts de PDF novos aparecem).
+### Fase E — Busca inteligente 1.0.x (prioridade imediata pós-reunião)
+
+*Quick wins de frontend — sem dependência de API de placa.*
+
+| # | Passo | ID ref. | Status |
+|---|--------|---------|--------|
+| E1 | Destacar `match_valor` na linha da busca | FE-09 | ✅ 06/07/2026 |
+| E2 | `titulo_normalizado` no dashboard/histórico | FE-16 | ✅ 06/07/2026 |
+| E3 | Chips `medidas_extraidas` no detalhe | FE-17 | ✅ 06/07/2026 |
+| E4 | `aplicacao_resumo` na linha da busca | — | ✅ 06/07/2026 (migration 005) |
+| E5 | Guia visual de busca (3 exemplos no dashboard) | — | ⬜ |
+| E6 | Autocomplete — histórico + sugestão de códigos | — | ⬜ |
+| E7 | Drawer de produto (row click na busca) | FE-13 | ⬜ |
+| E8 | Indicador de confiança do match | — | ⬜ |
+
+Detalhes e critérios de aceite: `docs/HANDOFF_BACKEND_MELHORIAS.md`, `docs/UX_MELHORIAS_BALCAO.md`.
+
+### Fase F — Busca por veículo (épico principal 1.1)
+
+*Coração do alinhamento 06/07 — desbloqueia desempate por aplicação/ano.*
+
+| # | Passo | Depende de |
+|---|--------|------------|
+| F1 | Migration `produto_aplicacoes` + extração na ingestão | BE-06 |
+| F2 | Wizard `/veiculo`: montadora → modelo → ano → motor | BE-06 ou parsing incremental |
+| F3 | Contexto veículo na busca (filtrar/refinar resultados) | F1 + F2 |
+| F4 | Ranking com boost por aplicação compatível | RPC `buscar_produtos` v2 |
+| F5 | API placa → chassi → pré-preencher wizard | Leonardo (API) |
+| F6 | Vincular chassi a equipamentos da montadora | F5 + dados OEM |
+
+**Duração indicativa restante do 1.0:** 4–8 semanas (Fase E em paralelo com A7/A9; Fase F após BE-06 ou API).
 
 ---
 
@@ -571,13 +670,51 @@ Atalhos técnicos e templates: `Telas_MVP.md` § **14. WhatsApp (diferencial)**.
 
 ---
 
-## 13. Próxima ação concreta (esta semana)
+## 13. Próximas ações executáveis (06/07/2026)
 
-1. ~~Alinhar preço/estoque/WhatsApp para 2.0~~ — **feito** (§ 9).
-2. **Travar escopo das telas** em `Telas_MVP.md` — nada de preço/carrinho no protótipo **1.0**.
-3. **Executar** `MVP_VALIDACAO.md` (100 catálogos).
-4. **Abrir** repositório do front assim que protótipo Stitch aprovado.
-5. ~~Fechar perguntas em aberto do 1.0~~ — **feito** (§ 9.1, § 9.2).
+### Esta semana — dev (sem dependência externa)
+
+| # | Ação | Fase | Owner |
+|---|------|------|-------|
+| 1 | ~~FE-09 + FE-16 + FE-17 (match, dashboard, medidas)~~ | E1–E3 | ✅ 06/07/2026 |
+| 2 | ~~`aplicacao_resumo` na linha da busca~~ (migration 005) | E4 | ✅ 06/07/2026 |
+| 3 | Guia visual de busca no dashboard | E5 | Dev |
+| 4 | Validar demo agregados (1 principal + 2 itens) | B7 | Dev + produto |
+| 5 | SQL de auditoria `catalogos` ↔ `produtos.origem_catalogo` | A7 | Dev |
+
+### Paralelo — dependências da equipe
+
+| # | Ação | Owner | Desbloqueia |
+|---|------|-------|-------------|
+| 6 | Pesquisa API placa/chassi | Leonardo | F5 |
+| 7 | Docs Partes Link + catálogo | Leandro | A8 |
+| 8 | Docs código original (pai) | Gustavo | A8, BE-07 |
+
+### Próximas 2–4 semanas
+
+| # | Ação | Fase |
+|---|------|------|
+| 9 | BE-06 `produto_aplicacoes` + hook ingestão | A9, F1 |
+| 10 | Wizard `/veiculo` (sem placa primeiro) | F2 |
+| 11 | Autocomplete na busca | E6 |
+| 12 | Drawer de produto na busca | E7 |
+| 13 | Executar `MVP_VALIDACAO.md` (100 catálogos) | A1 |
+| 14 | Iniciar piloto C4 com 1 loja | C4 |
+
+### Já concluído (não repetir)
+
+- ~~Alinhar preço/estoque/WhatsApp para 2.0~~ — **feito** (§ 9).
+- ~~Fechar perguntas em aberto do 1.0~~ — **feito** (§ 9.1, § 9.2).
+- ~~RPC busca + normalização + orçamento transacional~~ — **feito** (03/07/2026).
+- ~~MVP demo agregados~~ — **feito** (06/07/2026, migration `004`).
+
+### Critério “1.0 pronto para piloto”
+
+1. Vendedor acha peça por **código ou ref.** em &lt; 3 s ✅
+2. Vendedor refina busca genérica com **contexto de veículo** ⬜ (Fase F)
+3. Foto legível no WhatsApp ✅
+4. Catálogos auditados sem slugs órfãos ⬜ (A7)
+5. 1 loja piloto usando 2+ semanas ⬜ (C4)
 
 ---
 
@@ -593,9 +730,12 @@ Atalhos técnicos e templates: `Telas_MVP.md` § **14. WhatsApp (diferencial)**.
 |---------|----------|
 | `Telas_MVP.md` | UX, fluxos, atalhos WhatsApp |
 | `docs/MVP_VALIDACAO.md` | Pipeline 100 catálogos |
+| `docs/UX_MELHORIAS_BALCAO.md` | Pesquisa UX + status por tela |
+| `docs/HANDOFF_BACKEND_MELHORIAS.md` | Contratos RPC e campos normalizados |
+| `docs/PRD_AGREGADOS.md` | Agregados de montagem |
 | `ARQUITETURA_ESCALA.md` | Escala catálogo + sync estoque (§ 13) |
 | `PROJETO_HISTORICO.md` | Log operacional |
 
 ---
 
-*Criado em 23/05/2026 · Decisões 2.0 alinhadas em 23/05/2026. Revisar após piloto MVP 1.0.*
+*Criado em 23/05/2026 · Decisões 2.0: 23/05/2026 · Revisão alinhamento produto: 06/07/2026.*

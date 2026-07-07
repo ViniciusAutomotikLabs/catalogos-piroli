@@ -6,7 +6,7 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 
 **Documentos relacionados:** `Telas_MVP.md`, `docs/ROADMAP_MVP.md`, `PROJETO_HISTORICO.md` (§ UX balcão + redesign visual)
 
-**Última atualização:** 03/07/2026 — backend P0/P1 aplicado no Supabase; handoff de retorno em `docs/HANDOFF_BACKEND_MELHORIAS.md`.
+**Última atualização:** 06/07/2026 — FE-09/16/17 + `aplicacao_resumo` na linha da busca entregues; agregados MVP (`/agregados`); migrations 004–005 aplicadas.
 
 ---
 
@@ -26,11 +26,12 @@ Documento condensado para guiar implementação. Foco: **vendedor de balcão de 
 | Área | Status | Próximo passo |
 |------|--------|---------------|
 | Shell responsivo (drawer mobile) | ✅ | Focus trap no drawer/modais |
-| Busca — estrutura de linha | 🟡 | Campos normalizados do backend disponíveis; polish visual pendente |
+| Busca — estrutura de linha | ✅ | Match destacado (FE-09) + `aplicacao_resumo` na linha; drawer pendente |
 | Busca — ações na linha | ✅ | Considerar ícones + row click → drawer |
-| Detalhe do produto | 🟡 | `aplicacao_resumo` quando extraível; drawer/similares pendentes |
+| Detalhe do produto | 🟡 | Medidas (FE-17 ✅) + agregados ✅; drawer/similares pendentes |
+| Agregados de montagem | 🟡 | MVP `/agregados` + chips na busca; seed demo e papel `dono` pendentes |
 | WhatsApp editável | ✅ | — |
-| Dashboard repaginado | ✅ | Compactar hero; usar `titulo_normalizado` no histórico — **FE-16** |
+| Dashboard repaginado | ✅ | Campos normalizados (FE-16 ✅); compactar hero — FE-02 |
 | Redesign visual (paleta, sidebar dark) | ✅ | Simplificar acentos; polir telas secundárias |
 | Parser de descrições (display) | ✅ | Fallback; preferir campos do backend quando `normalizado_em` preenchido |
 | Match exato (ranking) | ✅ | RPC `buscar_produtos` + badges `match_tipo` na busca |
@@ -473,7 +474,7 @@ Oficina que já comprou antes
 
 A prioridade não é adicionar muitas telas — é **melhorar a qualidade da informação na busca** e criar um **detalhe de produto forte**, porque é ali que a confiança da venda acontece.
 
-**Estado em 03/07/2026:** backend de normalização e busca com ranking aplicado no Supabase; próximo salto frontend = **FE-09/16/17** (aproveitar campos do banco) + **header com busca** e **hero compacto** (visual) + **drawer de produto** (fluxo balcão). Ver `docs/HANDOFF_BACKEND_MELHORIAS.md`.
+**Estado em 06/07/2026:** FE-09/16/17 + `aplicacao_resumo` na linha da busca **entregues** (migration 005); agregados de montagem em MVP demo. Próximo salto = **busca por veículo** (Fase F do roadmap, alinhamento 06/07) + **drawer de produto** + polish visual (FE-01–06). Ver `docs/ROADMAP_MVP.md` § 2.1 e § 13.
 
 ---
 

@@ -559,6 +559,7 @@ export type Database = {
           p_limite?: number
         }
         Returns: {
+          aplicacao_resumo: string | null
           codigo_principal: string
           codigo_produto_interno: string
           descricao: string

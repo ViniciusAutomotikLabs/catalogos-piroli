@@ -496,4 +496,53 @@ Tarefas frontend prioritárias: **FE-09** (highlight match), **FE-16** (dashboar
 
 ---
 
+## 14. Agregados MVP + quick wins de busca FE-09/16/17 + migration 005 (05–06/07/2026)
+
+### Agregados de montagem (MVP demo)
+
+Cadastro de peças complementares (batente, coifa, rolamento…) com regras **globais** — PRD em `docs/PRD_AGREGADOS.md`. Commit `5cf38ac`.
+
+| Entrega | Arquivo |
+|---------|---------|
+| Migration `produto_relacoes` + RLS (authenticated CRUD para demo) | `sql/migrations/004_produto_relacoes.sql` — **aplicada no Supabase** |
+| Queries de agregados | `src/lib/agregados.ts` |
+| Server actions (criar/remover/buscar) | `src/lib/actions/agregados.ts` |
+| Tela de cadastro | `src/app/(app)/agregados/page.tsx` + `components/agregados/form-cadastro.tsx` |
+| Chips “Montagem:” + botão “+ Agregados” na busca | `components/agregados/agregados-busca-row.tsx`, `adicionar-agregados-button.tsx` |
+| Seção “Itens da montagem” no detalhe | `produtos/[id]/page.tsx` |
+
+**Pendente:** seed de demonstração; restringir cadastro ao papel `dono` (P1 do PRD).
+
+### Quick wins de busca (FE-09 / FE-16 / FE-17 / E4)
+
+Executados via agente frontend (06/07/2026), alinhados à reunião de produto do mesmo dia (código original como métrica principal; ver `docs/ROADMAP_MVP.md` § 2.1).
+
+| ID | Entrega | Arquivos |
+|----|---------|----------|
+| FE-09 | Destaque do `match_valor`: código com `bg-primary-container` quando match por código; chip de referência destacado e reordenado quando match por referência; helper `normalizarCodigo()` replica `normalizar_codigo_busca` do banco | `busca/page.tsx`, `produto-campos.ts` |
+| FE-16 | Dashboard e histórico com `tituloExibicao`/`codigoExibicao` (selects ganharam `titulo_normalizado`, `codigo_principal`) | `page.tsx`, `historico/page.tsx` |
+| FE-17 | Chips de `medidas_extraidas` no detalhe (ícone `straighten`, visual neutro) | `produtos/[id]/page.tsx` |
+| E4 | `aplicacao_resumo` na linha da busca (`line-clamp-1`) | `busca/page.tsx`, `busca-produtos.ts` |
+
+### Migration 005 — RPC `buscar_produtos` retorna `aplicacao_resumo`
+
+`sql/migrations/005_buscar_produtos_aplicacao.sql` — **aplicada no Supabase** (06/07/2026).
+
+- `DROP FUNCTION` + `CREATE` (mudança de `RETURNS TABLE` não permite `CREATE OR REPLACE`).
+- Correções de defeitos latentes da 002: ambiguidade `cand.score` no CTE e casts `::TEXT` para colunas `varchar(100)` (erro “structure of query does not match function result type”).
+- Types (`supabase/types.ts`) e mapeamento (`busca-produtos.ts`) atualizados.
+
+### Validação
+
+- `npm test` ✓ 35/35 · `npm run build` ✓
+- RPC validada no banco: busca com `aplicacao_resumo = "Randon"` retornando pelo caminho principal; listagem com `total_count = 86442`.
+- Smoke E2E Playwright (build de produção local): login renderiza, erro amigável em credenciais inválidas, rotas protegidas (`/`, `/busca`, `/agregados`, `/produtos/[id]`, `/historico`) redirecionam para `/login`, console sem erros.
+- E2E autenticado (usuário piloto, 15/15 ✓): FE-09 (badge "Código exato" + código destacado na busca por `1386677`), FE-16 (dashboard com 12 itens de histórico normalizados), FE-17 (2 chips de medidas no detalhe `/produtos/7792`), E4 (`aplicacao_resumo` em 24/25 linhas na busca "randon"), tela `/agregados` operacional.
+
+### Roadmap
+
+`docs/ROADMAP_MVP.md` revisado com o alinhamento de produto de 06/07/2026 (§ 2.1): código OEM como métrica principal, desempate por aplicação/ano, épico busca por veículo (Fase F), dores de dados (slug/amarrações) e ações por responsável.
+
+---
+
 *Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web).*

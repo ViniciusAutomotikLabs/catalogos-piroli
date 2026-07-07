@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { tituloDescricao } from "@/lib/descricao-parser";
+import { codigoExibicao, tituloExibicao } from "@/lib/produto-campos";
 
 type Consulta = {
   id: number;
@@ -10,7 +10,9 @@ type Consulta = {
   produtos: {
     id: number;
     codigo_produto_interno: string;
+    codigo_principal: string | null;
     descricao: string | null;
+    titulo_normalizado: string | null;
   } | null;
 };
 
@@ -35,7 +37,7 @@ export default async function HistoricoPage({
   let query = supabase
     .from("historico_consultas")
     .select(
-      "id, termo, contexto_veiculo, criado_em, produtos(id, codigo_produto_interno, descricao)"
+      "id, termo, contexto_veiculo, criado_em, produtos(id, codigo_produto_interno, codigo_principal, descricao, titulo_normalizado)"
     )
     .order("criado_em", { ascending: false })
     .limit(100);
@@ -138,9 +140,9 @@ export default async function HistoricoPage({
                           className="text-primary hover:underline"
                         >
                           <span className="font-mono text-code-md">
-                            {c.produtos.codigo_produto_interno}
+                            {codigoExibicao(c.produtos)}
                           </span>{" "}
-                          · {tituloDescricao(c.produtos.descricao)}
+                          · {tituloExibicao(c.produtos)}
                         </Link>
                       ) : (
                         <span className="text-on-surface-variant">—</span>

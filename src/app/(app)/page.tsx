@@ -4,7 +4,11 @@ import { getContextoLoja } from "@/lib/loja";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento-button";
 import { OrcamentoStatusChip } from "@/components/dashboard/atalho-orcamento";
-import { parseDescricao } from "@/lib/descricao-parser";
+import {
+  codigoExibicao,
+  descricaoOriginalExibicao,
+  tituloExibicao,
+} from "@/lib/produto-campos";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -34,7 +38,7 @@ export default async function DashboardPage() {
     supabase
       .from("historico_consultas")
       .select(
-        "id, termo, criado_em, produtos(id, codigo_produto_interno, descricao, foto_url, fabricantes(nome_fabricante))"
+        "id, termo, criado_em, produtos(id, codigo_produto_interno, codigo_principal, descricao, descricao_original, titulo_normalizado, foto_url, fabricantes(nome_fabricante))"
       )
       .not("produto_id", "is", null)
       .order("criado_em", { ascending: false })
@@ -125,7 +129,9 @@ export default async function DashboardPage() {
                   const p = r.produtos;
                   if (!p) return null;
                   const fabricante = p.fabricantes?.nome_fabricante;
-                  const desc = parseDescricao(p.descricao);
+                  const titulo = tituloExibicao(p);
+                  const codigo = codigoExibicao(p);
+                  const textoOriginal = descricaoOriginalExibicao(p);
                   return (
                     <li
                       key={r.id}
@@ -158,13 +164,13 @@ export default async function DashboardPage() {
                         <div className="min-w-0 flex-1">
                           <p
                             className="line-clamp-1 font-semibold text-on-surface"
-                            title={desc.textoOriginal || undefined}
+                            title={textoOriginal || undefined}
                           >
-                            {desc.titulo}
+                            {titulo}
                           </p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                             <span className="font-mono text-code-md text-primary">
-                              {p.codigo_produto_interno}
+                              {codigo}
                             </span>
                             {fabricante && (
                               <span className="flex items-center gap-2 text-label-sm text-on-surface-variant">
@@ -191,15 +197,15 @@ export default async function DashboardPage() {
                         <AdicionarOrcamentoButton
                           item={{
                             produtoId: p.id,
-                            codigo: p.codigo_produto_interno,
-                            descricao: p.descricao ?? "Peça",
+                            codigo,
+                            descricao: p.descricao ?? titulo,
                             fabricante,
                             fotoUrl: p.foto_url,
                           }}
                         />
                         <Link
                           href={`/produtos/${p.id}`}
-                          aria-label={`Reabrir ${p.descricao ?? "produto"}`}
+                          aria-label={`Reabrir ${titulo}`}
                           title="Reabrir"
                           className="flex h-8 w-8 items-center justify-center rounded border border-transparent bg-surface-container text-on-surface-variant transition-colors hover:border-primary hover:bg-primary hover:text-on-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >

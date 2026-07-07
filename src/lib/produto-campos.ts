@@ -35,6 +35,11 @@ export function parseDescricaoComFallback(p: ProdutoCamposBase): DescricaoParse 
   return parsed;
 }
 
+/** Espelha `normalizar_codigo_busca` do backend: remove espaços, `.`, `/`, `-` e converte para minúsculas. */
+export function normalizarCodigo(valor: string | null | undefined): string {
+  return (valor ?? "").replace(/[\s./-]/g, "").toLowerCase();
+}
+
 export type MatchTipo =
   | "codigo_exato"
   | "referencia_exata"

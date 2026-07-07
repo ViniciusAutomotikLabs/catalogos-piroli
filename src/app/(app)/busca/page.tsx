@@ -8,7 +8,12 @@ import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { buscarProdutos } from "@/lib/busca-produtos";
 import { listarAgregadosPorProdutos } from "@/lib/agregados";
 import { AgregadosBuscaRow } from "@/components/agregados/agregados-busca-row";
-import { codigoExibicao, labelMatchTipo, tituloExibicao } from "@/lib/produto-campos";
+import {
+  codigoExibicao,
+  labelMatchTipo,
+  normalizarCodigo,
+  tituloExibicao,
+} from "@/lib/produto-campos";
 
 const POR_PAGINA = 25;
 const MAX_CHIPS_REFERENCIA = 3;
@@ -16,23 +21,41 @@ const MAX_CHIPS_REFERENCIA = 3;
 function ReferenciaChips({
   refs,
   numeroProduto,
+  matchValor,
 }: {
   refs: string[];
   numeroProduto?: string | null;
+  matchValor?: string | null;
 }) {
   if (refs.length > 0) {
-    const visiveis = refs.slice(0, MAX_CHIPS_REFERENCIA);
-    const restantes = refs.length - visiveis.length;
+    const matchNormalizado = matchValor ? normalizarCodigo(matchValor) : "";
+    const casaComMatch = (r: string) =>
+      Boolean(matchNormalizado) && normalizarCodigo(r).includes(matchNormalizado);
+    // Referência que casou vem primeiro para não ficar escondida no "+N"
+    const ordenadas = matchNormalizado
+      ? [...refs].sort((a, b) => Number(casaComMatch(b)) - Number(casaComMatch(a)))
+      : refs;
+    const visiveis = ordenadas.slice(0, MAX_CHIPS_REFERENCIA);
+    const restantes = ordenadas.length - visiveis.length;
     return (
       <div className="flex flex-wrap items-center gap-1">
-        {visiveis.map((r) => (
-          <span
-            key={r}
-            className="inline-flex items-center rounded border border-outline-variant bg-surface px-1.5 py-0.5 font-mono text-[11px] leading-4 text-on-surface-variant"
-          >
-            {r}
-          </span>
-        ))}
+        {visiveis.map((r) =>
+          casaComMatch(r) ? (
+            <span
+              key={r}
+              className="inline-flex items-center rounded border border-primary bg-primary-container px-1.5 py-0.5 font-mono text-[11px] font-semibold leading-4 text-on-primary-container"
+            >
+              {r}
+            </span>
+          ) : (
+            <span
+              key={r}
+              className="inline-flex items-center rounded border border-outline-variant bg-surface px-1.5 py-0.5 font-mono text-[11px] leading-4 text-on-surface-variant"
+            >
+              {r}
+            </span>
+          )
+        )}
         {restantes > 0 && (
           <span className="text-label-sm text-on-surface-variant">+{restantes}</span>
         )}
@@ -213,6 +236,13 @@ export default async function BuscaPage({
                 const titulo = tituloExibicao(p);
                 const codigo = codigoExibicao(p);
                 const matchLabel = labelMatchTipo(p.match_tipo);
+                const matchNoCodigo =
+                  (p.match_tipo === "codigo_exato" || p.match_tipo === "codigo_normalizado") &&
+                  Boolean(p.match_valor) &&
+                  normalizarCodigo(p.match_valor) === normalizarCodigo(codigo);
+                const matchNaReferencia =
+                  p.match_tipo === "referencia_exata" || p.match_tipo === "referencia_normalizada";
+                const matchValorRef = matchNaReferencia ? p.match_valor : null;
                 const descricaoParaAcao = p.descricao ?? titulo;
                 const agregados = agregadosPorProduto.get(p.id) ?? [];
 
@@ -254,7 +284,15 @@ export default async function BuscaPage({
                         {titulo}
                       </Link>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                        <span className="font-mono text-code-md text-primary">{codigo}</span>
+                        <span
+                          className={
+                            matchNoCodigo
+                              ? "font-mono text-code-md font-semibold text-on-primary-container bg-primary-container rounded px-1"
+                              : "font-mono text-code-md text-primary"
+                          }
+                        >
+                          {codigo}
+                        </span>
                         {matchLabel && (
                           <span className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant">
                             <span className="material-symbols-outlined text-[14px]">swap_horiz</span>
@@ -262,6 +300,11 @@ export default async function BuscaPage({
                           </span>
                         )}
                       </div>
+                      {p.aplicacao_resumo && (
+                        <p className="mt-0.5 line-clamp-1 text-label-sm text-on-surface-variant">
+                          {p.aplicacao_resumo}
+                        </p>
+                      )}
                       <AgregadosBuscaRow
                         agregados={agregados}
                         principal={{
@@ -273,11 +316,19 @@ export default async function BuscaPage({
                         }}
                       />
                       <div className="md:hidden mt-1.5">
-                        <ReferenciaChips refs={refs} numeroProduto={p.numero_produto} />
+                        <ReferenciaChips
+                          refs={refs}
+                          numeroProduto={p.numero_produto}
+                          matchValor={matchValorRef}
+                        />
                       </div>
                     </td>
                     <td className="px-3 py-2.5 hidden md:table-cell">
-                      <ReferenciaChips refs={refs} numeroProduto={p.numero_produto} />
+                      <ReferenciaChips
+                        refs={refs}
+                        numeroProduto={p.numero_produto}
+                        matchValor={matchValorRef}
+                      />
                     </td>
                     <td className="px-3 py-2.5 hidden sm:table-cell">
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface text-label-sm text-on-surface-variant uppercase">
