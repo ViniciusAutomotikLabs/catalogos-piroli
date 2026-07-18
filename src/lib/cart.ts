@@ -31,9 +31,13 @@ function persist(items: CartItem[]) {
 
 export function addToCart(item: Omit<CartItem, "quantidade"> & { quantidade?: number }) {
   const items = getCart();
-  const existing = items.find(
-    (i) => i.produtoId !== null && i.produtoId === item.produtoId
-  );
+  const existing = items.find((i) => {
+    if (item.produtoId !== null && item.produtoId !== undefined) {
+      return i.produtoId !== null && i.produtoId === item.produtoId;
+    }
+    // Itens externos (TecDoc): dedup por código
+    return i.produtoId === null && i.codigo === item.codigo;
+  });
   if (existing) {
     existing.quantidade += item.quantidade ?? 1;
   } else {

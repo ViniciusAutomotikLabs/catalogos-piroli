@@ -2,10 +2,10 @@
 
 Documento de retorno do backend após implementação das melhorias estruturais.
 
-**Data:** 03/07/2026 · **Atualizado:** 06/07/2026 (FE-09/16/17 entregues; migration 005)  
-**Status:** P0 + P1 (busca/orçamento) **entregues e aplicados no Supabase**  
+**Data:** 03/07/2026 · **Atualizado:** 16/07/2026 (BE-10 TecDoc federado)  
+**Status:** P0 + P1 (busca/orçamento) **entregues** · BE-10 TecDoc **entregue (app-only)**  
 **Documento base:** `docs/UX_MELHORIAS_BALCAO.md`  
-**Histórico técnico:** `PROJETO_HISTORICO.md` §13
+**Histórico técnico:** `PROJETO_HISTORICO.md` §13–§15
 
 ---
 
@@ -22,6 +22,7 @@ Documento de retorno do backend após implementação das melhorias estruturais.
 | BE-07 | Equivalências/similares tipados | ⬜ P2 |
 | BE-08 | Contrato estoque/preço | ⬜ P3 |
 | BE-09 | Orçamento transacional | ✅ RPC `salvar_orcamento` + action integrada |
+| BE-10 | Busca federada TecDoc (PostgREST VPS) | ✅ 16/07/2026 — on-demand, sem ETL |
 
 ---
 
@@ -210,22 +211,45 @@ SELECT * FROM produtos WHERE codigo_produto_interno_anterior IS NOT NULL LIMIT 2
 
 | Área | Arquivos |
 |------|----------|
-| Migrations | `sql/migrations/001_*.sql`, `002_*.sql`, `003_*.sql` |
+| Migrations | `sql/migrations/001_*.sql` … `005_*.sql` |
 | Normalizador | `src/lib/produto-normalizador.ts`, `produto-normalizador.test.ts` |
 | Parser display (legado) | `src/lib/descricao-parser.ts` |
 | Helpers UI | `src/lib/produto-campos.ts` |
-| Cliente busca | `src/lib/busca-produtos.ts` |
-| Backfill | `scripts/backfill-normalizacao.ts` |
+| Cliente busca + merge TecDoc | `src/lib/busca-produtos.ts` |
+| Cliente TecDoc | `src/lib/tecdoc-catalog.ts`, `tecdoc-termos.ts` (+ testes) |
+| Backfill | `scripts/backfill-normalizacao.ts`, `scripts/backfill-referencias.ts` |
 | Busca (integrado) | `src/app/(app)/busca/page.tsx` |
-| Detalhe (integrado) | `src/app/(app)/produtos/[id]/page.tsx` |
+| Detalhe local | `src/app/(app)/produtos/[id]/page.tsx` |
+| Detalhe TecDoc | `src/app/(app)/produtos/tecdoc/[articleId]/page.tsx` |
 | Orçamento (integrado) | `src/lib/actions/orcamentos.ts` |
 | Types | `src/lib/supabase/types.ts` |
 
 ---
 
-## 7. Observações
+## 7. BE-10 — Busca federada TecDoc (16/07/2026)
+
+**Fonte:** PostgREST na VPS `TECDOC_API_URL` → `GET /view_busca_catalogo` (sempre com `limit`/`offset`).
+
+| Contrato UI | Valor |
+|-------------|-------|
+| `fonte` | `"local"` \| `"tecdoc"` |
+| `origem_catalogo` (TecDoc) | `"tecdoc"` |
+| `externalId` | `tecdoc:{article_id}` |
+| `id` sintético | `-article_id` (não colide com Supabase) |
+| Detalhe | `/produtos/tecdoc/[articleId]` |
+| Orçamento | `produtoId: null`, `codigo: TecDoc-{id}` |
+
+**Regras:** termo ≥ 2 chars; não consulta TecDoc se filtro `catalogo` local ativo; timeout 5s; falha → só locais; glossário PT→EN em `tecdoc-termos.ts`; dedup por `article_id`.
+
+**Env:** `TECDOC_API_URL` (server-only, sem senha do Postgres). Ver `.env.example`.
+
+**Gap conhecido:** a VIEW não expõe código OEM — busca por código no TecDoc é limitada até a VIEW ser estendida.
+
+---
+
+## 8. Observações
 
 - Não remover `descricao-parser.ts` até backfill 100% concluído.
 - `codigo_principal` é a fonte de verdade para orçamento/WhatsApp na busca e detalhe.
 - Produtos com múltiplos `COD:` no texto ficam `parcial` — UI deve mostrar chips de `codigos_extraidos`.
-- Próximo incremento backend sugerido: BE-06 (tabela `produto_aplicacoes`) + hook na ingestão Python (`main2.py`).
+- Próximo incremento backend sugerido: BE-06 (tabela `produto_aplicacoes`) + extensão VIEW TecDoc com OEM.

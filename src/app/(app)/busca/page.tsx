@@ -83,7 +83,14 @@ function apenasCodigo(q: string) {
 export default async function BuscaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; catalogo?: string; foto?: string; ordem?: string; pagina?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    catalogo?: string;
+    foto?: string;
+    ordem?: string;
+    pagina?: string;
+    fonte?: string;
+  }>;
 }) {
   const params = await searchParams;
   const q = sanitize(params.q ?? "");
@@ -92,22 +99,39 @@ export default async function BuscaPage({
   const comFoto = params.foto === "1";
   const ordem = params.ordem ?? "relevancia";
   const pagina = Math.max(1, parseInt(params.pagina ?? "1", 10) || 1);
+  const fonteParam = params.fonte;
+  const fonte =
+    fonteParam === "local" || fonteParam === "tecdoc" || fonteParam === "todos"
+      ? fonteParam
+      : "todos";
 
   const supabase = await createClient();
 
-  const { data: catalogos } = await supabase
+  const { data: catalogosTop } = await supabase
     .from("catalogos")
     .select("slug, nome_exibicao")
     .eq("status", "ok")
     .order("produtos_count", { ascending: false })
     .limit(6);
 
-  const { produtos, total } = await buscarProdutos({
+  let catalogos = catalogosTop ?? [];
+  // Garante que o catálogo filtrado apareça nos chips (mesmo fora do top 6)
+  if (catalogo && !catalogos.some((c) => c.slug === catalogo)) {
+    const { data: selecionado } = await supabase
+      .from("catalogos")
+      .select("slug, nome_exibicao")
+      .eq("slug", catalogo)
+      .maybeSingle();
+    if (selecionado) catalogos = [selecionado, ...catalogos];
+  }
+
+  const { produtos, totalLocal, totalTecdoc } = await buscarProdutos({
     q,
     catalogo,
     comFoto,
     pagina,
     limite: POR_PAGINA,
+    fonte,
   });
 
   const produtosOrdenados =
@@ -117,15 +141,26 @@ export default async function BuscaPage({
         )
       : produtos;
 
-  const agregadosPorProduto = await listarAgregadosPorProdutos(
-    produtosOrdenados.map((p) => p.id)
-  );
+  // Agregados só para produtos locais (ids positivos do Supabase)
+  const idsLocais = produtosOrdenados.filter((p) => p.fonte === "local").map((p) => p.id);
+  const agregadosPorProduto = await listarAgregadosPorProdutos(idsLocais);
 
-  const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+  // Paginação considera apenas o total local; TecDoc é complemento da página atual
+  const totalPaginas = Math.max(1, Math.ceil(Math.max(totalLocal, 1) / POR_PAGINA));
+  const nomeCatalogoAtivo =
+    catalogos.find((c) => c.slug === catalogo)?.nome_exibicao ?? catalogo;
 
   const buildUrl = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
-    const merged = { q, catalogo, foto: comFoto ? "1" : undefined, ordem, pagina: undefined, ...patch };
+    const merged = {
+      q,
+      catalogo,
+      foto: comFoto ? "1" : undefined,
+      ordem,
+      fonte: fonte === "todos" ? undefined : fonte,
+      pagina: undefined,
+      ...patch,
+    };
     for (const [k, v] of Object.entries(merged)) {
       if (v) sp.set(k, v);
     }
@@ -207,6 +242,40 @@ export default async function BuscaPage({
             ))}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {!catalogo && (
+              <>
+                <Link
+                  href={buildUrl({ fonte: undefined })}
+                  className={
+                    fonte === "todos"
+                      ? "bg-primary-container text-on-primary-container border border-primary px-2.5 py-1 rounded-full text-label-sm"
+                      : "bg-surface-container-lowest border border-outline-variant px-2.5 py-1 rounded-full text-label-sm text-on-surface-variant hover:border-primary"
+                  }
+                >
+                  Todos
+                </Link>
+                <Link
+                  href={buildUrl({ fonte: "local" })}
+                  className={
+                    fonte === "local"
+                      ? "bg-primary-container text-on-primary-container border border-primary px-2.5 py-1 rounded-full text-label-sm"
+                      : "bg-surface-container-lowest border border-outline-variant px-2.5 py-1 rounded-full text-label-sm text-on-surface-variant hover:border-primary"
+                  }
+                >
+                  Local
+                </Link>
+                <Link
+                  href={buildUrl({ fonte: "tecdoc" })}
+                  className={
+                    fonte === "tecdoc"
+                      ? "bg-primary-container text-on-primary-container border border-primary px-2.5 py-1 rounded-full text-label-sm"
+                      : "bg-surface-container-lowest border border-outline-variant px-2.5 py-1 rounded-full text-label-sm text-on-surface-variant hover:border-primary"
+                  }
+                >
+                  TecDoc
+                </Link>
+              </>
+            )}
             <span className="text-label-sm text-on-surface-variant">Ordenar:</span>
             <Link
               href={buildUrl({ ordem: ordem === "codigo" ? undefined : "codigo" })}
@@ -216,6 +285,19 @@ export default async function BuscaPage({
             </Link>
           </div>
         </div>
+        {catalogo && (
+          <p className="text-body-md text-on-surface-variant">
+            Exibindo produtos do catálogo{" "}
+            <span className="font-semibold text-on-surface">{nomeCatalogoAtivo}</span>
+            {totalLocal > 0 && (
+              <>
+                {" "}
+                · <span className="font-mono font-semibold text-on-surface">{totalLocal.toLocaleString("pt-BR")}</span>{" "}
+                itens
+              </>
+            )}
+          </p>
+        )}
       </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
@@ -232,11 +314,13 @@ export default async function BuscaPage({
             </thead>
             <tbody className="text-body-md text-on-surface">
               {produtosOrdenados.map((p, i) => {
+                const isTecDoc = p.fonte === "tecdoc";
                 const refs = p.referencias;
                 const titulo = tituloExibicao(p);
                 const codigo = codigoExibicao(p);
                 const matchLabel = labelMatchTipo(p.match_tipo);
                 const matchNoCodigo =
+                  !isTecDoc &&
                   (p.match_tipo === "codigo_exato" || p.match_tipo === "codigo_normalizado") &&
                   Boolean(p.match_valor) &&
                   normalizarCodigo(p.match_valor) === normalizarCodigo(codigo);
@@ -244,11 +328,15 @@ export default async function BuscaPage({
                   p.match_tipo === "referencia_exata" || p.match_tipo === "referencia_normalizada";
                 const matchValorRef = matchNaReferencia ? p.match_valor : null;
                 const descricaoParaAcao = p.descricao ?? titulo;
-                const agregados = agregadosPorProduto.get(p.id) ?? [];
+                const agregados = isTecDoc ? [] : (agregadosPorProduto.get(p.id) ?? []);
+                const detalheHref = isTecDoc
+                  ? `/produtos/tecdoc/${p.articleId}`
+                  : `/produtos/${p.id}`;
+                const rowKey = isTecDoc ? `tecdoc-${p.articleId}` : `local-${p.id}`;
 
                 return (
                   <tr
-                    key={p.id}
+                    key={rowKey}
                     className={`border-b border-outline-variant hover:bg-primary-fixed/40 transition-colors align-top ${
                       i % 2 === 1 ? "bg-surface-container-low" : "bg-surface-container-lowest"
                     }`}
@@ -277,7 +365,7 @@ export default async function BuscaPage({
                     </td>
                     <td className="px-3 py-2.5">
                       <Link
-                        href={`/produtos/${p.id}`}
+                        href={detalheHref}
                         title={p.descricao_original ?? p.descricao ?? undefined}
                         className="font-semibold text-on-surface hover:text-primary hover:underline line-clamp-2"
                       >
@@ -293,7 +381,7 @@ export default async function BuscaPage({
                         >
                           {codigo}
                         </span>
-                        {matchLabel && (
+                        {matchLabel && !isTecDoc && (
                           <span className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant">
                             <span className="material-symbols-outlined text-[14px]">swap_horiz</span>
                             {matchLabel}
@@ -305,42 +393,63 @@ export default async function BuscaPage({
                           {p.aplicacao_resumo}
                         </p>
                       )}
-                      <AgregadosBuscaRow
-                        agregados={agregados}
-                        principal={{
-                          produtoId: p.id,
-                          codigo,
-                          descricao: descricaoParaAcao,
-                          fabricante: p.fabricante,
-                          fotoUrl: p.foto_url,
-                        }}
-                      />
+                      {!isTecDoc && (
+                        <AgregadosBuscaRow
+                          agregados={agregados}
+                          principal={{
+                            produtoId: p.id,
+                            codigo,
+                            descricao: descricaoParaAcao,
+                            fabricante: p.fabricante,
+                            fotoUrl: p.foto_url,
+                          }}
+                        />
+                      )}
                       <div className="md:hidden mt-1.5">
+                        {isTecDoc ? (
+                          <span className="text-label-sm text-on-surface-variant line-clamp-2">
+                            {p.aplicacao_resumo ?? "Catálogo TecDoc"}
+                          </span>
+                        ) : (
+                          <ReferenciaChips
+                            refs={refs}
+                            numeroProduto={p.numero_produto}
+                            matchValor={matchValorRef}
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 hidden md:table-cell">
+                      {isTecDoc ? (
+                        <span className="text-label-sm text-on-surface-variant line-clamp-3">
+                          {p.aplicacao_resumo ?? "—"}
+                        </span>
+                      ) : (
                         <ReferenciaChips
                           refs={refs}
                           numeroProduto={p.numero_produto}
                           matchValor={matchValorRef}
                         />
-                      </div>
-                    </td>
-                    <td className="px-3 py-2.5 hidden md:table-cell">
-                      <ReferenciaChips
-                        refs={refs}
-                        numeroProduto={p.numero_produto}
-                        matchValor={matchValorRef}
-                      />
+                      )}
                     </td>
                     <td className="px-3 py-2.5 hidden sm:table-cell">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface text-label-sm text-on-surface-variant uppercase">
-                        <span className="w-2 h-2 rounded-full bg-secondary-fixed" />
-                        {p.origem_catalogo}
-                      </span>
+                      {isTecDoc ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-primary/40 bg-primary-container/40 text-label-sm text-on-primary-container uppercase font-semibold">
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                          TecDoc
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface text-label-sm text-on-surface-variant uppercase">
+                          <span className="w-2 h-2 rounded-full bg-secondary-fixed" />
+                          {p.origem_catalogo}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <AdicionarOrcamentoButton
                           item={{
-                            produtoId: p.id,
+                            produtoId: isTecDoc ? null : p.id,
                             codigo,
                             descricao: descricaoParaAcao,
                             fabricante: p.fabricante ?? undefined,
@@ -353,12 +462,12 @@ export default async function BuscaPage({
                             codigo,
                             numeroProduto: p.numero_produto,
                             fabricante: p.fabricante ?? undefined,
-                            catalogo: p.origem_catalogo,
+                            catalogo: isTecDoc ? "TecDoc" : p.origem_catalogo,
                             fotoUrl: p.foto_url,
                           }}
                         />
                         <Link
-                          href={`/produtos/${p.id}`}
+                          href={detalheHref}
                           className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center border border-transparent hover:border-primary shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           title="Ver detalhes"
                           aria-label="Ver detalhes do produto"
@@ -432,10 +541,16 @@ export default async function BuscaPage({
           <span className="text-body-md text-on-surface-variant">
             Mostrando{" "}
             <span className="font-bold text-on-surface">
-              {total === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1}–
-              {Math.min(pagina * POR_PAGINA, total)}
+              {totalLocal === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1}–
+              {Math.min(pagina * POR_PAGINA, totalLocal)}
             </span>{" "}
-            de <span className="font-bold text-on-surface">{total}</span>
+            de <span className="font-bold text-on-surface">{totalLocal}</span>
+            {totalTecdoc > 0 && (
+              <>
+                {" "}
+                · <span className="font-bold text-primary">{totalTecdoc}</span> TecDoc
+              </>
+            )}
           </span>
           <div className="flex items-center gap-2">
             {pagina > 1 ? (

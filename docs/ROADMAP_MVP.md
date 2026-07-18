@@ -678,6 +678,7 @@ Atalhos técnicos e templates: `Telas_MVP.md` § **14. WhatsApp (diferencial)**.
 |---|------|------|-------|
 | 1 | ~~FE-09 + FE-16 + FE-17 (match, dashboard, medidas)~~ | E1–E3 | ✅ 06/07/2026 |
 | 2 | ~~`aplicacao_resumo` na linha da busca~~ (migration 005) | E4 | ✅ 06/07/2026 |
+| 2b | ~~Busca federada TecDoc (PostgREST VPS)~~ | A10 / BE-10 | ✅ 16/07/2026 |
 | 3 | Guia visual de busca no dashboard | E5 | Dev |
 | 4 | Validar demo agregados (1 principal + 2 itens) | B7 | Dev + produto |
 | 5 | SQL de auditoria `catalogos` ↔ `produtos.origem_catalogo` | A7 | Dev |
@@ -707,6 +708,7 @@ Atalhos técnicos e templates: `Telas_MVP.md` § **14. WhatsApp (diferencial)**.
 - ~~Fechar perguntas em aberto do 1.0~~ — **feito** (§ 9.1, § 9.2).
 - ~~RPC busca + normalização + orçamento transacional~~ — **feito** (03/07/2026).
 - ~~MVP demo agregados~~ — **feito** (06/07/2026, migration `004`).
+- ~~Busca federada TecDoc~~ — **feito** (16/07/2026, BE-10).
 
 ### Critério “1.0 pronto para piloto”
 

@@ -12,7 +12,7 @@ import {
 import { useFocusTrap } from "@/lib/use-focus-trap";
 
 type Props = {
-  produto: ProdutoMensagem & { produtoId: number };
+  produto: ProdutoMensagem & { produtoId: number | null };
   telefoneLoja?: string | null;
 };
 

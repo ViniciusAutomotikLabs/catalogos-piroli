@@ -539,9 +539,63 @@ Executados via agente frontend (06/07/2026), alinhados à reunião de produto do
 - Smoke E2E Playwright (build de produção local): login renderiza, erro amigável em credenciais inválidas, rotas protegidas (`/`, `/busca`, `/agregados`, `/produtos/[id]`, `/historico`) redirecionam para `/login`, console sem erros.
 - E2E autenticado (usuário piloto, 15/15 ✓): FE-09 (badge "Código exato" + código destacado na busca por `1386677`), FE-16 (dashboard com 12 itens de histórico normalizados), FE-17 (2 chips de medidas no detalhe `/produtos/7792`), E4 (`aplicacao_resumo` em 24/25 linhas na busca "randon"), tela `/agregados` operacional.
 
+### Backfill de referências cruzadas (06/07/2026)
+
+A tabela `referencias_cruzadas` estava **vazia** (a busca por referência da RPC nunca casava). Novo script `scripts/backfill-referencias.ts` (`npm run backfill:referencias`) popula a tabela a partir de `produtos.codigos_extraidos` (extraídos na normalização BE-01).
+
+| Métrica | Valor |
+|---------|-------|
+| Produtos com `codigos_extraidos` | 13.904 |
+| Candidatos avaliados | 19.811 |
+| Filtrados como ruído (`codigoConfiavel` + comprimento ≥ 3 + ≥ 2 chars distintos) | 10.053 |
+| **Referências inseridas** | **9.758** |
+| Erros | 0 |
+
+- Idempotente (re-execução: `inseridos = 0`); leitura de existentes paginada (PostgREST trunca em 1000 linhas).
+- `fabricante_referencia` fica `NULL` (fonte: extração de texto) — instrução de rollback no cabeçalho do script.
+- Validado na RPC: busca `478` retorna produtos `1478` e `5995` com `match_tipo = referencia_exata` e chips de referência preenchidos.
+- Limitação conhecida: são referências extraídas de texto de PDF, não amarrações OEM verificadas — a curadoria OEM real depende dos docs Partes Link/Gustavo (roadmap A8).
+
 ### Roadmap
 
 `docs/ROADMAP_MVP.md` revisado com o alinhamento de produto de 06/07/2026 (§ 2.1): código OEM como métrica principal, desempate por aplicação/ano, épico busca por veículo (Fase F), dores de dados (slug/amarrações) e ações por responsável.
+
+---
+
+## 15. Busca federada TecDoc — PostgREST VPS (16/07/2026)
+
+Integração **on-demand** (sem ETL dos 60M+ registros) da API PostgREST hospedada na VPS (`http://31.97.93.135:3005/view_busca_catalogo`).
+
+### Entregas
+
+| Componente | Arquivo |
+|------------|---------|
+| Cliente PostgREST + detalhe | `src/lib/tecdoc-catalog.ts` |
+| Glossário PT→EN + heurísticas | `src/lib/tecdoc-termos.ts` (+ testes Vitest) |
+| Merge na busca | `src/lib/busca-produtos.ts` (`fonte`, `totalLocal`, `totalTecdoc`) |
+| UI mesma tabela + badge | `src/app/(app)/busca/page.tsx` |
+| Detalhe read-only | `src/app/(app)/produtos/tecdoc/[articleId]/page.tsx` |
+| Carrinho dedup por código | `src/lib/cart.ts` |
+| Env | `TECDOC_API_URL` em `.env.example` / `.env.local` |
+
+### Regras de segurança/performance
+
+- Sempre `limit` (máx. 15 resultados, fetch bruto até 80 para compensar dedup)
+- Timeout 5s; falha silenciosa → só catálogo local
+- Só consulta TecDoc com termo ≥ 2 chars e **sem** filtro de catálogo local
+- App **não** usa senha do Postgres TecDoc — só URL PostgREST server-side
+
+### Validação
+
+- `npm test` ✓ 45/45 · `npm run build` ✓ (rota `/produtos/tecdoc/[articleId]`)
+- Integração ao vivo: `Gol` → Brake Fluid / GOLF; `filtro` → Oil Filter; detalhe article 30 com 27 aplicações
+- E2E Playwright autenticado: login piloto retornou credenciais inválidas nesta sessão (senha pode ter sido rotacionada); cobrir UI após atualizar senha do usuário de teste
+
+### Pendências (Fase 3)
+
+- Estender VIEW TecDoc com código OEM/fabricante
+- HTTPS + API key no Traefik
+- Cache por termo
 
 ---
 
