@@ -5,16 +5,25 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CART_EVENT, cartCount } from "@/lib/cart";
 import { useFocusTrap } from "@/lib/use-focus-trap";
+import { moduloLiberado, type ModuloChave } from "@/lib/modulos";
 
-const ITEMS = [
+const ITEMS: Array<{
+  href: string;
+  icon: string;
+  label: string;
+  showCartBadge?: boolean;
+  modulo?: ModuloChave;
+}> = [
   { href: "/", icon: "home", label: "Início" },
-  { href: "/busca", icon: "search", label: "Busca" },
-  { href: "/orcamento", icon: "shopping_cart", label: "Orçamento", showCartBadge: true },
-  { href: "/veiculo", icon: "directions_car", label: "Veículo" },
-  { href: "/catalogos", icon: "menu_book", label: "Catálogos" },
-  { href: "/agregados", icon: "construction", label: "Agregados" },
-  { href: "/historico", icon: "history", label: "Histórico" },
-  { href: "/clientes", icon: "group", label: "CRM" },
+  { href: "/busca", icon: "search", label: "Busca", modulo: "busca" },
+  { href: "/orcamento", icon: "shopping_cart", label: "Orçamento", showCartBadge: true, modulo: "orcamento" },
+  { href: "/veiculo", icon: "directions_car", label: "Veículo", modulo: "busca" },
+  { href: "/catalogos", icon: "menu_book", label: "Catálogos", modulo: "catalogos" },
+  { href: "/agregados", icon: "construction", label: "Agregados", modulo: "agregados" },
+  { href: "/historico", icon: "history", label: "Histórico", modulo: "historico" },
+  { href: "/pessoas", icon: "badge", label: "Pessoas", modulo: "pessoas" },
+  { href: "/rh", icon: "diversity_3", label: "RH", modulo: "rh" },
+  { href: "/clientes", icon: "group", label: "CRM", modulo: "pessoas" },
   { href: "/configuracoes", icon: "settings", label: "Configurações" },
 ];
 
@@ -26,12 +35,20 @@ function isActive(pathname: string, href: string) {
 
 type SidebarProps = {
   lojaNome?: string | null;
+  modulos?: string[] | null;
+  isSuperAdmin?: boolean;
   open?: boolean;
   onClose?: () => void;
 };
 
-export function Sidebar({ lojaNome, open = false, onClose }: SidebarProps) {
+export function Sidebar({ lojaNome, modulos, isSuperAdmin, open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
+  // `null`/ausente = sem enforcement (mostra tudo); array = só os módulos ativos.
+  const modulosAtivos =
+    modulos == null ? null : new Set(modulos as ModuloChave[]);
+  const itensVisiveis = ITEMS.filter((item) =>
+    moduloLiberado(item.modulo ?? null, modulosAtivos)
+  );
   const [count, setCount] = useState(0);
   // Focus trap ativo apenas quando o drawer mobile está aberto. Em `lg+` a
   // sidebar é fixa (`open` sempre false), então o trap fica inativo.
@@ -80,7 +97,7 @@ export function Sidebar({ lojaNome, open = false, onClose }: SidebarProps) {
         </button>
       </div>
       <ul className="flex flex-col gap-1 overflow-y-auto">
-        {ITEMS.map((item) => {
+        {itensVisiveis.map((item) => {
           const active = isActive(pathname, item.href);
           return (
             <li key={item.href}>
@@ -110,6 +127,23 @@ export function Sidebar({ lojaNome, open = false, onClose }: SidebarProps) {
             </li>
           );
         })}
+
+        {isSuperAdmin && (
+          <li className="mt-2 pt-2 border-t border-sidebar-border">
+            <Link
+              href="/admin"
+              aria-current={pathname.startsWith("/admin") ? "page" : undefined}
+              className={
+                pathname.startsWith("/admin")
+                  ? "flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg bg-primary/20 text-white font-semibold border-l-4 border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
+                  : "flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-lg text-on-sidebar-variant hover:bg-white/5 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
+              }
+            >
+              <span className="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+              <span className="text-label-sm flex-1">Admin (SaaS)</span>
+            </Link>
+          </li>
+        )}
       </ul>
     </nav>
   );

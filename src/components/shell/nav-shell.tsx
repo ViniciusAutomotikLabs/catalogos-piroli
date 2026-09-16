@@ -10,7 +10,15 @@ import { Header } from "@/components/shell/header";
  * hambúrguer) e a Sidebar (drawer sobreposto). Em telas `lg+` a sidebar é
  * fixa e o estado é irrelevante.
  */
-export function NavShell({ lojaNome }: { lojaNome?: string | null }) {
+export function NavShell({
+  lojaNome,
+  modulos,
+  isSuperAdmin,
+}: {
+  lojaNome?: string | null;
+  modulos?: string[] | null;
+  isSuperAdmin?: boolean;
+}) {
   const [aberto, setAberto] = useState(false);
   const pathname = usePathname();
 
@@ -37,7 +45,7 @@ export function NavShell({ lojaNome }: { lojaNome?: string | null }) {
 
   return (
     <>
-      <Sidebar lojaNome={lojaNome} open={aberto} onClose={fechar} />
+      <Sidebar lojaNome={lojaNome} modulos={modulos} isSuperAdmin={isSuperAdmin} open={aberto} onClose={fechar} />
       <Header onOpenMenu={() => setAberto(true)} />
       {aberto && (
         <div

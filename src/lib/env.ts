@@ -19,6 +19,26 @@ export function getSupabasePublicEnv() {
   return { url, key };
 }
 
+/**
+ * Chave service_role (SERVER-ONLY). Usada para escritas privilegiadas que a RLS
+ * bloqueia para `authenticated` (ex.: débito no ledger de tokens, log de uso de IA).
+ * NUNCA expor no browser. Retorna undefined se não configurada.
+ */
+export function getSupabaseServiceRoleKey(): string | undefined {
+  return firstDefined(
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_SECRET_KEY
+  );
+}
+
+/** Configuração do módulo de IA (DGX/Ollama via Tailscale). */
+export function getOllamaEnv() {
+  return {
+    baseUrl: firstDefined(process.env.OLLAMA_BASE_URL),
+    model: firstDefined(process.env.OLLAMA_MODEL) ?? "llama3.1",
+  };
+}
+
 export function requireSupabasePublicEnv() {
   const { url, key } = getSupabasePublicEnv();
   if (!url || !key) {

@@ -1,0 +1,38 @@
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Segunda-feira 06:00 UTC — pega CVEs novas mesmo sem push.
+    - cron: "0 6 * * 1"
+
+jobs:
+  deps-audit:
+    name: Dependency scan (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Falha o build se houver vulnerabilidade high/critical nas deps de produção.
+      - name: npm audit (production, high+)
+        run: npm audit --omit=dev --audit-level=high
+
+  typecheck-lint-test:
+    name: Typecheck + Lint + Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test

@@ -1,9 +1,14 @@
 # Histórico do Projeto — Pipeline de Catálogos de Autopeças
 
-Documento vivo com o que foi feito, como executar e decisões técnicas.  
+Documento vivo de **controle do time**: o que foi feito, como executar e decisões técnicas.  
+Fonte canônica da evolução do produto neste repositório (não depende de `/octo:history` nem de run stores externos).
+
 **Projeto Supabase:** `oxqojsmlbptmofmhyfea` · URL: `https://oxqojsmlbptmofmhyfea.supabase.co`
 
-**MVP 100 catálogos (WhatsApp HD):** ver `MVP_VALIDACAO.md` · **Roadmap produto:** `docs/ROADMAP_MVP.md` · **UX balcão:** `docs/UX_MELHORIAS_BALCAO.md` · Escala: `ARQUITETURA_ESCALA.md`
+**MVP 100 catálogos (WhatsApp HD):** `MVP_VALIDACAO.md` · **Roadmap:** `docs/ROADMAP_MVP.md` · **UX balcão:** `docs/UX_MELHORIAS_BALCAO.md` · Escala: `ARQUITETURA_ESCALA.md`  
+**Agente n8n / GPASI:** `docs/API_GPASI_NO_N8N.md` · `docs/RELATORIO_TESTE_GPASI_AGENTE.md` · **Prompt Maria:** `Prompt.md` · **TecDoc VPS v2:** `docs/HANDOFF_BACKEND_TECDOC_API_V2.md`
+
+**Status (set/2026):** app web Next.js **retomado** como **ERP 2.0** (Piroli Autopeças) — Pessoas, RH, entitlements SaaS, painel super admin. Agente WhatsApp (n8n/GPASI) segue como frente paralela — ver §17+ e §22.
 
 ---
 
@@ -15,26 +20,32 @@ Consolidar mais de 300 catálogos de autopeças (PDFs e planilhas) em um banco P
 - Ingestão em lote via **staging tables** + `INSERT ... ON CONFLICT`
 - Orquestração centralizada em **`main2.py`** (o `main.py` permanece intocado como fallback)
 
+A partir de jul–ago/2026 o escopo operacional expandiu para o **atendimento WhatsApp** (agente “Maria” no n8n), consultando estoque/preço reais via **GPASI** e catálogo/TecDoc — enquanto o app de balcão ficou em pausa (§17). Em **set/2026** o app Next.js foi retomado como **ERP 2.0** (Pessoas + RH + painel SaaS) — ver §22.
+
 ---
 
 ## 2. Estrutura do repositório
 
 ```text
 Projeto Leo/
-├── src/                    # App web Next.js 15 (App Router)
-│   ├── app/                # rotas (login + área autenticada)
+├── src/                    # App web Next.js 15 (App Router) — ERP 2.0 ativo (§22)
+│   ├── app/                # rotas (login + área autenticada + Pessoas/RH/admin)
 │   ├── components/         # UI (shell, busca, orçamento, catálogos…)
-│   ├── lib/                # Supabase, actions, whatsapp, cart, loja
+│   ├── lib/                # Supabase, actions, crypto, RH, IA, loja, tecdoc
 │   └── middleware.ts       # refresh de sessão Supabase SSR
 ├── catalogos/              # entrada (PDF/XLSX aguardando)
 ├── catalogos_extraidos/    # processados com sucesso
 ├── catalogos_erro/         # falhas (opcional)
-├── scripts/                # todo o código Python
-│   ├── main2.py            # orquestrador MVP
-│   ├── catalogo_utils.py   # fila por pasta + inferência de layout
-│   └── project_paths.py    # caminhos da raiz do projeto
-├── sql/                    # schema tenant + RLS
-├── docs/                   # roadmap, UX, validação
+├── scripts/                # Python: ingestão + GPASI/Redis/agente
+│   ├── main2.py            # orquestrador MVP catálogos
+│   ├── gpasi_*.py          # sync Redis, search API, smoke, enrich
+│   ├── systemd/            # timers VPS (catalog / prices / enrich)
+│   └── …                   # catalogo_utils, backfills TS, etc.
+├── sql/
+│   ├── migrations/         # schema app + ERP 2.0 (007–012) + RPCs agente 006
+│   └── vps/                # TecDoc API v2 (indexes + views PostgREST)
+├── docs/                   # roadmap, UX, GPASI/n8n, TecDoc, ERP 2.0 (`docs/erp-2.0/`)
+├── Prompt.md               # system prompt do agente Maria (n8n)
 ├── .env.example            # placeholders (sem secrets reais)
 └── README.md
 ```
@@ -45,6 +56,11 @@ Projeto Leo/
 | `scripts/catalog_configs.py` | Regras de parsing por layout |
 | `scripts/storage_uploader.py` | Imagens → Supabase Storage (quota 50 MB) |
 | `scripts/main.py` | Pipeline legado (não alterar) |
+| `scripts/gpasi_redis_sync.py` | Sync GPASI → Redis (`--catalog` / `--prices` / `--enrich`) |
+| `scripts/gpasi_search_api.py` | Microserviço `/search` + `/peca/{codigo}` para o n8n |
+| `scripts/gpasi_agent_smoke_test.py` | Smoke/recon da API GPASI (produção) |
+| `scripts/gpasi_enrich_aplicacao.py` | Enrich de aplicação veicular |
+| `scripts/systemd/gpasi-redis-*.{service,timer}` | Agendamento na VPS |
 
 ### Dados
 
@@ -278,6 +294,14 @@ O MCP **não substitui** a senha do Postgres para o Python: o `main2.py` conecta
 | 2026-05-21 | MVP: `catalogos`+`ingestao_jobs`, fila JSON, cap imagens/catálogo |
 | 2026-05-21 | Pastas: `scripts/`, `catalogos/`, `catalogos_extraidos/`; main2 por pasta |
 | 2026-07-02 | **App web:** code review, correções de bugs/segurança, middleware, testes — ver § 12 |
+| 2026-07-03 | Redesign visual SaaS + UX P0 balcão — ver § 12 |
+| 2026-07-03 | Backend: normalização, RPC `buscar_produtos` / `salvar_orcamento`, backfill (~86k) — ver § 13 (`a484091`) |
+| 2026-07-05–06 | Agregados MVP + FE-09/16/17 + migration 005 + backfill referências — ver § 14 (`5cf38ac`, `fc71b50`) |
+| 2026-07-16–18 | Busca federada TecDoc no app + API TecDoc v2 na VPS — ver §§ 15–16 (`a30eddf`) |
+| 2026-07–ago | **Pivot:** app web pausado; foco no agente WhatsApp (n8n) — ver § 17 |
+| 2026-08-04–05 | Recon GPASI produção + correções (`peca/dados` bloco≥1; similares só por código) — ver § 18 |
+| 2026-08-05–12 | Docs n8n, Redis sync, `gpasi-search`, RPCs 006/007, Prompt Maria — ver §§ 18–21 |
+| 2026-09-08–15 | **ERP 2.0:** Pessoas, entitlements, cripto, RH, painel super admin — ver § 22 |
 
 ---
 
@@ -599,4 +623,270 @@ Integração **on-demand** (sem ETL dos 60M+ registros) da API PostgREST hospeda
 
 ---
 
-*Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web).*
+## 16. TecDoc API v2 na VPS (18/07/2026)
+
+Evolução da API PostgREST na VPS para expor artigos, aplicações, referências e imagens **sem** cartesian product na view legada. Handoff: `docs/HANDOFF_BACKEND_TECDOC_API_V2.md`. SQL auditável: `sql/vps/tecdoc_api_v2_indexes.sql`, `sql/vps/tecdoc_api_v2_views.sql`.
+
+### Implantado e validado
+
+| Item | Estado |
+|------|--------|
+| Backup pré-deploy | `/root/tecdoc-backup-20260718-124027` |
+| API legada `view_busca_catalogo` | Preservada (HTTP 200) |
+| Views v2 (`artigos`, `aplicacoes`, `referencias`, `imagens`, `especificacoes`) | Implantadas |
+| Índices código/OEM normalizados + 1ª JPEG | Válidos |
+| PostgREST | Role limitada (`postgrest_authenticator`); `PGRST_DB_MAX_ROWS=100`; timeout 5s |
+| Container rollback | `postgrest-legacy-20260718-125920` |
+
+### Validação
+
+- Legado e v2 retornam HTTP 200; tabelas-base anônimas → 401
+- Busca por `article_number_normalized` / `oem_number_normalized` usa índice
+- Consultas externas < 100 ms nos testes; sem `limit` → máx. 100 linhas
+
+### Pendências operacionais (não bloqueiam v2)
+
+1. HTTPS + autenticação + rate limit (Traefik)
+2. Bloquear exposição pública direta da porta 3005 após validar o proxy
+3. Rotacionar senha da role `postgres` após mapear PgBouncer
+4. Integrar endpoints v2 no Catálogo Industrial / app (adiado com a pausa do app — §17)
+
+---
+
+## 17. Pivot de produto — app pausado, foco no agente n8n (jul–ago/2026)
+
+### Decisão
+
+Após a entrega da busca federada TecDoc no app (§15) e da API v2 na VPS (§16), a evolução do **app Next.js de balcão foi pausada**. A prioridade passou para o **agente de atendimento WhatsApp** orquestrado no **n8n** (“Maria”), consultando:
+
+- **GPASI** (ERP Gestão Parts) — preço e estoque reais da rede Piroli
+- **Catálogo sincronizado** (Redis + fallback Supabase) — busca por descrição / viscosidade / veículo
+- **TecDoc / placa** — tools complementares de aplicação e identificação do veículo
+
+### Por quê
+
+Valor operacional imediato no atendimento ao cliente (WhatsApp), com estoque e preço de produção — em vez de continuar polish de UI do balcão interno sem dado de ERP ao vivo.
+
+### O que ficou congelado no app
+
+- Último commit relevante de produto no app: `a30eddf` (TecDoc federado, 18/07/2026)
+- Pendências de UX/backend do balcão (estoque/preço no app, focus trap, dark mode, FE restantes) **não** avançaram nesta fase
+- O código do app permanece no repositório e em produção; só a **fila de evolução** mudou
+
+### O que passou a ser o “trabalho principal”
+
+Documentado nas §§18–21: recon GPASI → guia n8n → Redis/`gpasi-search` na VPS → RPCs agente → prompt Maria.
+
+---
+
+## 18. Recon GPASI + integração n8n (04–12/08/2026)
+
+**API:** Gestão Parts API Suite Integration (GPASI) **4.0.29** · Produção · Base `http://181.191.194.31:54123`
+
+### Artefatos
+
+| Artefato | Função |
+|----------|--------|
+| `docs/RELATORIO_TESTE_GPASI_AGENTE.md` | Relatório de smoke (04/08) + correções (05/08) |
+| `docs/API_GPASI_NO_N8N.md` | Guia completo para montar workflows n8n |
+| `scripts/gpasi_agent_smoke_test.py` | Script de teste automatizado |
+| `docs/gpasi_smoke_results.json` / `gpasi_desc_search_probe.json` | Saídas de probe |
+
+### Veredito (produção)
+
+| Critério | Status |
+|----------|--------|
+| Auth OAuth2 `/token` (24h, sem `expires_in`) | OK — cache no n8n com margem 23h |
+| Preço por código | OK (~180–230 ms); **preço único na rede** |
+| Estoque v2 com `empresa` explícita | OK; **estoque por loja** |
+| Busca nativa por descrição na GPASI | **Não existe** — sync + índice local |
+| `GET /peca/dados` | OK com `bloco >= 1` (lento: 29–57 s/bloco) |
+| `similarmestre` | Só aceita **código** de produto, não texto |
+
+### Decisões de negócio (fase atual)
+
+- Agente consulta estoque na **matriz `0001`** (e, no prompt, lojas físicas nomeadas Eldorado / Mundo Novo / Itaquiraí via tools dedicadas)
+- Códigos empresa **espelho/AUX** não entram em soma de estoque (duplicam quantidade)
+- Ambiente é **produção real** — agente só leitura (peça/preço/estoque); sem pedidos/WMS/financeiro
+
+### Arquitetura n8n (resumo)
+
+1. Sub-workflow de token com cache (`getWorkflowStaticData`)
+2. Sync agendado do catálogo (não como tool por mensagem)
+3. Tools por mensagem: busca local → preço → estoque (e similares sob demanda)
+
+Detalhes e cURLs: `docs/API_GPASI_NO_N8N.md`.
+
+---
+
+## 19. Produção — Redis + `gpasi-search` (ago/2026)
+
+Montar ~110k `HSET` nó a nó no n8n é inviável. Produção usa **Redis na VPS** + microserviço interno.
+
+### Componentes
+
+| Componente | Arquivo / recurso |
+|------------|-------------------|
+| Sync GPASI → Redis | `scripts/gpasi_redis_sync.py` (`--catalog`, `--prices`, `--enrich`, `--full`) |
+| Search API (FastAPI) | `scripts/gpasi_search_api.py` — `GET /health`, `/search`, `/peca/{codigo}` |
+| Docker | `scripts/gpasi_sync.Dockerfile`, `scripts/gpasi_search.Dockerfile` |
+| systemd | `scripts/systemd/gpasi-redis-{catalog,prices,enrich}.{service,timer}` |
+| Redis | container `tecdoc_redis` (rede `easypanel`), prefixo `gpasi:` |
+| Search | container `gpasi-search:8080` |
+
+### Fluxo
+
+```text
+systemd timers (VPS)
+  → gpasi_redis_sync (--catalog / --prices / --enrich)
+  → Redis gpasi:peca:* + gpasi:tok:* + gpasi:visc:* + gpasi:aplic:*
+  → gpasi-search /search
+       com modelo → interseção tok ∩ aplic (STRICT; miss limpo)
+       sem modelo e ERP vazio → RPC buscar_produtos_agente (Supabase)
+  → n8n tools do agente
+Estoque continua live na GPASI (não espelhado no Redis).
+```
+
+### Regras da API de busca
+
+- **STRICT:** com `modelo` preenchido, só Redis (sem Supabase); miss → `retry=false` (agente esclarece e rebusca no máx. 1×)
+- Fallback Supabase: só sem `modelo` (ou `fonte=fornecedor`); service role **somente** no `gpasi-search`
+- Catálogos de fornecedor no Supabase **não** são espelhados no Redis
+
+Documentação operacional: `docs/API_GPASI_NO_N8N.md` §10.0.
+
+---
+
+## 20. RPCs `buscar_produtos_agente` (migrations 006 / 007)
+
+Busca enxuta para o fallback do agente (não substitui a RPC `buscar_produtos` do app de balcão).
+
+| Migration | Entrega |
+|-----------|---------|
+| `sql/migrations/006_buscar_produtos_agente.sql` | RPC `buscar_produtos_agente`: sem `total_count`, `LIMIT` cedo, `SECURITY DEFINER`, grant `service_role`, `statement_timeout` 2500ms |
+| `sql/migrations/007_buscar_produtos_agente_sem_seqscan.sql` | Evita `57014` (timeout): remove padrões que forçam seq scan (`LIKE` sem `text_pattern_ops`, `ILIKE ALL` ignorando gin_trgm, fallback sem índice) |
+
+**Colisão de número (set/2026):** a 007 efetiva no repositório do ERP 2.0 é `007_erp_pessoas.sql` (§22). A 007 do agente (`…sem_seqscan.sql`) não chegou a existir neste working tree; a RPC 006 do agente permanece untracked. Não misturar as duas frentes no mesmo commit.
+
+Retorno tipado para o agente: `codigo`, `descricao`, `marca`, `aplicacao`, `catalogo`, `foto_url`, `referencias`, `match_tipo`.
+
+---
+
+## 21. Prompt do agente Maria (`Prompt.md`)
+
+System prompt do atendimento WhatsApp (n8n). Identidade: balconista da Auto Peças Piroli (Eldorado-MS / fronteira PY).
+
+### Capacidades documentadas no prompt
+
+| Área | Conteúdo |
+|------|----------|
+| Estilo | Mensagens curtas estilo celular; sem travessão; emoji raro |
+| Idiomas | PT / ES / guarani-jopara; busca interna sempre em PT; TecDoc em EN |
+| Foto de peça | Identifica nome popular + pede placa/modelo; não repassa laudo técnico |
+| Mapa de tools | `ConsultaPlaca`, `buscar_peca_catalogo`, `buscar_por_viscosidade`, Consulta TecDoc, `consultar_preco_peca`, estoque por loja (`…01` / `…04` / `…05`) |
+| Sigilo | Nunca citar sistema, catálogo ou nome de ferramenta ao cliente |
+| Preço | Informa via tool; fechamento/negociação com vendedor (handoff) quando aplicável |
+
+Arquivo: `Prompt.md` (raiz). Trechos espelhados/ajustados também em `docs/API_GPASI_NO_N8N.md` §10.5.
+
+---
+
+## Status do time (15/09/2026)
+
+| Frente | Estado | Notas |
+|--------|--------|-------|
+| Pipeline PDF/XLSX → Supabase | Entregue (mai/2026) | §§1–11 |
+| App web Next.js | **Ativo — ERP 2.0** | Pessoas + RH + painel SaaS no piloto (`oxqojsmlbptmofmhyfea`). Branch `feat/erp-2.0` (§22). Balcão (busca/orçamento) permanece |
+| TecDoc PostgREST VPS | **Operacional** | Legado + v2 (§§15–16); HTTPS/auth ainda pendente |
+| Agente WhatsApp n8n + GPASI | **Ativo / WIP** | Docs e scripts locais; **não** entram no commit do ERP 2.0 |
+| Infra self-host (Coolify + 4ª VPS PITR) | **Depois** | Schema já no Supabase gerenciado; cutover VPS não bloqueia o piloto |
+
+### Artefatos do agente ainda untracked (git)
+
+- `Prompt.md`
+- `docs/API_GPASI_NO_N8N.md`, `docs/RELATORIO_TESTE_GPASI_AGENTE.md`, `docs/HANDOFF_BACKEND_TECDOC_API_V2.md`
+- `docs/gpasi_smoke_results.json`, `docs/gpasi_desc_search_probe.json`
+- `scripts/gpasi_*.py`, `scripts/gpasi_*.Dockerfile`, `scripts/systemd/gpasi-redis-*`
+- `sql/migrations/006_buscar_produtos_agente.sql` (a 007 do agente não existe neste tree; 007 = ERP Pessoas)
+- `sql/vps/tecdoc_api_v2_indexes.sql`, `sql/vps/tecdoc_api_v2_views.sql`
+- `espelho-redis/`, `Reunião /` (prints + transcrição)
+
+Quando forem commitados, atualizar esta tabela. **Não** misturar com `feat/erp-2.0`.
+
+---
+
+## 22. ERP 2.0 — Pessoas, RH e SaaS (08–15/09/2026)
+
+Retomada do app Next.js como **produto multi-loja**, não clone do SS Plus. Piroli é o piloto; a arquitetura é de SaaS (módulos por loja, cripto em camadas, self-host depois).
+
+`/octo:history` nesta sessão: **sem run store** em `~/.claude-octopus/runs/run-log.jsonl`. Esta seção é a fonte canônica do que foi feito.
+
+### Origem
+
+Reunião 08/09/2026 (Leandro, Gustavo, Léo). Transcrição e prints em `Reunião /` (não versionados nesta branch). Spec: `docs/erp-2.0/` (`INTENT.md`, `PRD.md`, `MODELO_PESSOAS.md`, `INFRA.md`, `SEGURANCA.md`, `FONTES_REUNIAO.md`).
+
+### Decisões (não reabrir sem motivo)
+
+| Tema | Decisão |
+|------|---------|
+| Produto | ERP revendável; Piroli = piloto. Não é clone do SS Plus |
+| Cadastro | Uma pessoa, vários papéis. RH **não** vive dentro de Pessoas |
+| Segurança | Cripto em camadas (TLS + disco + coluna AES-256-GCM + HMAC blind index). **Não** E2EE zero-knowledge |
+| Entitlements | Super admin libera módulos por loja (`modulos` / `loja_modulos` / `super_admins`) |
+| IA | Ollama no DGX via Tailscale; ledger append-only de tokens (009). Gateway de cobrança = P2 |
+| Banco | Migrations 007–012 **aplicadas** no Supabase gerenciado `oxqojsmlbptmofmhyfea`. Self-host (Coolify + PITR na 4ª VPS) **depois** |
+| Fora deste ciclo | NF-e, boleto Sicredi, WhatsApp oficial, Rede Âncora, eSocial, portal do funcionário |
+
+### Schema (aplicado no piloto)
+
+| Migration | Entrega |
+|-----------|---------|
+| `007_erp_pessoas.sql` | `pessoas`, papéis, endereços, contatos, documentos fiscais, `clientes.pessoa_id` |
+| `008_erp_entitlements.sql` | Catálogo de módulos + liberação por loja + `super_admins` |
+| `009_erp_tokens_ia.sql` | Ledger de tokens (append-only) |
+| `010_erp_pessoas_storage.sql` | Bucket privado `pessoas` + policies |
+| `011_erp_super_admin_visao.sql` | Visão agregada para o painel SaaS |
+| `012_erp_rh.sql` | Contratos, dependentes, férias, afastamentos, advertências, folha, rescisões, documentos, `rh_tabelas_legais` + bucket `rh` |
+
+RLS por `organizacao_id` em toda tabela nova. Colunas sensíveis (documento, salário, bancário, CID) cifradas no app (`src/lib/crypto/`); busca por HMAC.
+
+### App (Next.js)
+
+| Superfície | Caminho |
+|------------|---------|
+| Pessoas CRUD + webcam | `src/app/(app)/pessoas/*`, `src/components/pessoas/*`, `src/lib/actions/pessoas.ts` |
+| Painel super admin | `src/app/admin/*` — super admin **sem loja** cai em `/admin` (não fica preso no layout da loja) |
+| Guard de módulo | `src/lib/modulos.ts` + `requireModulo` |
+| RH | `src/app/(app)/rh/*` — dashboard, funcionários, férias, folha, rescisão |
+| Cálculos RH | `src/lib/rh/` — INSS/IRRF/FGTS/férias+1/3/13º/rescisão; faixas 2026 em `rh_tabelas_legais` (configuráveis; **sem eSocial**) |
+| Upload RH | `src/lib/actions/rh-storage.ts` — upload/assinatura via `service_role` (upload client+RLS não persistia em `storage.objects`) |
+| Backfill clientes | `scripts/backfill-clientes-pessoas.ts` (`npm run backfill:clientes-pessoas`) |
+| Backup PITR (depois) | `scripts/backup/` (pgBackRest; ainda não no piloto) |
+| CI | `.github/workflows/security.yml` — audit + tsc + lint + test |
+
+`next.config.ts`: `experimental.serverActions.bodySizeLimit` 12mb (PDF de contrato).
+
+### Bugs corrigidos nesta frente
+
+| Sintoma | Causa | Correção |
+|---------|-------|----------|
+| Webcam sem imagem | `videoRef` nulo até `camAtiva` | `useEffect` anexa o stream depois do mount |
+| Super admin sem loja preso | Layout `(app)` exige loja | Logout + redirect `/admin` |
+| RH “Ativos” vazio (dashboard = 1) | PostgREST devolve embed 1:1 como **objeto**, não array; join interno no papel | Lista a partir de `rh_contratos` |
+| Documento RH 400 Object not found | Path no banco, 0 rows em `storage.objects` (upload client) | Upload/sign server-side com admin client. **Reenviar** documentos antigos |
+
+### Verificação
+
+- `npx tsc --noEmit` ok; Vitest **85** passando (crypto + libs RH).
+- `npm run lint` ainda tem dívida antiga em `types.ts` (não introduzida pelo ERP).
+- Módulo `rh` semeado e liberado para a loja piloto no painel super admin.
+
+### Pendências (próxima sessão)
+
+- Reenviar documentos RH já cadastrados antes do fix de storage.
+- Self-host / VPS / pgBackRest.
+- Não commitar `.env`. GPASI/n8n e pasta `Reunião /` ficam **fora** de `feat/erp-2.0`.
+
+---
+
+*Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web, avanços do agente n8n/GPASI, ERP 2.0).*

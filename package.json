@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "backfill:normalizacao": "npx tsx scripts/backfill-normalizacao.ts",
-    "backfill:referencias": "npx tsx scripts/backfill-referencias.ts"
+    "backfill:referencias": "npx tsx scripts/backfill-referencias.ts",
+    "backfill:clientes-pessoas": "npx tsx scripts/backfill-clientes-pessoas.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
