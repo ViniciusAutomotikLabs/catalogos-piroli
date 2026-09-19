@@ -65,18 +65,30 @@ type VeiculoInput = {
   chassi: string | null;
 };
 
+type GrupoInput = {
+  grupo_comercial_id: number | null;
+  grupo_custom: string | null;
+};
+
 type PessoaInput = {
   tipo_pessoa: "PF" | "PJ";
   nome: string;
   nome_fantasia: string | null;
   documento: string | null;
   foto_url: string | null;
-  grupo_comercial_id: number | null;
   situacao: "ativo" | "inativo";
+  inscricao_estadual: string | null;
+  inscricao_municipal: string | null;
+  codigo_interno: string | null;
+  responsavel: string | null;
+  observacoes: string | null;
   papeis: PapelInput[];
+  grupos: GrupoInput[];
   contatos: ContatoInput[];
   enderecos: EnderecoInput[];
   veiculos: VeiculoInput[];
+  /** Destino pós-criar: só "rh" é aceito (whitelist). */
+  redirect_to: "rh" | null;
 };
 
 // ===== Helpers de parsing/validação =====
@@ -129,12 +141,6 @@ function parsePessoaInput(fd: FormData): { dados?: PessoaInput; erro?: string } 
     return { erro: "Situação inválida." };
   }
 
-  const grupoRaw = txt(fd, "grupo_comercial_id");
-  const grupo_comercial_id = grupoRaw ? Number(grupoRaw) : null;
-  if (grupoRaw && !Number.isFinite(grupo_comercial_id)) {
-    return { erro: "Grupo comercial inválido." };
-  }
-
   const papeis = parseJsonArray<PapelInput>(txt(fd, "papeis"), (o) => {
     const papel = asStr(o, "papel") as Papel | null;
     if (!papel || !PAPEIS_VALIDOS.includes(papel)) return null;
@@ -142,6 +148,32 @@ function parsePessoaInput(fd: FormData): { dados?: PessoaInput; erro?: string } 
     if (papel === "custom" && !papel_custom) return null;
     return { papel, papel_custom: papel === "custom" ? papel_custom : null };
   });
+
+  const grupos = parseJsonArray<GrupoInput>(txt(fd, "grupos"), (o) => {
+    const idRaw = o.grupo_comercial_id;
+    const id =
+      idRaw == null || idRaw === ""
+        ? null
+        : Number(idRaw);
+    const grupo_custom = asStr(o, "grupo_custom");
+    if (id != null && Number.isFinite(id) && id > 0) {
+      return { grupo_comercial_id: id, grupo_custom: null };
+    }
+    if (grupo_custom) {
+      return { grupo_comercial_id: null, grupo_custom: grupo_custom.slice(0, 120) };
+    }
+    return null;
+  });
+
+  const redirectRaw = txt(fd, "redirect_to");
+  const redirect_to = redirectRaw === "rh" ? ("rh" as const) : null;
+
+  const ieIsenta = fd.get("ie_isenta") === "on" || fd.get("ie_isenta") === "true";
+  let inscricao_estadual = txt(fd, "inscricao_estadual");
+  if (tipo_pessoa === "PJ" && ieIsenta) inscricao_estadual = "ISENTO";
+  if (tipo_pessoa !== "PJ") {
+    inscricao_estadual = null;
+  }
 
   const contatos = parseJsonArray<ContatoInput>(txt(fd, "contatos"), (o) => {
     const canal = asStr(o, "canal") as Canal | null;
@@ -182,12 +214,18 @@ function parsePessoaInput(fd: FormData): { dados?: PessoaInput; erro?: string } 
       nome_fantasia: txt(fd, "nome_fantasia"),
       documento: txt(fd, "documento"),
       foto_url: txt(fd, "foto_url"),
-      grupo_comercial_id,
       situacao: situacao as "ativo" | "inativo",
+      inscricao_estadual: tipo_pessoa === "PJ" ? inscricao_estadual : null,
+      inscricao_municipal: tipo_pessoa === "PJ" ? txt(fd, "inscricao_municipal") : null,
+      codigo_interno: tipo_pessoa === "PJ" ? txt(fd, "codigo_interno") : null,
+      responsavel: tipo_pessoa === "PJ" ? txt(fd, "responsavel") : null,
+      observacoes: tipo_pessoa === "PJ" ? txt(fd, "observacoes") : null,
       papeis,
+      grupos,
       contatos,
       enderecos,
       veiculos,
+      redirect_to,
     },
   };
 }
@@ -205,6 +243,17 @@ async function inserirFilhas(
         pessoa_id: pessoaId,
         papel: p.papel,
         papel_custom: p.papel_custom,
+      }))
+    );
+    if (error) return error.message;
+  }
+
+  if (dados.grupos.length) {
+    const { error } = await sb.from("pessoa_grupos_comerciais").insert(
+      dados.grupos.map((g) => ({
+        pessoa_id: pessoaId,
+        grupo_comercial_id: g.grupo_comercial_id,
+        grupo_custom: g.grupo_custom,
       }))
     );
     if (error) return error.message;
@@ -301,8 +350,12 @@ export async function criarPessoa(
       documento_bidx: blindIndexDocumento(dados.documento),
       documento_mascara: mascararDocumento(dados.documento),
       foto_url: dados.foto_url,
-      grupo_comercial_id: dados.grupo_comercial_id,
       situacao: dados.situacao,
+      inscricao_estadual: dados.inscricao_estadual,
+      inscricao_municipal: dados.inscricao_municipal,
+      codigo_interno: dados.codigo_interno,
+      responsavel: dados.responsavel,
+      observacoes: dados.observacoes,
     })
     .select("id")
     .single();
@@ -324,7 +377,13 @@ export async function criarPessoa(
     contexto.user?.id ?? null
   );
 
+  const pessoaId = pessoa.id as number;
   revalidatePath("/pessoas");
+  if (dados.redirect_to === "rh") {
+    revalidatePath("/rh/funcionarios");
+    revalidatePath(`/rh/funcionarios/${pessoaId}`);
+    redirect(`/rh/funcionarios/${pessoaId}`);
+  }
   redirect("/pessoas");
 }
 
@@ -360,8 +419,12 @@ export async function atualizarPessoa(
       documento_bidx: blindIndexDocumento(dados.documento),
       documento_mascara: mascararDocumento(dados.documento),
       foto_url: dados.foto_url,
-      grupo_comercial_id: dados.grupo_comercial_id,
       situacao: dados.situacao,
+      inscricao_estadual: dados.inscricao_estadual,
+      inscricao_municipal: dados.inscricao_municipal,
+      codigo_interno: dados.codigo_interno,
+      responsavel: dados.responsavel,
+      observacoes: dados.observacoes,
     })
     .eq("id", id)
     .eq("organizacao_id", contexto.organizacaoId);
@@ -369,7 +432,13 @@ export async function atualizarPessoa(
   if (error) return { erro: `Não foi possível salvar: ${error.message}` };
 
   // Substitui as filhas (delete + reinsere) dentro do escopo da pessoa.
-  for (const t of ["pessoa_papeis", "pessoa_contatos", "pessoa_enderecos", "pessoa_veiculos"]) {
+  for (const t of [
+    "pessoa_papeis",
+    "pessoa_grupos_comerciais",
+    "pessoa_contatos",
+    "pessoa_enderecos",
+    "pessoa_veiculos",
+  ]) {
     await sb.from(t).delete().eq("pessoa_id", id);
   }
   const erroFilhas = await inserirFilhas(sb, id, dados);

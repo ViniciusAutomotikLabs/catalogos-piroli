@@ -144,8 +144,8 @@ export default async function RHDashboardPage() {
             <Link href="/rh/folha" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">payments</span> Folha de pagamento
             </Link>
-            <Link href="/pessoas/novo" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">person_add</span> Cadastrar funcionário (Pessoas)
+            <Link href="/pessoas/novo?papel=funcionario&origem=rh" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">person_add</span> Cadastrar funcionário
             </Link>
           </div>
         </div>

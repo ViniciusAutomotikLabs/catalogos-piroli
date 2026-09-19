@@ -5,6 +5,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 import { cifrar, criptografiaConfigurada } from "@/lib/crypto";
+import {
+  serializarDadosBancarios,
+  validarDadosBancarios,
+  type DadosBancarios,
+} from "@/lib/rh/dados-bancarios";
 
 export type EstadoRH =
   | { erro?: string; ok?: boolean; mensagem?: string }
@@ -133,6 +138,16 @@ export async function salvarContrato(_estado: EstadoRH, formData: FormData): Pro
     .maybeSingle();
   if (!pessoa) return { erro: "Funcionário não encontrado nesta organização." };
 
+  const bancarios: DadosBancarios = {
+    banco: txt(formData, "banco"),
+    agencia: txt(formData, "agencia"),
+    conta: txt(formData, "conta"),
+    tipo_conta: (txt(formData, "tipo_conta") as DadosBancarios["tipo_conta"]) ?? null,
+    pix: txt(formData, "pix"),
+  };
+  const erroBanc = validarDadosBancarios(bancarios);
+  if (erroBanc) return { erro: erroBanc };
+
   const registro = {
     organizacao_id: contexto.organizacaoId,
     pessoa_id: pessoaId,
@@ -144,7 +159,7 @@ export async function salvarContrato(_estado: EstadoRH, formData: FormData): Pro
     tipo_contrato,
     jornada_horas_semana: num(formData, "jornada_horas_semana") ?? 44,
     salario_base_cifrado: cifrar(txt(formData, "salario_base")),
-    dados_bancarios_cifrado: cifrar(txt(formData, "dados_bancarios")),
+    dados_bancarios_cifrado: cifrar(serializarDadosBancarios(bancarios)),
     sindicato: txt(formData, "sindicato"),
     status,
     desligamento_em: txt(formData, "desligamento_em"),

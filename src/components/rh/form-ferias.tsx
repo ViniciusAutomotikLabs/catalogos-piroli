@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { agendarFerias, type EstadoRH } from "@/lib/actions/rh-ferias";
+import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
@@ -26,7 +27,9 @@ export function FormFerias({
         <input type="hidden" name="contrato_id" value={contratoIdFixo} />
       ) : (
         <div className="flex flex-col gap-1.5 md:col-span-2">
-          <label className="text-label-sm text-on-surface-variant">Funcionário</label>
+          <LabelComAjuda ajuda="Funcionário com contrato ativo para agendar o gozo.">
+            Funcionário
+          </LabelComAjuda>
           <select name="contrato_id" required defaultValue="" className={INPUT}>
             <option value="" disabled>
               Selecione…
@@ -41,27 +44,31 @@ export function FormFerias({
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Início do gozo</label>
+        <LabelComAjuda ajuda="Primeiro dia de férias gozadas.">Início do gozo</LabelComAjuda>
         <input type="date" name="data_inicio_gozo" className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Dias de gozo</label>
+        <LabelComAjuda ajuda="Quantidade de dias de descanso (até 30).">Dias de gozo</LabelComAjuda>
         <input type="number" name="dias_gozo" min={1} max={30} defaultValue={30} className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Abono (dias)</label>
+        <LabelComAjuda ajuda="Dias vendidos (abono pecuniário), até 10.">Abono (dias)</LabelComAjuda>
         <input type="number" name="abono_pecuniario_dias" min={0} max={10} defaultValue={0} className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Aquisitivo início</label>
+        <LabelComAjuda ajuda="Início do período aquisitivo (12 meses trabalhados).">
+          Aquisitivo início
+        </LabelComAjuda>
         <input type="date" name="aquisitivo_inicio" className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Aquisitivo fim</label>
+        <LabelComAjuda ajuda="Fim do período aquisitivo.">Aquisitivo fim</LabelComAjuda>
         <input type="date" name="aquisitivo_fim" className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-label-sm text-on-surface-variant">Concessivo até</label>
+        <LabelComAjuda ajuda="Prazo limite para conceder as férias (período concessivo).">
+          Concessivo até
+        </LabelComAjuda>
         <input type="date" name="concessivo_ate" className={INPUT} />
       </div>
       <div className="flex flex-col gap-1.5 md:col-span-4">

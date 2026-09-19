@@ -873,19 +873,19 @@ RLS por `organizacao_id` em toda tabela nova. Colunas sensíveis (documento, sal
 | Webcam sem imagem | `videoRef` nulo até `camAtiva` | `useEffect` anexa o stream depois do mount |
 | Super admin sem loja preso | Layout `(app)` exige loja | Logout + redirect `/admin` |
 | RH “Ativos” vazio (dashboard = 1) | PostgREST devolve embed 1:1 como **objeto**, não array; join interno no papel | Lista a partir de `rh_contratos` |
-| Documento RH 400 Object not found | Path no banco, 0 rows em `storage.objects` (upload client) | Upload/sign server-side com admin client. **Reenviar** documentos antigos |
+| Documento RH 400 Object not found | Path no banco, 0 rows em `storage.objects` (upload client) | Upload/sign server-side com admin client. **Validado 16/09/2026** (upload + abertura ok) |
 
 ### Verificação
 
 - `npx tsc --noEmit` ok; Vitest **85** passando (crypto + libs RH).
 - `npm run lint` ainda tem dívida antiga em `types.ts` (não introduzida pelo ERP).
 - Módulo `rh` semeado e liberado para a loja piloto no painel super admin.
+- Documentos RH: upload e abertura com URL assinada **ok** no piloto (16/09/2026).
 
 ### Pendências (próxima sessão)
 
-- Reenviar documentos RH já cadastrados antes do fix de storage.
 - Self-host / VPS / pgBackRest.
-- Não commitar `.env`. GPASI/n8n e pasta `Reunião /` ficam **fora** de `feat/erp-2.0`.
+- GPASI/n8n e pasta `Reunião /` continuam **fora** de `feat/erp-2.0` (PR [#1](https://github.com/ViniciusAutomotikLabs/catalogos-piroli/pull/1)).
 
 ---
 

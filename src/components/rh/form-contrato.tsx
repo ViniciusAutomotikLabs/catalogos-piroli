@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { salvarContrato, type EstadoRH } from "@/lib/actions/rh";
+import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
+import { parseDadosBancarios, type DadosBancarios } from "@/lib/rh/dados-bancarios";
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
@@ -37,6 +39,7 @@ export type ContratoValores = {
   tipo_contrato?: string | null;
   jornada_horas_semana?: number | null;
   salario_base?: string | null;
+  /** String decifrada: JSON novo ou texto legado. */
   dados_bancarios?: string | null;
   sindicato?: string | null;
   status?: string | null;
@@ -54,15 +57,29 @@ export function FormContrato({
   const [estado, formAction, pendente] = useActionState<EstadoRH, FormData>(salvarContrato, null);
   const [status, setStatus] = useState(valores?.status ?? "ativo");
   const [dependentes, setDependentes] = useState<Dependente[]>(valores?.dependentes ?? []);
+  const bancariosIniciais = useMemo(
+    () => parseDadosBancarios(valores?.dados_bancarios),
+    [valores?.dados_bancarios]
+  );
+  const [bancarios, setBancarios] = useState<DadosBancarios>(bancariosIniciais);
 
   function atualizarDep(i: number, patch: Partial<Dependente>) {
     setDependentes((prev) => prev.map((d, idx) => (idx === i ? { ...d, ...patch } : d)));
+  }
+
+  function patchBanc(patch: Partial<DadosBancarios>) {
+    setBancarios((prev) => ({ ...prev, ...patch }));
   }
 
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="pessoa_id" value={pessoaId} />
       <input type="hidden" name="dependentes" value={JSON.stringify(dependentes)} readOnly />
+      <input type="hidden" name="banco" value={bancarios.banco ?? ""} readOnly />
+      <input type="hidden" name="agencia" value={bancarios.agencia ?? ""} readOnly />
+      <input type="hidden" name="conta" value={bancarios.conta ?? ""} readOnly />
+      <input type="hidden" name="tipo_conta" value={bancarios.tipo_conta ?? "corrente"} readOnly />
+      <input type="hidden" name="pix" value={bancarios.pix ?? ""} readOnly />
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
@@ -70,22 +87,28 @@ export function FormContrato({
           Ficha Trabalhista
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Campo label="Matrícula">
+          <Campo
+            label="Matrícula"
+            ajuda="Número interno do funcionário na empresa (folha / ponto)."
+          >
             <input name="matricula" defaultValue={valores?.matricula ?? ""} className={INPUT} />
           </Campo>
-          <Campo label="Cargo">
+          <Campo label="Cargo" ajuda="Função exercida (ex.: Gerente, Balconista, Mecânico).">
             <input name="cargo" defaultValue={valores?.cargo ?? ""} className={INPUT} />
           </Campo>
-          <Campo label="CBO">
-            <input name="cbo" defaultValue={valores?.cbo ?? ""} className={INPUT} />
+          <Campo
+            label="CBO"
+            ajuda="Código Brasileiro de Ocupações (MTE). Ex.: 1421-05 para gerente comercial."
+          >
+            <input name="cbo" defaultValue={valores?.cbo ?? ""} className={INPUT} placeholder="Ex.: 1421-05" />
           </Campo>
-          <Campo label="Departamento">
+          <Campo label="Departamento" ajuda="Área ou setor (ex.: Vendas, Estoque, Administrativo).">
             <input name="departamento" defaultValue={valores?.departamento ?? ""} className={INPUT} />
           </Campo>
-          <Campo label="Admissão">
+          <Campo label="Admissão" ajuda="Data de início do vínculo trabalhista.">
             <input type="date" name="admissao" defaultValue={valores?.admissao ?? ""} className={INPUT} />
           </Campo>
-          <Campo label="Tipo de contrato">
+          <Campo label="Tipo de contrato" ajuda="Regime: CLT, experiência, estágio, temporário ou PJ.">
             <select name="tipo_contrato" defaultValue={valores?.tipo_contrato ?? "clt"} className={INPUT}>
               {TIPOS_CONTRATO.map((t) => (
                 <option key={t.valor} value={t.valor}>
@@ -94,7 +117,7 @@ export function FormContrato({
               ))}
             </select>
           </Campo>
-          <Campo label="Jornada (h/semana)">
+          <Campo label="Jornada (h/semana)" ajuda="Horas semanais contratadas. Padrão CLT: 44.">
             <input
               type="number"
               step="0.5"
@@ -103,7 +126,11 @@ export function FormContrato({
               className={INPUT}
             />
           </Campo>
-          <Campo label="Salário base (R$)" dica="Armazenado cifrado (AES-256).">
+          <Campo
+            label="Salário base (R$)"
+            ajuda="Salário mensal bruto. Armazenado cifrado (AES-256)."
+            dica="Armazenado cifrado (AES-256)."
+          >
             <input
               type="number"
               step="0.01"
@@ -113,10 +140,10 @@ export function FormContrato({
               className={`${INPUT} font-mono`}
             />
           </Campo>
-          <Campo label="Sindicato">
+          <Campo label="Sindicato" ajuda="Nome do sindicato da categoria, se houver.">
             <input name="sindicato" defaultValue={valores?.sindicato ?? ""} className={INPUT} />
           </Campo>
-          <Campo label="Status">
+          <Campo label="Status" ajuda="Ativo, afastado ou desligado. Afeta listas e folha.">
             <select
               name="status"
               value={status}
@@ -131,7 +158,7 @@ export function FormContrato({
             </select>
           </Campo>
           {status === "desligado" && (
-            <Campo label="Desligamento em">
+            <Campo label="Desligamento em" ajuda="Data efetiva do desligamento.">
               <input
                 type="date"
                 name="desligamento_em"
@@ -140,18 +167,68 @@ export function FormContrato({
               />
             </Campo>
           )}
-          <Campo label="Dados bancários" dica="Cifrado. Ex.: Banco / Ag / Conta / PIX." className="md:col-span-3">
-            <textarea
-              name="dados_bancarios"
-              defaultValue={valores?.dados_bancarios ?? ""}
-              rows={2}
-              className={INPUT}
-            />
-          </Campo>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-outline-variant">
+          <h3 className="text-label-sm text-primary mb-3 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">account_balance</span>
+            Dados bancários
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Campo label="Banco" ajuda="Nome do banco (ex.: Banco do Brasil, Caixa, Nubank).">
+              <input
+                value={bancarios.banco ?? ""}
+                onChange={(e) => patchBanc({ banco: e.target.value })}
+                placeholder="Ex.: Banco do Brasil"
+                className={INPUT}
+              />
+            </Campo>
+            <Campo label="Agência" ajuda="Número da agência (com dígito, se houver).">
+              <input
+                value={bancarios.agencia ?? ""}
+                onChange={(e) => patchBanc({ agencia: e.target.value })}
+                placeholder="0001"
+                className={`${INPUT} font-mono`}
+              />
+            </Campo>
+            <Campo label="Conta" ajuda="Número da conta com dígito verificador.">
+              <input
+                value={bancarios.conta ?? ""}
+                onChange={(e) => patchBanc({ conta: e.target.value })}
+                placeholder="12345-6"
+                className={`${INPUT} font-mono`}
+              />
+            </Campo>
+            <Campo label="Tipo da conta" ajuda="Corrente, poupança ou conta pagamento.">
+              <select
+                value={bancarios.tipo_conta ?? "corrente"}
+                onChange={(e) =>
+                  patchBanc({ tipo_conta: e.target.value as DadosBancarios["tipo_conta"] })
+                }
+                className={INPUT}
+              >
+                <option value="corrente">Corrente</option>
+                <option value="poupanca">Poupança</option>
+                <option value="pagamento">Pagamento</option>
+              </select>
+            </Campo>
+            <Campo
+              label="Chave PIX"
+              ajuda="CPF, e-mail, telefone ou chave aleatória para pagamento."
+              className="md:col-span-2"
+              dica="Dados bancários armazenados cifrados (AES-256)."
+            >
+              <input
+                value={bancarios.pix ?? ""}
+                onChange={(e) => patchBanc({ pix: e.target.value })}
+                placeholder="CPF, e-mail, telefone ou chave"
+                className={INPUT}
+              />
+            </Campo>
+          </div>
         </div>
       </section>
 
-      {/* Dependentes */}
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-headline-sm text-primary flex items-center gap-2">
@@ -253,18 +330,22 @@ export function FormContrato({
 
 function Campo({
   label,
+  ajuda,
   dica,
   className = "",
   children,
 }: {
   label: string;
+  ajuda?: string;
   dica?: string;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label className="text-label-sm text-on-surface-variant">{label}</label>
+      {ajuda ? <LabelComAjuda ajuda={ajuda}>{label}</LabelComAjuda> : (
+        <label className="text-label-sm text-on-surface-variant">{label}</label>
+      )}
       {children}
       {dica && <p className="text-label-sm text-outline">{dica}</p>}
     </div>

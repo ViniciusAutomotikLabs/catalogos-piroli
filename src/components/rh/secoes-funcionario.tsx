@@ -12,6 +12,7 @@ import {
 } from "@/lib/actions/rh";
 import { UploadArquivo } from "@/components/rh/upload-arquivo";
 import { LinkArquivoRh } from "@/components/rh/link-arquivo";
+import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
@@ -221,7 +222,9 @@ function Afastamentos({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-label-sm text-on-surface-variant">CID (cifrado)</label>
+          <LabelComAjuda ajuda="Código Internacional de Doenças do atestado. Armazenado cifrado (dado de saúde).">
+            CID (cifrado)
+          </LabelComAjuda>
           <input name="cid" placeholder="ex.: M54" className={INPUT} />
         </div>
         <div className="flex flex-col gap-1.5">

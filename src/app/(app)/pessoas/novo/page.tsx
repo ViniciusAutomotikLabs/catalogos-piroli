@@ -5,9 +5,16 @@ import { getContextoLoja, requireModulo } from "@/lib/loja";
 import { FormPessoa } from "@/components/pessoas/form-pessoa";
 import { criarPessoa } from "@/lib/actions/pessoas";
 
-export default async function NovaPessoaPage() {
+export default async function NovaPessoaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ papel?: string; origem?: string }>;
+}) {
   await requireModulo("pessoas");
   const contexto = await getContextoLoja();
+  const params = await searchParams;
+  const fromRh = params.origem === "rh" || params.papel === "funcionario";
+  const papelFuncionario = params.papel === "funcionario";
 
   if (!contexto?.organizacaoId) {
     return (
@@ -35,20 +42,27 @@ export default async function NovaPessoaPage() {
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-2 text-body-md text-on-surface-variant">
-        <Link href="/pessoas" className="hover:text-primary hover:underline">
-          Pessoas
+        <Link
+          href={fromRh ? "/rh/funcionarios" : "/pessoas"}
+          className="hover:text-primary hover:underline"
+        >
+          {fromRh ? "RH / Funcionários" : "Pessoas"}
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-        <span className="text-on-surface font-semibold">Nova Pessoa</span>
+        <span className="text-on-surface font-semibold">
+          {papelFuncionario ? "Novo Funcionário" : "Nova Pessoa"}
+        </span>
       </nav>
 
       <FormPessoa
         action={criarPessoa}
         organizacaoId={contexto.organizacaoId}
+        pessoa={papelFuncionario ? { papeis: [{ papel: "funcionario" }] } : undefined}
         grupos={(grupos as { id: number; nome: string }[] | null) ?? []}
-        cancelHref="/pessoas"
+        cancelHref={fromRh ? "/rh/funcionarios" : "/pessoas"}
+        redirectTo={fromRh ? "rh" : undefined}
         submitLabel="Salvar Cadastro"
-        titulo="Cadastro de Pessoa"
+        titulo={papelFuncionario ? "Cadastro de Funcionário" : "Cadastro de Pessoa"}
         subtitulo="Dados básicos → Papéis → Contatos → Endereços → Veículos"
       />
     </div>

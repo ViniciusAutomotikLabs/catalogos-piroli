@@ -127,26 +127,31 @@ export default async function RHFuncionariosPage({
         <div>
           <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Funcionários</h1>
           <p className="text-body-md text-on-surface-variant mt-1">
-            Pessoas com papel funcionário — {lista.length} registro(s). Cadastro em{" "}
-            <Link href="/pessoas/novo" className="text-primary hover:underline">
-              Pessoas
-            </Link>
-            .
+            Pessoas com papel funcionário — {lista.length} registro(s).
           </p>
         </div>
-        <form action="/rh/funcionarios" className="relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">
-            search
-          </span>
-          {status && <input type="hidden" name="status" value={status} />}
-          <input
-            type="text"
-            name="f"
-            defaultValue={filtro}
-            placeholder="Nome do funcionário…"
-            className="pl-10 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md text-on-surface placeholder:text-outline focus:border-primary outline-none w-72"
-          />
-        </form>
+        <div className="flex items-center gap-3 flex-wrap">
+          <form action="/rh/funcionarios" className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">
+              search
+            </span>
+            {status && <input type="hidden" name="status" value={status} />}
+            <input
+              type="text"
+              name="f"
+              defaultValue={filtro}
+              placeholder="Nome do funcionário…"
+              className="pl-10 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded text-body-md text-on-surface placeholder:text-outline focus:border-primary outline-none w-72"
+            />
+          </form>
+          <Link
+            href="/pessoas/novo?papel=funcionario&origem=rh"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">person_add</span>
+            Cadastrar funcionário
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
@@ -244,11 +249,11 @@ export default async function RHFuncionariosPage({
               Cadastre a pessoa em Pessoas com o papel &quot;Funcionário&quot; e gerencie aqui.
             </p>
             <Link
-              href="/pessoas/novo"
+              href="/pessoas/novo?papel=funcionario&origem=rh"
               className="mt-2 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
-              Cadastrar em Pessoas
+              Cadastrar funcionário
             </Link>
           </div>
         )}

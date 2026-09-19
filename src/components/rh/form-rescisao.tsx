@@ -6,6 +6,7 @@ import {
   alternarChecklistRescisao,
   type EstadoRH,
 } from "@/lib/actions/rh-rescisao";
+import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
@@ -119,7 +120,7 @@ export function FormRescisao({
         <input type="hidden" name="contrato_id" value={contratoId} />
         <input type="hidden" name="pessoa_id" value={pessoaId} />
 
-        <Campo label="Tipo">
+        <Campo label="Tipo" ajuda="Motivo da rescisão (sem justa causa, pedido, acordo 484-A, etc.).">
           <select name="tipo" defaultValue="sem_justa_causa" className={INPUT}>
             {TIPOS.map((t) => (
               <option key={t.valor} value={t.valor}>
@@ -128,33 +129,42 @@ export function FormRescisao({
             ))}
           </select>
         </Campo>
-        <Campo label="Aviso prévio">
+        <Campo label="Aviso prévio" ajuda="Aviso trabalhado, indenizado ou dispensado.">
           <select name="aviso_tipo" defaultValue="indenizado" className={INPUT}>
             <option value="indenizado">Indenizado</option>
             <option value="trabalhado">Trabalhado</option>
             <option value="dispensado">Dispensado</option>
           </select>
         </Campo>
-        <Campo label="Data do aviso">
+        <Campo label="Data do aviso" ajuda="Data em que o aviso prévio foi comunicado.">
           <input type="date" name="data_aviso" className={INPUT} />
         </Campo>
-        <Campo label="Data de desligamento *">
+        <Campo label="Data de desligamento *" ajuda="Último dia do vínculo.">
           <input type="date" name="data_desligamento" required className={INPUT} />
         </Campo>
-        <Campo label="Dias trabalhados no mês">
+        <Campo
+          label="Dias trabalhados no mês"
+          ajuda="Dias do mês corrente até o desligamento (pro-rata de salário)."
+        >
           <input type="number" name="dias_trabalhados_mes" min={0} max={31} defaultValue={30} className={INPUT} />
         </Campo>
-        <Campo label="Meses proporcionais (ano)">
+        <Campo
+          label="Meses proporcionais (ano)"
+          ajuda="Meses do 13º proporcional no ano do desligamento."
+        >
           <input type="number" name="meses_proporcionais" min={0} max={12} defaultValue={0} className={INPUT} />
         </Campo>
-        <Campo label="Saldo FGTS (p/ multa)">
+        <Campo
+          label="Saldo FGTS (p/ multa)"
+          ajuda="Saldo do FGTS usado para calcular a multa de 40% (quando aplicável)."
+        >
           <input type="number" step="0.01" name="saldo_fgts" min={0} defaultValue={0} className={`${INPUT} font-mono`} />
         </Campo>
         <label className="flex items-center gap-2 text-body-md text-on-surface-variant">
           <input type="checkbox" name="tem_ferias_vencidas" className="rounded text-primary focus:ring-primary" />
           Tem férias vencidas
         </label>
-        <Campo label="Motivo" className="md:col-span-3">
+        <Campo label="Motivo" className="md:col-span-3" ajuda="Descrição livre do motivo (interno).">
           <input name="motivo" className={INPUT} />
         </Campo>
 
@@ -177,16 +187,22 @@ export function FormRescisao({
 
 function Campo({
   label,
+  ajuda,
   className = "",
   children,
 }: {
   label: string;
+  ajuda?: string;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label className="text-label-sm text-on-surface-variant">{label}</label>
+      {ajuda ? (
+        <LabelComAjuda ajuda={ajuda}>{label}</LabelComAjuda>
+      ) : (
+        <label className="text-label-sm text-on-surface-variant">{label}</label>
+      )}
       {children}
     </div>
   );

@@ -34,7 +34,7 @@ export default async function EditarPessoaPage({
   const { data: pessoa } = await sb
     .from("pessoas")
     .select(
-      "id, tipo_pessoa, nome, nome_fantasia, documento_mascara, foto_url, grupo_comercial_id, situacao"
+      "id, tipo_pessoa, nome, nome_fantasia, documento_mascara, foto_url, situacao, inscricao_estadual, inscricao_municipal, codigo_interno, responsavel, observacoes"
     )
     .eq("id", id)
     .eq("organizacao_id", contexto.organizacaoId)
@@ -42,20 +42,30 @@ export default async function EditarPessoaPage({
 
   if (!pessoa) notFound();
 
-  const [{ data: papeis }, { data: contatos }, { data: enderecos }, { data: veiculos }, { data: grupos }] =
-    await Promise.all([
-      sb.from("pessoa_papeis").select("papel, papel_custom").eq("pessoa_id", id),
-      sb
-        .from("pessoa_contatos")
-        .select("canal, valor_cifrado, rotulo, recebe_fechamento, recebe_cobranca")
-        .eq("pessoa_id", id),
-      sb
-        .from("pessoa_enderecos")
-        .select("cep, logradouro, numero, complemento, bairro, cidade, uf, principal")
-        .eq("pessoa_id", id),
-      sb.from("pessoa_veiculos").select("placa, veiculo, marca, ano, chassi_cifrado").eq("pessoa_id", id),
-      sb.from("grupos_comerciais").select("id, nome").eq("organizacao_id", contexto.organizacaoId).order("nome"),
-    ]);
+  const [
+    { data: papeis },
+    { data: gruposPessoa },
+    { data: contatos },
+    { data: enderecos },
+    { data: veiculos },
+    { data: grupos },
+  ] = await Promise.all([
+    sb.from("pessoa_papeis").select("papel, papel_custom").eq("pessoa_id", id),
+    sb
+      .from("pessoa_grupos_comerciais")
+      .select("grupo_comercial_id, grupo_custom")
+      .eq("pessoa_id", id),
+    sb
+      .from("pessoa_contatos")
+      .select("canal, valor_cifrado, rotulo, recebe_fechamento, recebe_cobranca")
+      .eq("pessoa_id", id),
+    sb
+      .from("pessoa_enderecos")
+      .select("cep, logradouro, numero, complemento, bairro, cidade, uf, principal")
+      .eq("pessoa_id", id),
+    sb.from("pessoa_veiculos").select("placa, veiculo, marca, ano, chassi_cifrado").eq("pessoa_id", id),
+    sb.from("grupos_comerciais").select("id, nome").eq("organizacao_id", contexto.organizacaoId).order("nome"),
+  ]);
 
   const valores: PessoaFormValues = {
     id: pessoa.id,
@@ -64,12 +74,22 @@ export default async function EditarPessoaPage({
     nome_fantasia: pessoa.nome_fantasia,
     documento_mascara: pessoa.documento_mascara,
     foto_url: pessoa.foto_url,
-    grupo_comercial_id: pessoa.grupo_comercial_id,
     situacao: pessoa.situacao,
+    inscricao_estadual: pessoa.inscricao_estadual,
+    inscricao_municipal: pessoa.inscricao_municipal,
+    codigo_interno: pessoa.codigo_interno,
+    responsavel: pessoa.responsavel,
+    observacoes: pessoa.observacoes,
     papeis: (papeis ?? []).map((p: { papel: string; papel_custom: string | null }) => ({
       papel: p.papel,
       papel_custom: p.papel_custom,
     })),
+    grupos: (gruposPessoa ?? []).map(
+      (g: { grupo_comercial_id: number | null; grupo_custom: string | null }) => ({
+        grupo_comercial_id: g.grupo_comercial_id,
+        grupo_custom: g.grupo_custom,
+      })
+    ),
     contatos: (contatos ?? []).map(
       (c: {
         canal: string;

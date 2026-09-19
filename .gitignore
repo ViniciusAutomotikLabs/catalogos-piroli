@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+.venv-gpasi/
 
 # debug
 npm-debug.log*

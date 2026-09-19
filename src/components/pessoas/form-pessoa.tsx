@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import type { EstadoFormPessoa } from "@/lib/actions/pessoas";
 import { CapturaFoto } from "@/components/pessoas/captura-foto";
+import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
+import { buscarCep, formatarCep, normalizarCep } from "@/lib/cep";
 
 // ===== Tipos e catálogos =====
 
@@ -15,7 +17,6 @@ export const PAPEIS = [
   { valor: "entregador", label: "Entregador" },
   { valor: "oficina", label: "Oficina" },
   { valor: "mecanico", label: "Mecânico" },
-  { valor: "custom", label: "Outro…" },
 ] as const;
 
 const CANAIS = [
@@ -25,6 +26,10 @@ const CANAIS = [
 ] as const;
 
 type Papel = { papel: string; papel_custom?: string | null };
+type GrupoSel = {
+  grupo_comercial_id?: number | null;
+  grupo_custom?: string | null;
+};
 type Contato = {
   canal: string;
   valor: string;
@@ -59,9 +64,14 @@ export type PessoaFormValues = {
   documento?: string | null;
   documento_mascara?: string | null;
   foto_url?: string | null;
-  grupo_comercial_id?: number | null;
   situacao?: "ativo" | "inativo";
+  inscricao_estadual?: string | null;
+  inscricao_municipal?: string | null;
+  codigo_interno?: string | null;
+  responsavel?: string | null;
+  observacoes?: string | null;
   papeis?: Papel[];
+  grupos?: GrupoSel[];
   contatos?: Contato[];
   enderecos?: Endereco[];
   veiculos?: Veiculo[];
@@ -78,10 +88,15 @@ type Props = {
   submitLabel: string;
   titulo?: string;
   subtitulo?: string;
+  /** Whitelist no server: só "rh". */
+  redirectTo?: "rh";
 };
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
+
+const CHIP =
+  "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant hover:border-primary cursor-pointer transition-colors text-label-sm has-checked:border-primary has-checked:bg-primary-fixed/30";
 
 export function FormPessoa({
   action,
@@ -92,25 +107,92 @@ export function FormPessoa({
   submitLabel,
   titulo,
   subtitulo,
+  redirectTo,
 }: Props) {
   const [estado, formAction, pendente] = useActionState<EstadoFormPessoa, FormData>(action, null);
 
   const [tipoPessoa, setTipoPessoa] = useState<"PF" | "PJ">(pessoa?.tipo_pessoa ?? "PF");
   const [papeis, setPapeis] = useState<Papel[]>(pessoa?.papeis ?? [{ papel: "cliente" }]);
+  const [gruposSel, setGruposSel] = useState<GrupoSel[]>(pessoa?.grupos ?? []);
+  const [draftPapelCustom, setDraftPapelCustom] = useState("");
+  const [draftGrupoCustom, setDraftGrupoCustom] = useState("");
+  const [mostrarOutroPapel, setMostrarOutroPapel] = useState(
+    () => (pessoa?.papeis ?? []).some((p) => p.papel === "custom")
+  );
+  const [mostrarOutroGrupo, setMostrarOutroGrupo] = useState(
+    () => (pessoa?.grupos ?? []).some((g) => !!g.grupo_custom)
+  );
   const [contatos, setContatos] = useState<Contato[]>(
     pessoa?.contatos ?? [{ canal: "whatsapp", valor: "", recebe_fechamento: false, recebe_cobranca: false }]
   );
   const [enderecos, setEnderecos] = useState<Endereco[]>(pessoa?.enderecos ?? []);
   const [veiculos, setVeiculos] = useState<Veiculo[]>(pessoa?.veiculos ?? []);
+  const [ieIsenta, setIeIsenta] = useState(
+    () => (pessoa?.inscricao_estadual ?? "").toUpperCase() === "ISENTO"
+  );
 
-  function togglePapel(valor: string, checked: boolean) {
+  const papeisFixos = papeis.filter((p) => p.papel !== "custom");
+  const papeisCustom = papeis.filter((p) => p.papel === "custom" && p.papel_custom);
+  const gruposCatalogo = gruposSel.filter((g) => g.grupo_comercial_id != null);
+  const gruposCustom = gruposSel.filter((g) => !!g.grupo_custom);
+
+  function togglePapelFixo(valor: string, checked: boolean) {
     setPapeis((prev) => {
-      if (checked) return [...prev, { papel: valor }];
-      return prev.filter((p) => p.papel !== valor);
+      const customs = prev.filter((p) => p.papel === "custom");
+      const fixos = prev.filter((p) => p.papel !== "custom");
+      if (checked) return [...fixos, { papel: valor }, ...customs];
+      return [...fixos.filter((p) => p.papel !== valor), ...customs];
     });
   }
-  const papelAtivo = (valor: string) => papeis.some((p) => p.papel === valor);
-  const papelCustom = papeis.find((p) => p.papel === "custom")?.papel_custom ?? "";
+
+  function adicionarPapelCustom(texto: string) {
+    const nome = texto.trim().slice(0, 60);
+    if (!nome) return;
+    setPapeis((prev) => {
+      const jaExiste = prev.some(
+        (p) => p.papel === "custom" && (p.papel_custom ?? "").toLowerCase() === nome.toLowerCase()
+      );
+      if (jaExiste) return prev;
+      return [...prev, { papel: "custom", papel_custom: nome }];
+    });
+    setDraftPapelCustom("");
+  }
+
+  function removerPapelCustom(nome: string) {
+    setPapeis((prev) =>
+      prev.filter((p) => !(p.papel === "custom" && (p.papel_custom ?? "") === nome))
+    );
+  }
+
+  function toggleGrupoCatalogo(id: number, checked: boolean) {
+    setGruposSel((prev) => {
+      if (checked) {
+        if (prev.some((g) => g.grupo_comercial_id === id)) return prev;
+        return [...prev, { grupo_comercial_id: id, grupo_custom: null }];
+      }
+      return prev.filter((g) => g.grupo_comercial_id !== id);
+    });
+  }
+
+  function adicionarGrupoCustom(texto: string) {
+    const nome = texto.trim().slice(0, 120);
+    if (!nome) return;
+    setGruposSel((prev) => {
+      const jaExiste = prev.some(
+        (g) => (g.grupo_custom ?? "").toLowerCase() === nome.toLowerCase()
+      );
+      if (jaExiste) return prev;
+      return [...prev, { grupo_comercial_id: null, grupo_custom: nome }];
+    });
+    setDraftGrupoCustom("");
+  }
+
+  function removerGrupoCustom(nome: string) {
+    setGruposSel((prev) => prev.filter((g) => (g.grupo_custom ?? "") !== nome));
+  }
+
+  const papelAtivo = (valor: string) => papeisFixos.some((p) => p.papel === valor);
+  const grupoAtivo = (id: number) => gruposCatalogo.some((g) => g.grupo_comercial_id === id);
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -123,9 +205,10 @@ export function FormPessoa({
 
       <form action={formAction} className="space-y-6">
         {pessoa?.id && <input type="hidden" name="id" value={pessoa.id} />}
+        {redirectTo && <input type="hidden" name="redirect_to" value={redirectTo} />}
 
-        {/* Campos serializados (JSON) */}
         <input type="hidden" name="papeis" value={JSON.stringify(papeis)} readOnly />
+        <input type="hidden" name="grupos" value={JSON.stringify(gruposSel)} readOnly />
         <input type="hidden" name="contatos" value={JSON.stringify(contatos)} readOnly />
         <input type="hidden" name="enderecos" value={JSON.stringify(enderecos)} readOnly />
         <input type="hidden" name="veiculos" value={JSON.stringify(veiculos)} readOnly />
@@ -178,14 +261,14 @@ export function FormPessoa({
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-label-sm text-on-surface-variant" htmlFor="documento">
+                <LabelComAjuda ajuda="CPF (pessoa física) ou CNPJ (pessoa jurídica). Armazenado cifrado; buscável por índice cego.">
                   {tipoPessoa === "PF" ? "CPF" : "CNPJ"}
                   {pessoa?.id && (
-                    <span className="ml-2 text-outline">
+                    <span className="ml-2 text-outline font-normal">
                       (atual: {pessoa?.documento_mascara ?? "—"} · digite para alterar)
                     </span>
                   )}
-                </label>
+                </LabelComAjuda>
                 <input
                   id="documento"
                   name="documento"
@@ -197,43 +280,91 @@ export function FormPessoa({
                 <p className="text-label-sm text-outline">Armazenado cifrado (AES-256). Buscável por índice cego.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface-variant" htmlFor="grupo_comercial_id">
-                    Grupo comercial
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Condições comerciais desta pessoa (pode marcar vários). Use Outro… para criar um grupo livre.">
+                  Grupo comercial
+                </LabelComAjuda>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {grupos.map((g) => (
+                    <label key={g.id} className={CHIP}>
+                      <input
+                        type="checkbox"
+                        checked={grupoAtivo(g.id)}
+                        onChange={(e) => toggleGrupoCatalogo(g.id, e.target.checked)}
+                        className="rounded text-primary focus:ring-primary w-3.5 h-3.5"
+                      />
+                      {g.nome}
+                    </label>
+                  ))}
+                  <label className={CHIP}>
+                    <input
+                      type="checkbox"
+                      checked={mostrarOutroGrupo || gruposCustom.length > 0}
+                      onChange={(e) => {
+                        setMostrarOutroGrupo(e.target.checked);
+                        if (!e.target.checked) {
+                          setGruposSel((prev) => prev.filter((g) => !g.grupo_custom));
+                          setDraftGrupoCustom("");
+                        }
+                      }}
+                      className="rounded text-primary focus:ring-primary w-3.5 h-3.5"
+                    />
+                    Outro…
                   </label>
-                  <select
-                    id="grupo_comercial_id"
-                    name="grupo_comercial_id"
-                    defaultValue={pessoa?.grupo_comercial_id ?? ""}
-                    className={INPUT}
-                  >
-                    <option value="">— nenhum —</option>
-                    {grupos.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.nome}
-                      </option>
+                </div>
+                {gruposCustom.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {gruposCustom.map((g) => (
+                      <span
+                        key={g.grupo_custom!}
+                        className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed/30 border border-primary/40 text-label-sm"
+                      >
+                        {g.grupo_custom}
+                        <button
+                          type="button"
+                          onClick={() => removerGrupoCustom(g.grupo_custom!)}
+                          className="text-primary hover:text-error"
+                          aria-label={`Remover grupo ${g.grupo_custom}`}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">close</span>
+                        </button>
+                      </span>
                     ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface-variant" htmlFor="situacao">
-                    Situação
-                  </label>
-                  <select
-                    id="situacao"
-                    name="situacao"
-                    defaultValue={pessoa?.situacao ?? "ativo"}
-                    className={INPUT}
-                  >
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                  </select>
-                </div>
+                  </div>
+                )}
+                {(mostrarOutroGrupo || gruposCustom.length > 0) && (
+                  <input
+                    placeholder="Nome do grupo (Enter para adicionar)"
+                    value={draftGrupoCustom}
+                    onChange={(e) => setDraftGrupoCustom(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        adicionarGrupoCustom(draftGrupoCustom);
+                      }
+                    }}
+                    className={`${INPUT} mt-2 max-w-xs`}
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Ativo aparece nas buscas e listas; inativo fica oculto no uso diário.">
+                  Situação
+                </LabelComAjuda>
+                <select
+                  id="situacao"
+                  name="situacao"
+                  defaultValue={pessoa?.situacao ?? "ativo"}
+                  className={INPUT}
+                >
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
               </div>
             </div>
 
-            {/* Foto */}
             <div>
               <p className="text-label-sm text-on-surface-variant mb-2">Foto</p>
               <CapturaFoto organizacaoId={organizacaoId} valorInicial={pessoa?.foto_url ?? null} />
@@ -241,37 +372,154 @@ export function FormPessoa({
           </div>
         </section>
 
+        {tipoPessoa === "PJ" && (
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+            <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px]">apartment</span>
+              Dados da empresa
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Inscrição estadual no cadastro de contribuinte. Marque Isenta se a empresa não possui IE.">
+                  Inscrição estadual (IE)
+                </LabelComAjuda>
+                <input
+                  name="inscricao_estadual"
+                  defaultValue={
+                    (pessoa?.inscricao_estadual ?? "").toUpperCase() === "ISENTO"
+                      ? ""
+                      : (pessoa?.inscricao_estadual ?? "")
+                  }
+                  disabled={ieIsenta}
+                  className={INPUT}
+                  placeholder="Somente números"
+                />
+                <label className="flex items-center gap-2 text-label-sm text-on-surface-variant">
+                  <input
+                    type="checkbox"
+                    name="ie_isenta"
+                    checked={ieIsenta}
+                    onChange={(e) => setIeIsenta(e.target.checked)}
+                    className="rounded text-primary focus:ring-primary"
+                  />
+                  IE isenta
+                </label>
+              </div>
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Inscrição municipal (ISS), quando aplicável.">
+                  Inscrição municipal (IM)
+                </LabelComAjuda>
+                <input
+                  name="inscricao_municipal"
+                  defaultValue={pessoa?.inscricao_municipal ?? ""}
+                  className={INPUT}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Código legado do sistema anterior (ex.: SS Plus) ou código interno da loja.">
+                  Código interno
+                </LabelComAjuda>
+                <input
+                  name="codigo_interno"
+                  defaultValue={pessoa?.codigo_interno ?? ""}
+                  placeholder="Ex.: 0042"
+                  className={INPUT}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <LabelComAjuda ajuda="Pessoa de contato principal na empresa (balcão / telefone).">
+                  Responsável
+                </LabelComAjuda>
+                <input
+                  name="responsavel"
+                  defaultValue={pessoa?.responsavel ?? ""}
+                  placeholder="Nome do contato principal"
+                  className={INPUT}
+                />
+              </div>
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <LabelComAjuda ajuda="Notas comerciais: prazo, preferência de entrega, observações internas.">
+                  Observações
+                </LabelComAjuda>
+                <textarea
+                  name="observacoes"
+                  defaultValue={pessoa?.observacoes ?? ""}
+                  rows={2}
+                  className={INPUT}
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ===== Papéis ===== */}
         <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
           <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">groups</span>
-            Papéis
+            <LabelComAjuda ajuda="Uma pessoa pode ter vários papéis (cliente e oficina, por exemplo). Funcionário libera a ficha no RH.">
+              Papéis
+            </LabelComAjuda>
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             {PAPEIS.map((p) => (
-              <label
-                key={p.valor}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant hover:border-primary cursor-pointer transition-colors text-label-sm has-checked:border-primary has-checked:bg-primary-fixed/30"
-              >
+              <label key={p.valor} className={CHIP}>
                 <input
                   type="checkbox"
                   checked={papelAtivo(p.valor)}
-                  onChange={(e) => togglePapel(p.valor, e.target.checked)}
+                  onChange={(e) => togglePapelFixo(p.valor, e.target.checked)}
                   className="rounded text-primary focus:ring-primary w-3.5 h-3.5"
                 />
                 {p.label}
               </label>
             ))}
+            <label className={CHIP}>
+              <input
+                type="checkbox"
+                checked={mostrarOutroPapel || papeisCustom.length > 0}
+                onChange={(e) => {
+                  setMostrarOutroPapel(e.target.checked);
+                  if (!e.target.checked) {
+                    setPapeis((prev) => prev.filter((p) => p.papel !== "custom"));
+                    setDraftPapelCustom("");
+                  }
+                }}
+                className="rounded text-primary focus:ring-primary w-3.5 h-3.5"
+              />
+              Outro…
+            </label>
           </div>
-          {papelAtivo("custom") && (
+          {papeisCustom.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {papeisCustom.map((p) => (
+                <span
+                  key={p.papel_custom!}
+                  className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed/30 border border-primary/40 text-label-sm"
+                >
+                  {p.papel_custom}
+                  <button
+                    type="button"
+                    onClick={() => removerPapelCustom(p.papel_custom!)}
+                    className="text-primary hover:text-error"
+                    aria-label={`Remover papel ${p.papel_custom}`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          {(mostrarOutroPapel || papeisCustom.length > 0) && (
             <input
-              placeholder="Descreva o papel (ex.: representante)"
-              defaultValue={papelCustom}
-              onChange={(e) =>
-                setPapeis((prev) =>
-                  prev.map((p) => (p.papel === "custom" ? { ...p, papel_custom: e.target.value } : p))
-                )
-              }
+              placeholder="Descreva o papel (Enter para adicionar)"
+              value={draftPapelCustom}
+              onChange={(e) => setDraftPapelCustom(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  adicionarPapelCustom(draftPapelCustom);
+                }
+              }}
               className={`${INPUT} mt-3 max-w-xs`}
             />
           )}
@@ -296,13 +544,8 @@ export function FormPessoa({
           )}
         </section>
 
-        {/* ===== Contatos ===== */}
         <RepetivelContatos contatos={contatos} setContatos={setContatos} />
-
-        {/* ===== Endereços ===== */}
         <RepetivelEnderecos enderecos={enderecos} setEnderecos={setEnderecos} />
-
-        {/* ===== Veículos ===== */}
         <RepetivelVeiculos veiculos={veiculos} setVeiculos={setVeiculos} />
 
         {estado?.erro && (
@@ -438,15 +681,46 @@ function RepetivelEnderecos({
   enderecos: Endereco[];
   setEnderecos: React.Dispatch<React.SetStateAction<Endereco[]>>;
 }) {
+  const [cepStatus, setCepStatus] = useState<Record<number, "idle" | "loading" | "ok" | "erro">>({});
+  const lastLookup = useRef<Record<number, string>>({});
+
   function atualizar(i: number, patch: Partial<Endereco>) {
     setEnderecos((prev) => prev.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
   }
+
+  async function consultarCep(i: number, cepRaw: string) {
+    const digits = normalizarCep(cepRaw);
+    if (digits.length !== 8) return;
+    if (lastLookup.current[i] === digits) return;
+    lastLookup.current[i] = digits;
+    setCepStatus((s) => ({ ...s, [i]: "loading" }));
+    try {
+      const end = await buscarCep(digits);
+      if (!end) {
+        setCepStatus((s) => ({ ...s, [i]: "erro" }));
+        return;
+      }
+      atualizar(i, {
+        cep: end.cep,
+        logradouro: end.logradouro || undefined,
+        bairro: end.bairro || undefined,
+        cidade: end.cidade || undefined,
+        uf: end.uf || undefined,
+      });
+      setCepStatus((s) => ({ ...s, [i]: "ok" }));
+    } catch {
+      setCepStatus((s) => ({ ...s, [i]: "erro" }));
+    }
+  }
+
   return (
     <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-headline-sm text-primary flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">location_on</span>
-          Endereços
+          <LabelComAjuda ajuda="Digite o CEP (8 dígitos) para preencher logradouro, bairro, cidade e UF automaticamente. Número e complemento ficam para você.">
+            Endereços
+          </LabelComAjuda>
         </h2>
         <button
           type="button"
@@ -459,7 +733,34 @@ function RepetivelEnderecos({
       <div className="space-y-4">
         {enderecos.map((e, i) => (
           <div key={i} className="grid grid-cols-1 md:grid-cols-6 gap-3 border-b border-outline-variant pb-4 last:border-0">
-            <input value={e.cep ?? ""} onChange={(ev) => atualizar(i, { cep: ev.target.value })} placeholder="CEP" className={`${INPUT} md:col-span-2 font-mono text-code-md`} />
+            <div className="md:col-span-2 flex flex-col gap-1">
+              <input
+                value={e.cep ?? ""}
+                onChange={(ev) => {
+                  const formatado = formatarCep(ev.target.value);
+                  atualizar(i, { cep: formatado });
+                  if (normalizarCep(formatado).length === 8) {
+                    void consultarCep(i, formatado);
+                  } else {
+                    setCepStatus((s) => ({ ...s, [i]: "idle" }));
+                  }
+                }}
+                onBlur={(ev) => void consultarCep(i, ev.target.value)}
+                placeholder="CEP"
+                className={`${INPUT} font-mono text-code-md`}
+                inputMode="numeric"
+                autoComplete="postal-code"
+              />
+              {cepStatus[i] === "loading" && (
+                <span className="text-label-sm text-outline">Buscando endereço…</span>
+              )}
+              {cepStatus[i] === "ok" && (
+                <span className="text-label-sm text-primary">Endereço preenchido pelo CEP</span>
+              )}
+              {cepStatus[i] === "erro" && (
+                <span className="text-label-sm text-error">CEP não encontrado — preencha manualmente</span>
+              )}
+            </div>
             <input value={e.logradouro ?? ""} onChange={(ev) => atualizar(i, { logradouro: ev.target.value })} placeholder="Logradouro" className={`${INPUT} md:col-span-4`} />
             <input value={e.numero ?? ""} onChange={(ev) => atualizar(i, { numero: ev.target.value })} placeholder="Nº" className={`${INPUT} md:col-span-1`} />
             <input value={e.complemento ?? ""} onChange={(ev) => atualizar(i, { complemento: ev.target.value })} placeholder="Complemento" className={`${INPUT} md:col-span-2`} />

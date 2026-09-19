@@ -43,15 +43,12 @@ type SidebarProps = {
 
 export function Sidebar({ lojaNome, modulos, isSuperAdmin, open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
-  // `null`/ausente = sem enforcement (mostra tudo); array = só os módulos ativos.
   const modulosAtivos =
     modulos == null ? null : new Set(modulos as ModuloChave[]);
   const itensVisiveis = ITEMS.filter((item) =>
     moduloLiberado(item.modulo ?? null, modulosAtivos)
   );
   const [count, setCount] = useState(0);
-  // Focus trap ativo apenas quando o drawer mobile está aberto. Em `lg+` a
-  // sidebar é fixa (`open` sempre false), então o trap fica inativo.
   const navRef = useFocusTrap<HTMLElement>(open, onClose);
 
   useEffect(() => {

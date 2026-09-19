@@ -66,7 +66,9 @@ N endereços (CEP, logradouro, número, bairro, cidade, uf, complemento, princip
 Veículos relacionados **com exclusão** (placa, veiculo, marca, ano, chassi_cifrado). Corrige a dor do SS Plus.
 
 ### grupos_comerciais
-Configurável por organização (à vista, mensal, credital, expresso...). `pessoas` referencia `grupo_comercial_id`.
+Configurável por organização (à vista, mensal, credital, expresso...).
+
+Vínculo N:N em `pessoa_grupos_comerciais` (migration 013): uma pessoa pode ter vários grupos do catálogo **e** grupos livres (`grupo_custom`), no mesmo padrão de papéis “Outro…”. A coluna legada `pessoas.grupo_comercial_id` permanece nullable só por compatibilidade — o app não grava mais nela.
 
 ### pessoa_regras_unidade
 Regras por unidade (o "%Des/Acréscimo por Empresa" + formas de pagamento + vendedores + entrega).

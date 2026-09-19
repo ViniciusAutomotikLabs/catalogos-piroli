@@ -38,8 +38,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
+  const isCepApi = request.nextUrl.pathname.startsWith("/api/cep");
 
-  if (!user && !isLoginRoute) {
+  if (!user && !isLoginRoute && !isCepApi) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.search = "";
