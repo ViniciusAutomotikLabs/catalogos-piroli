@@ -11,8 +11,13 @@ import {
   parseDescricaoComFallback,
   tituloExibicao,
 } from "@/lib/produto-campos";
-import { listarAgregadosDoProduto } from "@/lib/agregados";
+import { listarAgregadosDoProduto, mapEspelhoAgregadosParaItens } from "@/lib/agregados";
 import { AdicionarAgregadosButton } from "@/components/agregados/adicionar-agregados-button";
+import {
+  buscarEspelhoPorCodigos,
+  buscarEspelhoPorProdutoIds,
+  listarAgregadosEspelhoPorCodigos,
+} from "@/lib/espelho";
 
 export default async function ProdutoPage({
   params,
@@ -51,7 +56,20 @@ export default async function ProdutoPage({
   const codigosExtra =
     produto.codigos_extraidos?.length ? produto.codigos_extraidos : desc.codigos;
   const medidas = produto.medidas_extraidas ?? [];
-  const agregados = await listarAgregadosDoProduto(produto.id);
+  const manuais = await listarAgregadosDoProduto(produto.id);
+  const espelhoMap = await buscarEspelhoPorProdutoIds([produto.id]);
+  const espelho =
+    espelhoMap.get(produto.id) ??
+    (await buscarEspelhoPorCodigos([codigo])).get(codigo);
+  const codigoEspelho = espelho?.codigo ?? codigo;
+  const doSsMap = await listarAgregadosEspelhoPorCodigos([codigoEspelho]);
+  const doSs = mapEspelhoAgregadosParaItens(
+    codigoEspelho,
+    doSsMap.get(codigoEspelho) ?? [],
+    produto.id
+  );
+  const vistos = new Set(manuais.map((a) => a.codigo));
+  const agregados = [...manuais, ...doSs.filter((a) => !vistos.has(a.codigo))];
 
   return (
     <div className="pb-24">
@@ -158,6 +176,29 @@ export default async function ProdutoPage({
                 Unidade:{" "}
                 <span className="font-semibold text-on-surface">{produto.unidade ?? "PC"}</span>
               </span>
+              {espelho && (
+                <>
+                  <span className="text-body-md text-on-surface-variant">
+                    Estoque:{" "}
+                    <span className="font-semibold text-on-surface">{espelho.disponivel}</span>
+                    {espelho.reservado > 0 ? (
+                      <span className="text-on-surface-variant">
+                        {" "}
+                        ({espelho.reservado} reserv.)
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="text-body-md text-on-surface-variant">
+                    Preço:{" "}
+                    <span className="font-semibold text-primary">
+                      {espelho.preco.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </span>
+                </>
+              )}
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface text-label-sm text-on-surface-variant uppercase">
                 <span className="w-2 h-2 rounded-full bg-secondary-fixed" />
                 Catálogo: {nomeCatalogo}
@@ -215,12 +256,21 @@ export default async function ProdutoPage({
                       className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2"
                     >
                       <div className="min-w-0">
-                        <Link
-                          href={`/produtos/${a.produtoRelacionadoId}`}
-                          className="font-medium text-on-surface hover:text-primary hover:underline line-clamp-1"
-                        >
-                          {a.titulo}
-                        </Link>
+                        {a.produtoRelacionadoId ? (
+                          <Link
+                            href={`/produtos/${a.produtoRelacionadoId}`}
+                            className="font-medium text-on-surface hover:text-primary hover:underline line-clamp-1"
+                          >
+                            {a.titulo}
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/busca?q=${encodeURIComponent(a.codigo)}`}
+                            className="font-medium text-on-surface hover:text-primary hover:underline line-clamp-1"
+                          >
+                            {a.titulo}
+                          </Link>
+                        )}
                         <p className="font-mono text-code-md text-primary">{a.codigo}</p>
                         <div className="flex gap-2 mt-0.5">
                           {a.obrigatorio && (
@@ -317,6 +367,7 @@ export default async function ProdutoPage({
           fotoUrl: produto.foto_url,
         }}
         telefoneLoja={contexto?.loja?.telefone_whatsapp}
+        precoUnitario={espelho?.preco ?? 0}
       />
     </div>
   );

@@ -33,13 +33,15 @@ A Piroli é o **piloto**; a arquitetura é de produto.
 - Não implementa NF-e, boleto Sicredi, agrupamento de duplicatas, disparo WhatsApp oficial, Rede Âncora nem módulo de marketing/imagens neste ciclo.
 - Não é E2EE zero-knowledge (incompatível com busca/relatório/IA server-side).
 - Não trava desenvolvimento esperando as VPS: schema e código correm antes do deploy.
+- **Cutover completo SS → ERP** (clientes + histórico de vendas + demais entidades via API) **está no plano P1** (fases 5–7 do PRD), mas **não** neste ciclo imediato: primeiro vendas novas no ERP + convites; migração em massa é job noturno com throttle.
 
 ## Context & Constraints
 
 **Stakeholders**: Leandro (operação/dono), Gustavo (mecânico/sócio), Léo (produto/tech), caixa, financeiro (Jaci), vendedores. Clientes finais = oficinas e mecânicos.
-**Existing Assets**: app Next.js 15 + Supabase (Auth/Storage/RLS/RPC), catálogo de ~86k produtos, CRUD de clientes, busca, orçamento.
+**Existing Assets**: app Next.js 15 + Supabase (Auth/Storage/RLS/RPC), catálogo de ~86k produtos, CRUD de clientes, busca, orçamento, espelho estoque GPASI, shell de vendas/RH.
 **Infra alvo**: Postgres (VPS dedicada) + Supabase self-host (Coolify) + DGX/Ollama (Tailscale) + backup (4ª VPS).
 **Cripto**: camadas (TLS + LUKS + coluna seletiva + blind index); chaves em secrets do Coolify.
+**API GPASI**: latência alta e limites de chamada — migração e enrich só via filas/checkpoint (ver PRD § 7.2).
 
 ## Validation Checklist
 

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja } from "@/lib/loja";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento-button";
+import { CampoBuscaAutocomplete } from "@/components/busca/campo-busca-autocomplete";
 import { OrcamentoStatusChip } from "@/components/dashboard/atalho-orcamento";
 import {
   codigoExibicao,
@@ -65,19 +66,18 @@ export default async function DashboardPage() {
           action="/busca"
           className="relative mt-3 flex items-center rounded-lg transition-shadow focus-within:ring-2 focus-within:ring-primary"
         >
-          <span className="material-symbols-outlined filled absolute left-4 text-outline">
+          <span className="material-symbols-outlined filled pointer-events-none absolute left-4 z-10 text-outline">
             search
           </span>
-          <input
-            type="text"
+          <CampoBuscaAutocomplete
             name="q"
             aria-label="Buscar peça por código, descrição ou referência"
             placeholder="Código, descrição ou referência (ex: 201.0813, PH2870A)"
-            className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-low py-3 pl-12 pr-28 font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:outline-none"
+            inputClassName="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-low py-3 pl-12 pr-28 font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:outline-none"
           />
           <button
             type="submit"
-            className="absolute right-2 flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-label-sm uppercase text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="absolute right-2 z-10 flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-label-sm uppercase text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
             <span className="hidden sm:inline">Buscar</span>

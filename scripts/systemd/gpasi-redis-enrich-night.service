@@ -1,0 +1,18 @@
+[Unit]
+Description=GPASI → Redis enrich night skip-retry (prio 0001, anti-loop empty)
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/gpasi-sync/.env
+Environment=ENRICH_NIGHT_BATCH=8
+Environment=ENRICH_NIGHT=1
+Environment=GPASI_SYNC_DIR=/opt/gpasi-sync
+Environment=GPASI_DOCKER_NETWORK=easypanel
+ExecStart=/opt/gpasi-sync/gpasi_enrich_night.sh
+TimeoutStartSec=10800
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

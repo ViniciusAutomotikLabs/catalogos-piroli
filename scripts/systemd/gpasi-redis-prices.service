@@ -1,0 +1,23 @@
+[Unit]
+Description=GPASI → Redis price sync (docker)
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/gpasi-sync/.env
+ExecStart=/usr/bin/docker run --rm --name gpasi-redis-prices-sync \
+  --network easypanel \
+  -e REDIS_HOST=tecdoc_redis \
+  -e REDIS_PORT=6379 \
+  -e REDIS_PASSWORD \
+  -e User_gestao \
+  -e Senha_gestao \
+  -e ip_gestao \
+  -v /opt/gpasi-sync:/opt/gpasi-sync:ro \
+  gpasi-sync:latest \
+  python /opt/gpasi-sync/gpasi_redis_sync.py --prices
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

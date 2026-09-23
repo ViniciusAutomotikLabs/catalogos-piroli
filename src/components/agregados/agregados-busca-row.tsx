@@ -7,7 +7,7 @@ const MAX_CHIPS = 3;
 type Props = {
   agregados: AgregadoItem[];
   principal: {
-    produtoId: number;
+    produtoId: number | null;
     codigo: string;
     descricao: string;
     fabricante?: string | null;
@@ -20,6 +20,9 @@ export function AgregadosBuscaRow({ agregados, principal }: Props) {
 
   const visiveis = agregados.slice(0, MAX_CHIPS);
   const restantes = agregados.length - visiveis.length;
+  const detalheHref = principal.produtoId
+    ? `/produtos/${principal.produtoId}`
+    : `/busca?q=${encodeURIComponent(principal.codigo)}`;
 
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -29,7 +32,7 @@ export function AgregadosBuscaRow({ agregados, principal }: Props) {
       </span>
       {visiveis.map((a) => (
         <span
-          key={a.id}
+          key={`${a.codigo}-${a.id}`}
           className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[11px] leading-4 ${
             a.obrigatorio
               ? "border-primary/40 bg-primary-container/30 text-on-primary-container font-medium"
@@ -42,10 +45,7 @@ export function AgregadosBuscaRow({ agregados, principal }: Props) {
         </span>
       ))}
       {restantes > 0 && (
-        <Link
-          href={`/produtos/${principal.produtoId}`}
-          className="text-label-sm text-primary hover:underline"
-        >
+        <Link href={detalheHref} className="text-label-sm text-primary hover:underline">
           +{restantes}
         </Link>
       )}

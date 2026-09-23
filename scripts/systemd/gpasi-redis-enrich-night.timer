@@ -1,0 +1,12 @@
+[Unit]
+Description=GPASI → Redis enrich night timer (02:00 America/Sao_Paulo)
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Timezone=America/Sao_Paulo
+Persistent=true
+AccuracySec=1min
+Unit=gpasi-redis-enrich-night.service
+
+[Install]
+WantedBy=timers.target

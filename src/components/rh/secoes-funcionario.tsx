@@ -13,6 +13,7 @@ import {
 import { UploadArquivo } from "@/components/rh/upload-arquivo";
 import { LinkArquivoRh } from "@/components/rh/link-arquivo";
 import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
+import { BotaoExcluirConfirmado } from "@/components/ui/botao-excluir-confirmado";
 
 const INPUT =
   "px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors";
@@ -110,15 +111,12 @@ function Documentos({
                   <span className="text-label-sm text-on-surface-variant">· validade {d.validade}</span>
                 )}
               </div>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => startTransition(() => void removerDocumento(d.id, pessoaId))}
-                className="text-error hover:bg-error-container/40 rounded p-1"
-                aria-label="Remover documento"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+              <BotaoExcluirConfirmado
+                titulo="Excluir documento?"
+                descricao="Tem certeza que deseja apagar este documento aqui mesmo?"
+                ariaLabel="Remover documento"
+                onConfirmar={() => removerDocumento(d.id, pessoaId)}
+              />
             </li>
           ))}
         </ul>
@@ -195,15 +193,12 @@ function Afastamentos({
                   </span>
                 )}
               </div>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => startTransition(() => void removerAfastamento(a.id, pessoaId))}
-                className="text-error hover:bg-error-container/40 rounded p-1"
-                aria-label="Remover afastamento"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+              <BotaoExcluirConfirmado
+                titulo="Excluir afastamento?"
+                descricao="Tem certeza que deseja apagar este afastamento aqui mesmo?"
+                ariaLabel="Remover afastamento"
+                onConfirmar={() => removerAfastamento(a.id, pessoaId)}
+              />
             </li>
           ))}
         </ul>
@@ -281,15 +276,13 @@ function Advertencias({
                 <span className="capitalize font-medium">{a.tipo}</span>
                 <span className="text-on-surface-variant"> · {a.data} · {a.motivo}</span>
               </div>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => startTransition(() => void removerAdvertencia(a.id, pessoaId))}
+              <BotaoExcluirConfirmado
+                titulo="Excluir advertência?"
+                descricao="Tem certeza que deseja apagar esta advertência aqui mesmo?"
+                ariaLabel="Remover advertência"
                 className="text-error hover:bg-error-container/40 rounded p-1 shrink-0"
-                aria-label="Remover advertência"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+                onConfirmar={() => removerAdvertencia(a.id, pessoaId)}
+              />
             </li>
           ))}
         </ul>

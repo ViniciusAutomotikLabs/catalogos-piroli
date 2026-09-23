@@ -90,6 +90,8 @@ type Props = {
   subtitulo?: string;
   /** Whitelist no server: só "rh". */
   redirectTo?: "rh";
+  /** Cadastro pelo RH: papel funcionário obrigatório (não dá para desmarcar). */
+  modoColaborador?: boolean;
 };
 
 const INPUT =
@@ -108,11 +110,18 @@ export function FormPessoa({
   titulo,
   subtitulo,
   redirectTo,
+  modoColaborador = false,
 }: Props) {
   const [estado, formAction, pendente] = useActionState<EstadoFormPessoa, FormData>(action, null);
 
   const [tipoPessoa, setTipoPessoa] = useState<"PF" | "PJ">(pessoa?.tipo_pessoa ?? "PF");
-  const [papeis, setPapeis] = useState<Papel[]>(pessoa?.papeis ?? [{ papel: "cliente" }]);
+  const [papeis, setPapeis] = useState<Papel[]>(() => {
+    const inicial = pessoa?.papeis ?? (modoColaborador ? [{ papel: "funcionario" }] : [{ papel: "cliente" }]);
+    if (modoColaborador && !inicial.some((p) => p.papel === "funcionario")) {
+      return [...inicial, { papel: "funcionario" }];
+    }
+    return inicial;
+  });
   const [gruposSel, setGruposSel] = useState<GrupoSel[]>(pessoa?.grupos ?? []);
   const [draftPapelCustom, setDraftPapelCustom] = useState("");
   const [draftGrupoCustom, setDraftGrupoCustom] = useState("");
@@ -137,6 +146,7 @@ export function FormPessoa({
   const gruposCustom = gruposSel.filter((g) => !!g.grupo_custom);
 
   function togglePapelFixo(valor: string, checked: boolean) {
+    if (modoColaborador && valor === "funcionario" && !checked) return;
     setPapeis((prev) => {
       const customs = prev.filter((p) => p.papel === "custom");
       const fixos = prev.filter((p) => p.papel !== "custom");
@@ -466,8 +476,9 @@ export function FormPessoa({
                 <input
                   type="checkbox"
                   checked={papelAtivo(p.valor)}
+                  disabled={modoColaborador && p.valor === "funcionario"}
                   onChange={(e) => togglePapelFixo(p.valor, e.target.checked)}
-                  className="rounded text-primary focus:ring-primary w-3.5 h-3.5"
+                  className="rounded text-primary focus:ring-primary w-3.5 h-3.5 disabled:opacity-60"
                 />
                 {p.label}
               </label>
@@ -527,9 +538,11 @@ export function FormPessoa({
             <div className="mt-4 flex items-center gap-3 bg-primary-fixed/20 border border-primary/30 rounded-lg px-4 py-3">
               <span className="material-symbols-outlined text-primary">diversity_3</span>
               <p className="text-body-md text-on-surface flex-1">
-                {pessoa?.id
-                  ? "A ficha trabalhista (salário, férias, folha) é gerenciada no módulo RH."
-                  : "Após salvar, gerencie a ficha trabalhista deste funcionário no módulo RH."}
+                {modoColaborador && !pessoa?.id
+                  ? "Ao salvar, você segue direto para a ficha trabalhista (contrato, documentos, folha)."
+                  : pessoa?.id
+                    ? "A ficha trabalhista (salário, férias, folha) é gerenciada no módulo RH."
+                    : "Após salvar, gerencie a ficha trabalhista deste funcionário no módulo RH."}
               </p>
               {pessoa?.id && (
                 <Link

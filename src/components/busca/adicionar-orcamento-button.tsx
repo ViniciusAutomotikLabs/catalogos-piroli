@@ -4,7 +4,9 @@ import { useState } from "react";
 import { addToCart, type CartItem } from "@/lib/cart";
 
 type Props = {
-  item: Pick<CartItem, "produtoId" | "codigo" | "descricao" | "fabricante" | "fotoUrl">;
+  item: Pick<CartItem, "produtoId" | "codigo" | "descricao" | "fabricante" | "fotoUrl"> & {
+    precoUnitario?: number;
+  };
   className?: string;
 };
 
@@ -22,7 +24,7 @@ export function AdicionarOrcamentoButton({ item, className }: Props) {
       descricao: item.descricao || "Peça",
       fabricante: item.fabricante,
       fotoUrl: item.fotoUrl,
-      precoUnitario: 0,
+      precoUnitario: item.precoUnitario ?? 0,
     });
     setAdicionado(true);
     setTimeout(() => setAdicionado(false), 1600);

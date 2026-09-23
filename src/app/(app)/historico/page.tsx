@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { codigoExibicao, tituloExibicao } from "@/lib/produto-campos";
+import { BotaoRemoverConsulta } from "@/components/historico/botao-remover-consulta";
 
 type Consulta = {
   id: number;
@@ -149,19 +150,22 @@ export default async function HistoricoPage({
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <Link
-                        href={
-                          c.termo
-                            ? `/busca?q=${encodeURIComponent(c.termo)}`
-                            : c.produtos
-                              ? `/produtos/${c.produtos.id}`
-                              : "/busca"
-                        }
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">replay</span>
-                        Repetir
-                      </Link>
+                      <div className="inline-flex items-center gap-1">
+                        <Link
+                          href={
+                            c.termo
+                              ? `/busca?q=${encodeURIComponent(c.termo)}`
+                              : c.produtos
+                                ? `/produtos/${c.produtos.id}`
+                                : "/busca"
+                          }
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">replay</span>
+                          Repetir
+                        </Link>
+                        <BotaoRemoverConsulta id={c.id} />
+                      </div>
                     </td>
                   </tr>
                 ))}

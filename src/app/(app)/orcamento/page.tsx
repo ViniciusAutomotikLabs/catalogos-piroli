@@ -13,6 +13,9 @@ import {
 } from "@/lib/cart";
 import { salvarOrcamento } from "@/lib/actions/orcamentos";
 import { OrcamentoBarraAcoes } from "@/components/orcamento/barra-acoes";
+import { ConfirmarExclusao } from "@/components/ui/confirmar-exclusao";
+import { BotaoExcluirConfirmado } from "@/components/ui/botao-excluir-confirmado";
+import { BotaoConverterEmVenda } from "@/components/vendas/botao-converter-venda";
 
 type ClienteOption = { id: number; nome: string; whatsapp: string | null };
 
@@ -28,6 +31,7 @@ export default function OrcamentoPage() {
   const [clienteId, setClienteId] = useState<number | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
+  const [confirmarLimpar, setConfirmarLimpar] = useState(false);
 
   useEffect(() => {
     const sync = () => setItens(getCart());
@@ -94,7 +98,8 @@ export default function OrcamentoPage() {
         </div>
         {itens.length > 0 && (
           <button
-            onClick={() => clearCart()}
+            type="button"
+            onClick={() => setConfirmarLimpar(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:border-error hover:text-error transition-colors text-label-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
           >
             <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
@@ -102,6 +107,18 @@ export default function OrcamentoPage() {
           </button>
         )}
       </div>
+
+      <ConfirmarExclusao
+        aberto={confirmarLimpar}
+        titulo="Limpar orçamento?"
+        descricao="Tem certeza que deseja apagar todos os itens do carrinho aqui mesmo?"
+        confirmarLabel="Limpar"
+        onCancelar={() => setConfirmarLimpar(false)}
+        onConfirmar={() => {
+          clearCart();
+          setConfirmarLimpar(false);
+        }}
+      />
 
       {mensagem && (
         <p className="text-body-md text-on-secondary-container bg-secondary-fixed/30 border border-secondary-fixed-dim rounded px-3 py-2">
@@ -197,13 +214,13 @@ export default function OrcamentoPage() {
                   </span>
                 </div>
 
-                <button
-                  onClick={() => removeCartItem(idx)}
+                <BotaoExcluirConfirmado
+                  titulo="Remover item?"
+                  descricao="Tem certeza que deseja remover esta peça do orçamento?"
+                  ariaLabel="Remover"
                   className="p-2 text-on-surface-variant hover:text-error transition-colors"
-                  title="Remover"
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
+                  onConfirmar={() => removeCartItem(idx)}
+                />
               </div>
             ))}
           </div>
@@ -250,6 +267,7 @@ export default function OrcamentoPage() {
             </div>
 
             <div className="flex flex-col gap-2 pt-2">
+              <BotaoConverterEmVenda clienteId={clienteId} />
               <button
                 onClick={handleSalvar}
                 disabled={salvando}

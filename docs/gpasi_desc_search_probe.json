@@ -1,0 +1,100 @@
+{
+  "similar_count": 109638,
+  "similar_ms": 4470,
+  "exact_5w40": 13,
+  "exact_5w40_com_estoque": 3,
+  "exact_5w30": 25,
+  "exact_5w30_com_estoque": 10,
+  "amostra_5w30_estoque": [
+    {
+      "codigo": "081951",
+      "descricao": "OLEO SAE 5W30 API SP SELENIA PERFORM SINTETICO FLEX 1L",
+      "estoque": 96.0,
+      "mestre": "Sim"
+    },
+    {
+      "codigo": "078937",
+      "descricao": "OLEO SAE 5W30 API SN SYNTIUM 5000XS SINTETICO FLEX 1L",
+      "estoque": 91.0,
+      "mestre": "Sim"
+    },
+    {
+      "codigo": "088051",
+      "descricao": "OLEO 6100 SAVE-LITE 5W30",
+      "estoque": 14.0,
+      "mestre": "Não"
+    },
+    {
+      "codigo": "182162",
+      "descricao": "ADITIVO REDUTOR FUMACA 500ML (P/OLEO 5W30)",
+      "estoque": 12.0,
+      "mestre": "Sim"
+    },
+    {
+      "codigo": "177092",
+      "descricao": "OLEO SAE 5W30 API SN SELENIA PERFORM SINTETICO FLEX 1L",
+      "estoque": 2.0,
+      "mestre": "Não"
+    }
+  ],
+  "amostra_5w40_estoque": [
+    {
+      "codigo": "081952",
+      "descricao": "OLEO SAE 5W40 API SP PERFORM SINTETICO FLEX 1L",
+      "estoque": 77.0,
+      "mestre": "Sim"
+    },
+    {
+      "codigo": "053692",
+      "descricao": "OLEO SAE 5W40 API SN SYNTIUM 3000E SINTETICO FLEX 1L",
+      "estoque": 28.0,
+      "mestre": "Não"
+    },
+    {
+      "codigo": "034592",
+      "descricao": "OLEO SAE 5W40 API SN OMNICRAFT SINTETICO FLEX 1L",
+      "estoque": 2.0,
+      "mestre": "Não"
+    },
+    {
+      "codigo": "032619",
+      "descricao": "OLEO SAE 5W40 API SN SELENIA PERFORM SINTETICO FLEX 1L",
+      "estoque": 0.0,
+      "mestre": "Não"
+    },
+    {
+      "codigo": "051311",
+      "descricao": "OLEO SAE 5W40 API SN HELIX ULTRA PROFESSIONAL AV SINTETICO FLEX 1L",
+      "estoque": 0.0,
+      "mestre": "Não"
+    }
+  ],
+  "fluxo_demo": {
+    "query": "óleo 5W30",
+    "match": {
+      "codigo": "081951",
+      "descricao": "OLEO SAE 5W30 API SP SELENIA PERFORM SINTETICO FLEX 1L",
+      "estoque": 96.0,
+      "mestre": "Sim"
+    },
+    "preco": [
+      {
+        "codigoerp": "081951",
+        "preco": 59.64,
+        "custo": 33.89,
+        "precoatacado": 55.08,
+        "precoecommerce": 59.64
+      }
+    ],
+    "estoque": [
+      {
+        "codigoerp": "081951",
+        "estoque": 96.0,
+        "estoquereservado": 0.0,
+        "estoquetransito": 0.0
+      }
+    ],
+    "preco_ms": 188.2,
+    "estoque_ms": 271.2
+  }
+}

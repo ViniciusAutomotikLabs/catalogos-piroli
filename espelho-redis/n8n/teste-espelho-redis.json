@@ -1,0 +1,223 @@
+{
+  "name": "teste espelho redis",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "713abacd-b5ef-4951-a2c9-616c75bc7f33",
+      "name": "When chat message received",
+      "webhookId": "381012e6-13fa-4b43-8faf-11dd647b69a3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Você testa o espelho Redis GPASI (gpasi-search). Sem TecDoc, sem placa, sem GPASI live.\n\nOBJETIVO: peça/código/óleo → NOME + CÓDIGO + PREÇO. Cite layer e status internamente na resposta (é um chat de teste).\n\nFERRAMENTAS (só Redis, fonte=gpasi já fixa):\n- buscar_peca_catalogo: q=descrição PT ou código. modelo=escopo (s10 2.8 diesel) se souber o carro.\n- buscar_por_viscosidade: 5W40/5W30 exato.\n\nREGRAS:\n1) Código ERP (000781) ou OEM (N-559): buscar_peca_catalogo com q=código.\n2) Óleo por viscosidade: buscar_por_viscosidade.\n3) Peça+veículo: UMA busca q + modelo. O servidor faz cascata codigo→strict→primary→unscoped.\n4) layer=unscoped: mostre preço e avise que aplicação não foi validada.\n5) miss: não rebuscar o mesmo q/modelo. Peça 1 dado (modelo/eixo) ou diga miss.\n6) Sem veículo (exceto óleo/código): pergunte modelo/motor 1x e busque no turno seguinte.\n7) \"similar / mais barato\": busque de novo a mesma peça e mostre opção mais barata.\n8) NÃO invente peça a partir de OEM. NÃO chame tool que não existe.\n\nResposta curta: descrição, codigo, preco, layer. Até 3 itens.",
+          "maxIterations": 4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        280,
+        0
+      ],
+      "id": "16694eef-250d-4130-be6b-00ba68963860",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        220
+      ],
+      "id": "a222b354-4d08-4ac3-9d72-49a1c86f6ecf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8mL9urli86y0he4x",
+          "name": "Vinicius"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}",
+        "sessionTTL": 86400
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        400
+      ],
+      "id": "b5b7547d-90c0-49cb-b923-4f2e3bde99c1",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "3wldFlE7qJLPETcH",
+          "name": "Redis GPASI tecdoc_redis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca Redis GPASI (fonte=gpasi fixo). q=peça PT ou código ERP/OEM. modelo=escopo veicular (s10 2.8 diesel). Cascata codigo→strict→unscoped. Já traz preco. 1 chamada. miss: não repetir mesmo q/modelo.",
+        "url": "=http://gpasi-search:8080/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $fromAI('q', 'Peça em português ou código, ex: PASTILHA FREIO ou 000781', 'string') }}"
+            },
+            {
+              "name": "modelo",
+              "value": "={{ $fromAI('modelo', 'Escopo veicular: s10 2.8 diesel. Vazio se não souber o carro.', 'string') }}"
+            },
+            {
+              "name": "fonte",
+              "value": "gpasi"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        220
+      ],
+      "id": "d3b2c460-d261-43f9-8807-2db736ca4b5f",
+      "name": "buscar_peca_catalogo"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Óleos por viscosidade EXATA no Redis. 5W40 ≠ 15W40. Uma chamada. Já traz preco.",
+        "url": "=http://gpasi-search:8080/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "viscosidade",
+              "value": "={{ $fromAI('viscosidade', 'Grau exato, ex: 5W40', 'string') }}"
+            },
+            {
+              "name": "fonte",
+              "value": "gpasi"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        220
+      ],
+      "id": "d2880502-1e26-4ca4-bd5b-04f3921ef6f1",
+      "name": "buscar_por_viscosidade"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_peca_catalogo": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_por_viscosidade": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": null
+  }
+}

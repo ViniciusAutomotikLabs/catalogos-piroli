@@ -889,4 +889,19 @@ RLS por `organizacao_id` em toda tabela nova. Colunas sensíveis (documento, sal
 
 ---
 
+## 23. Plano cutover SS — vendas ERP + convites + migração (23/09/2026)
+
+Alinhamento operacional: `/vendas` vazio **não** é falha de sync — não há sync de PDV da SS. Pedido para o plano:
+
+| Item | Fase ERP (`docs/erp-2.0/PRD.md` v0.2) |
+|------|----------------------------------------|
+| Vendas neste sistema (páginas + fluxo balcão) | **Fase 5** P1 |
+| Login funcionários por convite do admin (link → PC da loja) | **Fase 6** P1 |
+| Migração completa SS → ERP (clientes, histórico vendas, resto via API + throttle) | **Fase 7** P1 cutover |
+| Espelho estoque (já WIP) | Fase 4 |
+
+Ordem: **5 → 6 → 7** (vender/convidar antes do histórico em massa). Cross-ref no marketplace: `docs/ROADMAP_MVP.md` § 2.2. INTENT atualizado com restrição de API.
+
+---
+
 *Atualize este arquivo a cada sessão relevante (migrations, novos catálogos, mudanças de regra de parsing, correções do app web, avanços do agente n8n/GPASI, ERP 2.0).*

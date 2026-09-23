@@ -75,8 +75,8 @@ export default async function RHDashboardPage() {
       <div>
         <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">RH / Departamento Pessoal</h1>
         <p className="text-body-md text-on-surface-variant mt-1">
-          Ficha trabalhista, férias, folha e rescisão. O funcionário é cadastrado em Pessoas e
-          gerenciado aqui.
+          Ficha trabalhista, férias, folha e rescisão. Cadastre colaboradores aqui — a
+          pessoa também fica disponível em Pessoas.
         </p>
       </div>
 
@@ -144,8 +144,8 @@ export default async function RHDashboardPage() {
             <Link href="/rh/folha" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">payments</span> Folha de pagamento
             </Link>
-            <Link href="/pessoas/novo?papel=funcionario&origem=rh" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">person_add</span> Cadastrar funcionário
+            <Link href="/rh/funcionarios/novo" className="text-body-md text-on-surface hover:text-primary flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">person_add</span> Cadastrar colaborador
             </Link>
           </div>
         </div>

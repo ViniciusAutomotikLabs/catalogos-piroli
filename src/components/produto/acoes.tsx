@@ -14,9 +14,10 @@ import { useFocusTrap } from "@/lib/use-focus-trap";
 type Props = {
   produto: ProdutoMensagem & { produtoId: number | null };
   telefoneLoja?: string | null;
+  precoUnitario?: number;
 };
 
-export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
+export function ProdutoAcoes({ produto, telefoneLoja, precoUnitario = 0 }: Props) {
   const router = useRouter();
   const [modalAberto, setModalAberto] = useState(false);
   const [incluirFoto, setIncluirFoto] = useState(true);
@@ -85,7 +86,7 @@ export function ProdutoAcoes({ produto, telefoneLoja }: Props) {
                   descricao: produto.descricao ?? "Peça",
                   fabricante: produto.fabricante,
                   fotoUrl: produto.fotoUrl,
-                  precoUnitario: 0,
+                  precoUnitario,
                 });
                 avisar(`Adicionado! ${cartCount()} item(ns) — abra Orçamento no menu`);
               }}

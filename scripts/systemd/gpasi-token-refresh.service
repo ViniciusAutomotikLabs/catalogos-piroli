@@ -1,0 +1,17 @@
+# Renova Bearer GPASI (POST /token) e grava em GPASI_TOKEN_FILE.
+[Unit]
+Description=GPASI OAuth token refresh
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/catalogos-piroli
+EnvironmentFile=-/opt/catalogos-piroli/.env
+EnvironmentFile=-/opt/gpasi-sync/.env
+# Cache compartilhado com n8n/scripts na VPS
+Environment=GPASI_TOKEN_FILE=/opt/gpasi-sync/token.json
+ExecStart=/usr/bin/python3 /opt/catalogos-piroli/scripts/gpasi_token_refresh.py --force
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

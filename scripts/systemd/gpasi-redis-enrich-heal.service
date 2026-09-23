@@ -1,0 +1,11 @@
+[Unit]
+Description=GPASI enrich heal (image + timer)
+After=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/opt/gpasi-sync/.env
+ExecStart=/opt/gpasi-sync/gpasi_enrich_heal.sh
+
+[Install]
+WantedBy=multi-user.target

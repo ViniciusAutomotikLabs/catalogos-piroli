@@ -1,0 +1,244 @@
+{
+  "started_at": "2026-08-04T18:31:03.994770+00:00",
+  "base_url": "http://181.191.194.31:54123",
+  "api": "GPASI",
+  "version_expected": "4.0.29",
+  "scope": "agent_read_only",
+  "tests": [
+    {
+      "name": "auth_token",
+      "method": "POST",
+      "path": "/token",
+      "status": 200,
+      "elapsed_ms": 345.9,
+      "bytes": 173,
+      "ok": true,
+      "error": null,
+      "body_preview": "{\"access_token\": \"***\", \"token_type\": \"bearer\"}"
+    },
+    {
+      "name": "empresa_status",
+      "method": "GET",
+      "path": "/erpssplus/empresa/status",
+      "status": 200,
+      "elapsed_ms": 196.2,
+      "bytes": 3706,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"razaosocial\": \"AUTO PECAS E POSTO DE MOLAS PIROLI LTDA\", \"cnpj\": \"15389901000194\", \"fantasia\": \"PIROLI MATRIZ 0001\", \"codigo\": \"0001\", \"inscricaoestadual\": \"282028811\", \"endereco\": \"AVENIDA TANCREDO A NEVES, 501\", \"bairro\": \"CENTRO\", \"numero\": \"501\", \"complemento\": \"0\", \"cep\": \"79970000\", \"cidade\": \"ELDORADO\", \"codigo_cidade_ibge\": \"5003751\", \"estado\": \"MS\", \"fone\": \"0000000000\", \"email\": \"autopecaspiroli002@outlook.com\", \"linha\": 1}, {\"razaosocial\": \"AUTO PECAS E POSTO DE MOLAS PIROLI LTDA\", \"cnpj\": \"15389901000356\", \"fantasia\": \"PIROLI FILIAL 0003\", \"codigo\": \"0003\", \"inscricaoestadual\": \"9055803967\", \"endereco\": \"AVENIDA PRESIDENTE KENNEDY, 274\", \"bairro\": \"CENTRO\", \"numero\": \"274\", \"complemento\": \"\", \"cep\": \"85980000\", \"cidade\": \"GUAÍRA\", \"codigo_cidade_ibge\": \"4108809\", \"estado\": \"PR\", \"fone\": \"\", \"email\": \"\", \"linha\": 2}, {\"razaosocial\": \"AUTO PECAS E POSTO DE MOLAS PIROLI LTDA\"…"
+    },
+    {
+      "name": "peca_dados_grupo_lubrificantes",
+      "method": "GET",
+      "path": "/erpssplus/peca/dados",
+      "status": 200,
+      "elapsed_ms": 1236.2,
+      "bytes": 2,
+      "ok": true,
+      "error": null,
+      "body_preview": "[]",
+      "filter": {
+        "bloco": 0,
+        "grupo": "0030"
+      }
+    },
+    {
+      "name": "peca_grupo_status",
+      "method": "GET",
+      "path": "/erpssplus/peca/grupo/status",
+      "status": 200,
+      "elapsed_ms": 177.2,
+      "bytes": 16876,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"codigo\": \"0001\", \"nome\": \"GRUPO PADRAO\", \"comprador\": \"\", \"linha\": 1}, {\"codigo\": \"0002\", \"nome\": \"ACESSORIOS\", \"comprador\": \"\", \"linha\": 2}, {\"codigo\": \"0003\", \"nome\": \"AMORTECEDOR\", \"comprador\": \"\", \"linha\": 3}, {\"codigo\": \"0004\", \"nome\": \"BUCHAS/PINO MOLA AÇO\", \"comprador\": \"\", \"linha\": 4}, {\"codigo\": \"0005\", \"nome\": \"ARTEFATOS FUNDIDOS\", \"comprador\": \"\", \"linha\": 5}, {\"codigo\": \"0006\", \"nome\": \"SUSPENSAO\", \"comprador\": \"\", \"linha\": 6}, {\"codigo\": \"0007\", \"nome\": \"BUCHAS MOLA/ARTEFATOS BORRACHA\", \"comprador\": \"\", \"linha\": 7}, {\"codigo\": \"0008\", \"nome\": \"BARRA AXIAL\", \"comprador\": \"\", \"linha\": 8}, {\"codigo\": \"0009\", \"nome\": \"BARRA DIREÇAO\", \"comprador\": \"\", \"linha\": 9}, {\"codigo\": \"0010\", \"nome\": \"BOLSA/MOLA PNEUMATICA\", \"comprador\": \"\", \"linha\": 10}, {\"codigo\": \"0011\", \"nome\": \"BUCHAS/COXINS\", \"comprador\": \"\", \"linha\": 11}, {\"codigo\": \"0012\", \"nome\": \"TRANSMISSÃO\", \"comprador\": \"\",…"
+    },
+    {
+      "name": "peca_estoque_all_discovery",
+      "method": "GET",
+      "path": "/erpssplus/peca/estoque/atual/ALL",
+      "status": 200,
+      "elapsed_ms": 5337.9,
+      "bytes": 3992159,
+      "ok": true,
+      "error": null,
+      "body_preview": "{\"total\": 107834, \"com_estoque_positivo\": 25238, \"amostra_positivos\": [{\"codigoerp\": \"000005\", \"estoque\": 3.0}, {\"codigoerp\": \"000040\", \"estoque\": 5.0}, {\"codigoerp\": \"000052\", \"estoque\": 4.0}, {\"codigoerp\": \"000055\", \"estoque\": 12.0}, {\"codigoerp\": \"000057\", \"estoque\": 1.0}]}"
+    },
+    {
+      "name": "peca_existencia",
+      "method": "POST",
+      "path": "/erpssplus/peca",
+      "status": 500,
+      "elapsed_ms": 113.7,
+      "bytes": 21,
+      "ok": false,
+      "error": "HTTP 500",
+      "body_preview": "\"Internal Server Error\""
+    },
+    {
+      "name": "peca_preco",
+      "method": "GET",
+      "path": "/erpssplus/peca/preco/{codigoerp}",
+      "status": 200,
+      "elapsed_ms": 202.5,
+      "bytes": 94,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"codigoerp\": \"000005\", \"preco\": 96.0, \"custo\": 58.96, \"precoatacado\": 86.97, \"precoecommerce\": 96.0}]"
+    },
+    {
+      "name": "peca_estoque_v1",
+      "method": "GET",
+      "path": "/erpssplus/peca/estoque/atual/{codigoerp}",
+      "status": 200,
+      "elapsed_ms": 229.1,
+      "bytes": 38,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"codigoerp\": \"000005\", \"estoque\": 3.0}]"
+    },
+    {
+      "name": "peca_estoque_v2",
+      "method": "GET",
+      "path": "/erpssplus/v2/peca/estoque/atual/{codigoerp}",
+      "status": 200,
+      "elapsed_ms": 209.8,
+      "bytes": 83,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"codigoerp\": \"000005\", \"estoque\": 3.0, \"estoquereservado\": 0.0, \"estoquetransito\": 0.0}]"
+    },
+    {
+      "name": "peca_estoque_batch",
+      "method": "POST",
+      "path": "/erpssplus/peca/estoque/atual/",
+      "status": 200,
+      "elapsed_ms": 181.5,
+      "bytes": 61,
+      "ok": true,
+      "error": null,
+      "body_preview": "[{\"codigoerp\": \"000005\", \"estoque\": 3.0, \"estoquereservado\": 0.0}]",
+      "empresa_used": "0001"
+    },
+    {
+      "name": "peca_tabela_preco",
+      "method": "GET",
+      "path": "/erpssplus/peca/tabela/preco/",
+      "status": 200,
+      "elapsed_ms": 193.1,
+      "bytes": 2,
+      "ok": true,
+      "error": null,
+      "body_preview": "[]",
+      "empresa_used": "0001"
+    },
+    {
+      "name": "peca_marca_status",
+      "method": "GET",
+      "path": "/erpssplus/peca/marca/status",
+      "status": 200,
+      "elapsed_ms": 316.3,
+      "bytes": 142241,
+      "ok": true,
+      "error": null,
+      "body_preview": "{\"total\": 1719, \"amostra\": [{\"codigo\": \"1212\", \"nome\": \"TESTE\", \"comprador\": \"\", \"ranking\": \"Não Informado\", \"linha\": 1}, {\"codigo\": \"123\", \"nome\": \"TOPWAY PARTS\", \"comprador\": \"\", \"ranking\": \"Média\", \"linha\": 2}, {\"codigo\": \"12M\", \"nome\": \"12M\", \"comprador\": \"\", \"ranking\": \"Média\", \"linha\": 3}]}"
+    }
+  ],
+  "product": {
+    "codigoerp": "000005",
+    "nome": null,
+    "estoque_amostra": 3.0,
+    "match": "primeiro_com_estoque_positivo",
+    "note": "SKU escolhido via estoque/ALL (peca/dados vazio; sem cadastro de 'Teste Óleo' via API)."
+  },
+  "discovery": [
+    {
+      "oleo_grupos": [
+        {
+          "codigo": "0030",
+          "nome": "LUBRIFICANTES C/ ANP"
+        },
+        {
+          "codigo": "0031",
+          "nome": "LUBRIFICANTES S/ ANP"
+        },
+        {
+          "codigo": "0077",
+          "nome": "VARETA OLEO"
+        }
+      ]
+    },
+    {
+      "source": "estoque_ALL",
+      "total": 107834,
+      "com_estoque_positivo": 25238
+    }
+  ],
+  "notes": [
+    "GET /erpssplus/peca/dados retorna [] mesmo com filtros de grupo (incl. lubrificantes). Sem descrição de produto via API neste usuário — não foi possível localizar 'Teste Óleo' por nome.",
+    "POST /erpssplus/peca (verificar existência) retornou erro — não usar no agente até o fornecedor corrigir.",
+    "GET /erpssplus/peca/tabela/preco/ retornou []. Para preço no agente, preferir GET /erpssplus/peca/preco/{codigoerp}."
+  ],
+  "verdict": "pronta",
+  "empresas": [
+    {
+      "codigo": "0001",
+      "fantasia": "PIROLI MATRIZ 0001",
+      "cnpj": "15389901000194"
+    },
+    {
+      "codigo": "0003",
+      "fantasia": "PIROLI FILIAL 0003",
+      "cnpj": "15389901000356"
+    },
+    {
+      "codigo": "0004",
+      "fantasia": "PIROLI FILIAL 0004",
+      "cnpj": "15389901000437"
+    },
+    {
+      "codigo": "0005",
+      "fantasia": "PIROLI FILIAL 0005",
+      "cnpj": "15389901000518"
+    },
+    {
+      "codigo": "0010",
+      "fantasia": "PIROLI PECAS E SERVICOS MECANICO",
+      "cnpj": "32561159000171"
+    },
+    {
+      "codigo": "1001",
+      "fantasia": "PIROLI AUX 1001",
+      "cnpj": "00000000000000"
+    },
+    {
+      "codigo": "1010",
+      "fantasia": "PIROLI PECAS E SERVICOS MECANICO",
+      "cnpj": "00000000000000"
+    },
+    {
+      "codigo": "3003",
+      "fantasia": "PIROLI AUX 3003",
+      "cnpj": "00000000000000"
+    },
+    {
+      "codigo": "4004",
+      "fantasia": "PIROLI AUX 4004",
+      "cnpj": "00000000000000"
+    },
+    {
+      "codigo": "5005",
+      "fantasia": "PIROLI AUX 5005",
+      "cnpj": "00000000000000"
+    }
+  ],
+  "latency_summary": {
+    "count": 12,
+    "min_ms": 113.7,
+    "max_ms": 5337.9,
+    "avg_ms": 728.3
+  },
+  "finished_at": "2026-08-04T18:31:12.826913+00:00",
+  "username_used": "pirolin8nws",
+  "empresa_used": "0001"
+}

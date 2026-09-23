@@ -4,7 +4,7 @@ import { codigoExibicao, tituloExibicao } from "@/lib/produto-campos";
 export type AgregadoItem = {
   id: number;
   produtoPrincipalId: number;
-  produtoRelacionadoId: number;
+  produtoRelacionadoId: number | null;
   tipo: string;
   obrigatorio: boolean;
   quantidadeSugerida: number;
@@ -15,6 +15,7 @@ export type AgregadoItem = {
   fotoUrl: string | null;
   origemCatalogo: string;
   fabricante: string | null;
+  preco?: number | null;
 };
 
 type RelacaoRow = {
@@ -97,4 +98,34 @@ export async function listarAgregadosPorProdutos(
 export async function listarAgregadosDoProduto(produtoId: number): Promise<AgregadoItem[]> {
   const mapa = await listarAgregadosPorProdutos([produtoId]);
   return mapa.get(produtoId) ?? [];
+}
+
+/** Converte agregados do espelho SS em AgregadoItem (para UI/busca). */
+export function mapEspelhoAgregadosParaItens(
+  codigoPrincipal: string,
+  itens: Array<{
+    codigoAgregado: string;
+    quantidadeSugerida: number;
+    ordem: number;
+    descricao: string | null;
+    preco: number;
+  }>,
+  produtoPrincipalId = 0
+): AgregadoItem[] {
+  return itens.map((a, i) => ({
+    id: -(i + 1) - codigoPrincipal.length * 1000,
+    produtoPrincipalId,
+    produtoRelacionadoId: null,
+    tipo: "agregado",
+    obrigatorio: false,
+    quantidadeSugerida: a.quantidadeSugerida,
+    ordem: a.ordem,
+    observacao: null,
+    codigo: a.codigoAgregado,
+    titulo: a.descricao?.trim() || a.codigoAgregado,
+    fotoUrl: null,
+    origemCatalogo: "ssplus",
+    fabricante: null,
+    preco: a.preco || null,
+  }));
 }

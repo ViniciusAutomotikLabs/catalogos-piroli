@@ -4,9 +4,10 @@ import { RegistrarConsulta } from "@/components/registrar-consulta";
 import { WhatsAppRowButton } from "@/components/busca/whatsapp-row-button";
 import { AdicionarOrcamentoButton } from "@/components/busca/adicionar-orcamento-button";
 import { AtalhosBusca } from "@/components/busca/atalhos-busca";
+import { CampoBuscaAutocomplete } from "@/components/busca/campo-busca-autocomplete";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 import { buscarProdutos } from "@/lib/busca-produtos";
-import { listarAgregadosPorProdutos } from "@/lib/agregados";
+import { listarAgregadosPorProdutos, mapEspelhoAgregadosParaItens } from "@/lib/agregados";
 import { AgregadosBuscaRow } from "@/components/agregados/agregados-busca-row";
 import {
   codigoExibicao,
@@ -14,6 +15,11 @@ import {
   normalizarCodigo,
   tituloExibicao,
 } from "@/lib/produto-campos";
+import {
+  buscarEspelhoPorCodigos,
+  buscarEspelhoPorProdutoIds,
+  listarAgregadosEspelhoPorCodigos,
+} from "@/lib/espelho";
 
 const POR_PAGINA = 25;
 const MAX_CHIPS_REFERENCIA = 3;
@@ -144,6 +150,25 @@ export default async function BuscaPage({
   // Agregados só para produtos locais (ids positivos do Supabase)
   const idsLocais = produtosOrdenados.filter((p) => p.fonte === "local").map((p) => p.id);
   const agregadosPorProduto = await listarAgregadosPorProdutos(idsLocais);
+  const espelhoPorProduto = await buscarEspelhoPorProdutoIds(idsLocais);
+  const codigosTecdoc = produtosOrdenados
+    .filter((p) => p.fonte !== "local")
+    .map((p) => codigoExibicao(p))
+    .filter(Boolean);
+  const espelhoPorCodigo = await buscarEspelhoPorCodigos(codigosTecdoc);
+
+  // Agregados SS Plus (espelho) — chave = código ERP
+  const codigosParaAgregados = [
+    ...new Set([
+      ...idsLocais
+        .map((id) => espelhoPorProduto.get(id)?.codigo)
+        .filter((c): c is string => Boolean(c)),
+      ...produtosOrdenados.map((p) => codigoExibicao(p)).filter(Boolean),
+      ...codigosTecdoc,
+    ]),
+  ];
+  const agregadosEspelhoPorCodigo =
+    await listarAgregadosEspelhoPorCodigos(codigosParaAgregados);
 
   // Paginação considera apenas o total local; TecDoc é complemento da página atual
   const totalPaginas = Math.max(1, Math.ceil(Math.max(totalLocal, 1) / POR_PAGINA));
@@ -179,21 +204,19 @@ export default async function BuscaPage({
           className="flex items-center gap-3 rounded-xl bg-surface-container-lowest p-1.5 shadow-sm ring-1 ring-outline-variant transition-shadow focus-within:ring-2 focus-within:ring-primary"
         >
           <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+            <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-outline">
               search
             </span>
-            <input
+            <CampoBuscaAutocomplete
               id="busca-input"
-              type="text"
               name="q"
               defaultValue={q}
               autoFocus
+              showKbdHint
+              aria-label="Buscar por código, descrição ou referência"
               placeholder="Buscar por código, descrição ou referência..."
-              className="w-full bg-transparent text-body-lg text-on-surface placeholder:text-outline py-2.5 pl-12 pr-12 focus:outline-none"
+              inputClassName="w-full bg-transparent text-body-lg text-on-surface placeholder:text-outline py-2.5 pl-12 pr-12 focus:outline-none"
             />
-            <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 select-none items-center rounded border border-outline-variant bg-surface-container px-1.5 py-0.5 font-mono text-[11px] leading-none text-on-surface-variant sm:inline-flex">
-              /
-            </kbd>
           </div>
           {catalogo && <input type="hidden" name="catalogo" value={catalogo} />}
           <button
@@ -308,6 +331,7 @@ export default async function BuscaPage({
                 <th className="px-3 py-3 w-14 text-center font-semibold">Foto</th>
                 <th className="px-3 py-3 font-semibold">Peça</th>
                 <th className="px-3 py-3 w-56 hidden md:table-cell font-semibold">Aplicação / referências</th>
+                <th className="px-3 py-3 w-28 hidden lg:table-cell font-semibold text-right">Estoque</th>
                 <th className="px-3 py-3 w-32 hidden sm:table-cell font-semibold">Catálogo</th>
                 <th className="px-3 py-3 w-px text-right whitespace-nowrap font-semibold">Ações</th>
               </tr>
@@ -315,6 +339,7 @@ export default async function BuscaPage({
             <tbody className="text-body-md text-on-surface">
               {produtosOrdenados.map((p, i) => {
                 const isTecDoc = p.fonte === "tecdoc";
+                const isEspelho = p.fonte === "espelho";
                 const refs = p.referencias;
                 const titulo = tituloExibicao(p);
                 const codigo = codigoExibicao(p);
@@ -328,11 +353,37 @@ export default async function BuscaPage({
                   p.match_tipo === "referencia_exata" || p.match_tipo === "referencia_normalizada";
                 const matchValorRef = matchNaReferencia ? p.match_valor : null;
                 const descricaoParaAcao = p.descricao ?? titulo;
-                const agregados = isTecDoc ? [] : (agregadosPorProduto.get(p.id) ?? []);
+                const codigoEspelho =
+                  isEspelho
+                    ? codigo
+                    : espelhoPorProduto.get(p.id)?.codigo ?? codigo;
+                const manuais =
+                  isTecDoc || isEspelho ? [] : (agregadosPorProduto.get(p.id) ?? []);
+                const doSs = mapEspelhoAgregadosParaItens(
+                  codigoEspelho,
+                  agregadosEspelhoPorCodigo.get(codigoEspelho) ?? [],
+                  isTecDoc || isEspelho ? 0 : p.id
+                );
+                const vistos = new Set(manuais.map((a) => a.codigo));
+                const agregados = [
+                  ...manuais,
+                  ...doSs.filter((a) => !vistos.has(a.codigo)),
+                ];
                 const detalheHref = isTecDoc
                   ? `/produtos/tecdoc/${p.articleId}`
-                  : `/produtos/${p.id}`;
-                const rowKey = isTecDoc ? `tecdoc-${p.articleId}` : `local-${p.id}`;
+                  : isEspelho
+                    ? `/estoque/${encodeURIComponent(codigo)}`
+                    : `/produtos/${p.id}`;
+                const rowKey = isTecDoc
+                  ? `tecdoc-${p.articleId}`
+                  : isEspelho
+                    ? `espelho-${codigo}`
+                    : `local-${p.id}`;
+                const espelho = isTecDoc
+                  ? espelhoPorCodigo.get(codigo)
+                  : isEspelho
+                    ? espelhoPorCodigo.get(codigo)
+                    : espelhoPorProduto.get(p.id) ?? espelhoPorCodigo.get(codigo);
 
                 return (
                   <tr
@@ -393,11 +444,11 @@ export default async function BuscaPage({
                           {p.aplicacao_resumo}
                         </p>
                       )}
-                      {!isTecDoc && (
+                      {agregados.length > 0 && (
                         <AgregadosBuscaRow
                           agregados={agregados}
                           principal={{
-                            produtoId: p.id,
+                            produtoId: isTecDoc || isEspelho ? null : p.id,
                             codigo,
                             descricao: descricaoParaAcao,
                             fabricante: p.fabricante,
@@ -432,11 +483,31 @@ export default async function BuscaPage({
                         />
                       )}
                     </td>
+                    <td className="px-3 py-2.5 hidden lg:table-cell text-right">
+                      {espelho ? (
+                        <div className="leading-tight">
+                          <span className="font-semibold tabular-nums">{espelho.disponivel}</span>
+                          <span className="block text-label-sm text-on-surface-variant tabular-nums">
+                            {espelho.preco.toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-on-surface-variant">—</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2.5 hidden sm:table-cell">
                       {isTecDoc ? (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-primary/40 bg-primary-container/40 text-label-sm text-on-primary-container uppercase font-semibold">
                           <span className="w-2 h-2 rounded-full bg-primary" />
                           TecDoc
+                        </span>
+                      ) : isEspelho ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-primary/40 bg-primary-container/30 text-label-sm text-on-primary-container uppercase font-semibold">
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                          SS Plus
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-outline-variant bg-surface text-label-sm text-on-surface-variant uppercase">
@@ -449,11 +520,12 @@ export default async function BuscaPage({
                       <div className="flex items-center justify-end gap-2">
                         <AdicionarOrcamentoButton
                           item={{
-                            produtoId: isTecDoc ? null : p.id,
+                            produtoId: isTecDoc || isEspelho ? null : p.id,
                             codigo,
                             descricao: descricaoParaAcao,
                             fabricante: p.fabricante ?? undefined,
                             fotoUrl: p.foto_url,
+                            precoUnitario: espelho?.preco ?? 0,
                           }}
                         />
                         <WhatsAppRowButton
@@ -462,7 +534,11 @@ export default async function BuscaPage({
                             codigo,
                             numeroProduto: p.numero_produto,
                             fabricante: p.fabricante ?? undefined,
-                            catalogo: isTecDoc ? "TecDoc" : p.origem_catalogo,
+                            catalogo: isTecDoc
+                              ? "TecDoc"
+                              : isEspelho
+                                ? "SS Plus"
+                                : p.origem_catalogo,
                             fotoUrl: p.foto_url,
                           }}
                         />

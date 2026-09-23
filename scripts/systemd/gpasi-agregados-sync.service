@@ -1,0 +1,18 @@
+[Unit]
+Description=GPASI agregados SS → estoque_agregados
+After=network-online.target gpasi-token-refresh.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/catalogos-piroli
+EnvironmentFile=-/opt/catalogos-piroli/.env
+EnvironmentFile=-/opt/gpasi-sync/.env
+Environment=GPASI_TOKEN_FILE=/opt/gpasi-sync/token.json
+Environment=ORGANIZACAO_ID=1
+# Continua do checkpoint; 8 blocos/run ≈ 4–8 min
+ExecStart=/usr/bin/python3 /opt/catalogos-piroli/scripts/gpasi_agregados_sync.py --max-blocos 8
+Nice=15
+TimeoutStartSec=3600
+
+[Install]
+WantedBy=multi-user.target

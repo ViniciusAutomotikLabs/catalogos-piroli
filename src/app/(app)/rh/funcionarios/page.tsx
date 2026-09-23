@@ -145,11 +145,11 @@ export default async function RHFuncionariosPage({
             />
           </form>
           <Link
-            href="/pessoas/novo?papel=funcionario&origem=rh"
+            href="/rh/funcionarios/novo"
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
-            Cadastrar funcionário
+            Cadastrar colaborador
           </Link>
         </div>
       </div>
@@ -246,14 +246,14 @@ export default async function RHFuncionariosPage({
             <span className="material-symbols-outlined text-outline text-5xl">groups</span>
             <p className="text-headline-sm text-on-surface">Nenhum funcionário</p>
             <p className="text-body-md text-on-surface-variant">
-              Cadastre a pessoa em Pessoas com o papel &quot;Funcionário&quot; e gerencie aqui.
+              Cadastre o colaborador aqui no RH; a ficha trabalhista abre em seguida.
             </p>
             <Link
-              href="/pessoas/novo?papel=funcionario&origem=rh"
+              href="/rh/funcionarios/novo"
               className="mt-2 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-sm uppercase hover:bg-primary-container transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
-              Cadastrar funcionário
+              Cadastrar colaborador
             </Link>
           </div>
         )}

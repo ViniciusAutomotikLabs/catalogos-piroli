@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { salvarContrato, type EstadoRH } from "@/lib/actions/rh";
 import { LabelComAjuda } from "@/components/ui/label-com-ajuda";
+import { BotaoExcluirConfirmado } from "@/components/ui/botao-excluir-confirmado";
 import { parseDadosBancarios, type DadosBancarios } from "@/lib/rh/dados-bancarios";
 
 const INPUT =
@@ -287,14 +288,15 @@ export function FormContrato({
                 />
                 Sal.-fam.
               </label>
-              <button
-                type="button"
-                onClick={() => setDependentes((prev) => prev.filter((_, idx) => idx !== i))}
+              <BotaoExcluirConfirmado
+                titulo="Remover dependente?"
+                descricao="Tem certeza que deseja apagar este dependente da lista?"
+                ariaLabel="Remover dependente"
                 className="md:col-span-1 text-error hover:bg-error-container/40 rounded p-1.5 justify-self-start"
-                aria-label="Remover dependente"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+                onConfirmar={() =>
+                  setDependentes((prev) => prev.filter((_, idx) => idx !== i))
+                }
+              />
             </div>
           ))}
           {dependentes.length === 0 && (

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CART_EVENT, cartCount } from "@/lib/cart";
+import { CampoBuscaAutocomplete } from "@/components/busca/campo-busca-autocomplete";
 
 export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const [count, setCount] = useState(0);
@@ -32,15 +33,14 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
       {/* Busca global — sempre acessível no desktop (lg+) */}
       <form action="/busca" role="search" className="hidden lg:flex flex-1 max-w-xl">
         <div className="relative flex w-full items-center rounded-lg border border-outline-variant bg-surface-container-low transition-shadow focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-          <span className="material-symbols-outlined absolute left-3 text-outline text-[20px]">
+          <span className="material-symbols-outlined pointer-events-none absolute left-3 z-10 text-outline text-[20px]">
             search
           </span>
-          <input
-            type="text"
+          <CampoBuscaAutocomplete
             name="q"
             aria-label="Buscar peça por código, descrição ou referência"
             placeholder="Buscar peça por código, descrição ou referência…"
-            className="h-10 w-full rounded-lg bg-transparent pl-10 pr-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none"
+            inputClassName="h-10 w-full rounded-lg bg-transparent pl-10 pr-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none"
           />
         </div>
       </form>

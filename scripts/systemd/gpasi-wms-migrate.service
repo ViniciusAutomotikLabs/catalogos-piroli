@@ -1,0 +1,18 @@
+# Empurra pendências SS→WMS (mqtt/push). Rode com --execute em produção.
+# Ajuste --limit/--sleep conforme carga do WMS.
+[Unit]
+Description=GPASI WMS migrate (ERP SS → WMS)
+After=network-online.target gpasi-token-refresh.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/catalogos-piroli
+EnvironmentFile=-/opt/catalogos-piroli/.env
+EnvironmentFile=-/opt/gpasi-sync/.env
+Environment=GPASI_TOKEN_FILE=/opt/gpasi-sync/token.json
+# Lotes controlados: 500/run a cada timer — ~108k leva várias horas/dias
+ExecStart=/usr/bin/python3 /opt/catalogos-piroli/scripts/gpasi_wms_migrate.py --execute --limit 500 --sleep 0.05 --commit
+Nice=15
+
+[Install]
+WantedBy=multi-user.target

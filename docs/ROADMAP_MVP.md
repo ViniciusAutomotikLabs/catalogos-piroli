@@ -14,10 +14,11 @@ Guia passo a passo para evoluir o produto **sem tentar construir um Mercado Livr
 | `docs/UX_MELHORIAS_BALCAO.md` | Pesquisa UX balcão + status por tela |
 | `docs/HANDOFF_BACKEND_MELHORIAS.md` | Contratos backend → frontend (RPC, campos) |
 | `docs/PRD_AGREGADOS.md` | Agregados de montagem (regras globais) |
+| `docs/erp-2.0/PRD.md` | **ERP 2.0** (Piroli no lugar do SS): Pessoas, estoque espelho, vendas, convites, cutover |
 | `PROJETO_HISTORICO.md` | Log operacional e sessões de implementação |
 | `ARQUITETURA_ESCALA.md` | Escala de dados (500+ catálogos, infra) |
 
-**Última revisão:** 06/07/2026 — alinhamento de produto (reunião Vinícius / Léo / equipe).
+**Última revisão:** 23/09/2026 — cutover SS / vendas ERP / convites no PRD ERP 2.0 (este roadmap marketplace permanece; ver § 2.2).
 
 ---
 
@@ -60,6 +61,23 @@ MVP 4.0  Escala nacional           ← busca dedicada, réplicas, filas, app
 | Agregados de montagem | 🟡 | MVP demo (`/agregados`); seed e restrição `dono` pendentes |
 | Auth + multi-tenant loja | ✅ | Supabase Auth + RLS básico |
 | Piloto em loja real | ⬜ | Aguarda fechamento 1.0.x |
+
+---
+
+## 2.2 Trilha paralela — ERP 2.0 (substitui SS Plus na Piroli)
+
+O marketplace (`MVP 1→4` acima) e o **ERP 2.0** (`docs/erp-2.0/PRD.md`) correm em paralelo. O que o usuário pediu em 23/09/2026 entra **no ERP**, não no MVP 3.0 (checkout B2C):
+
+| Pedido | Fase ERP 2.0 | Status |
+|--------|--------------|--------|
+| Página/fluxo de **vendas neste sistema** | **Fase 5** (P1) — FR-050–054 | ⬜ shell `/vendas` sem dados SS |
+| **Login de funcionários** via convite do admin (link → PC da loja) | **Fase 6** (P1) — FR-060–063 | ⬜ (modelo § 9.2 deste doc; falta UI de convite) |
+| **Migração completa SS → ERP** (clientes perfil completo, histórico de vendas, demais dados via API, com limite de chamadas) | **Fase 7** (P1 cutover) — FR-070–076 | ⬜ jobs noturnos + throttle |
+| Espelho estoque/preço (já em andamento) | Fase 4 | 🟡 |
+
+**Ordem:** vendas novas no ERP (5) + convites (6) **antes** da migração em massa (7) — assim o balcão não fica parado esperando o histórico. Vendas do dia na SS só aparecem no ERP após a fase 7 (ou se forem lançadas na fase 5 neste app).
+
+Detalhe, riscos de API e critérios de cutover: `docs/erp-2.0/PRD.md` § 6–8.
 
 ---
 
@@ -619,6 +637,8 @@ Revenda “Autopeças Silva” (loja_id = 42)
 - Dono convida por **e-mail** (magic link ou senha) — fluxo na tela W09 Config  
 
 **MVP 1.0 mínimo:** dono + 1–2 vendedores já bastam para o piloto. Gestão completa de papéis pode ser simplificada (só `dono` e `vendedor`) e `estoquista` entra no 2.0.
+
+**ERP 2.0 (Piroli):** o fluxo completo de convite (admin manda link do sistema → funcionário acessa do PC da empresa) está na **fase 6** do PRD ERP — ver `docs/erp-2.0/PRD.md` FR-060–063. Este § 9.2 é o modelo de papéis; a UI de convite é entregável do ERP, não do marketplace 3.0.
 
 ### Ainda em aberto — MVP 3.0
 

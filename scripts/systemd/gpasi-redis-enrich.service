@@ -1,0 +1,18 @@
+[Unit]
+Description=GPASI → Redis enrich autonomous batch (skip-empty + auto-heal image)
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/gpasi-sync/.env
+Environment=ENRICH_BATCH=10
+Environment=GPASI_SYNC_DIR=/opt/gpasi-sync
+Environment=GPASI_DOCKER_NETWORK=easypanel
+ExecStart=/opt/gpasi-sync/gpasi_enrich_autonomous.sh
+# 10 blocos × ~3–4 min worst-case + skips
+TimeoutStartSec=7200
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

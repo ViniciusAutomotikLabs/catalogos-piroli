@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/agregados";
 import { codigoExibicao, tituloExibicao } from "@/lib/produto-campos";
 import type { AgregadoItem } from "@/lib/agregados";
+import { BotaoExcluirConfirmado } from "@/components/ui/botao-excluir-confirmado";
 
 type ProdutoBusca = {
   id: number;
@@ -121,15 +122,15 @@ export function FormCadastroAgregados({ principal, agregadosIniciais }: Props) {
                     )}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => remover(a.id)}
-                  disabled={salvando}
+                <BotaoExcluirConfirmado
+                  titulo="Remover agregado?"
+                  descricao="Tem certeza que deseja apagar este item da montagem?"
+                  ariaLabel="Remover agregado"
                   className="shrink-0 p-2 rounded-lg text-error hover:bg-error-container/30 transition-colors"
-                  aria-label="Remover agregado"
-                >
-                  <span className="material-symbols-outlined text-[20px]">delete</span>
-                </button>
+                  onConfirmar={async () => {
+                    await remover(a.id);
+                  }}
+                />
               </li>
             ))}
           </ul>

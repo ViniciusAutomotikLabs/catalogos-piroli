@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { alterarStatusFerias, removerFerias } from "@/lib/actions/rh-ferias";
+import { BotaoExcluirConfirmado } from "@/components/ui/botao-excluir-confirmado";
 
 export function AcoesFerias({ id, status }: { id: number; status: string }) {
   const [isPending, startTransition] = useTransition();
@@ -30,15 +31,12 @@ export function AcoesFerias({ id, status }: { id: number; status: string }) {
           Paga
         </button>
       )}
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() => startTransition(() => void removerFerias(id))}
-        className="text-error hover:bg-error-container/40 rounded p-1 disabled:opacity-60"
-        aria-label="Remover férias"
-      >
-        <span className="material-symbols-outlined text-[18px]">delete</span>
-      </button>
+      <BotaoExcluirConfirmado
+        titulo="Excluir férias?"
+        descricao="Tem certeza que deseja apagar este registro de férias aqui mesmo?"
+        ariaLabel="Remover férias"
+        onConfirmar={() => removerFerias(id)}
+      />
     </div>
   );
 }

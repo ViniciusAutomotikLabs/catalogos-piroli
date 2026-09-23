@@ -4,7 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getContextoLoja, requireModulo } from "@/lib/loja";
 import { FormPessoa, type PessoaFormValues } from "@/components/pessoas/form-pessoa";
-import { atualizarPessoa, excluirPessoa } from "@/lib/actions/pessoas";
+import { atualizarPessoa } from "@/lib/actions/pessoas";
+import { BotaoExcluirPessoa } from "@/components/pessoas/botao-excluir-pessoa";
 import { decifrar } from "@/lib/crypto";
 
 function safeDecifrar(valor: string | null): string {
@@ -126,11 +127,6 @@ export default async function EditarPessoaPage({
     ),
   };
 
-  async function onDelete() {
-    "use server";
-    await excluirPessoa(id);
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -141,15 +137,10 @@ export default async function EditarPessoaPage({
           <span className="material-symbols-outlined text-[16px]">chevron_right</span>
           <span className="text-on-surface font-semibold">{pessoa.nome_fantasia ?? pessoa.nome}</span>
         </nav>
-        <form action={onDelete}>
-          <button
-            type="submit"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-error/40 text-error hover:bg-error-container/40 transition-colors text-label-sm uppercase"
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-            Excluir
-          </button>
-        </form>
+        <BotaoExcluirPessoa
+          pessoaId={id}
+          nome={String(pessoa.nome_fantasia ?? pessoa.nome)}
+        />
       </div>
 
       <FormPessoa

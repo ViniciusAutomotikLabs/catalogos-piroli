@@ -1,21 +1,28 @@
 import { getContextoLoja } from "@/lib/loja";
 import { createClient } from "@/lib/supabase/server";
 import { sair } from "@/lib/actions/auth";
+import { obterSyncLegadoAtivo } from "@/lib/actions/sync-legado";
+import { ToggleSyncLegado } from "@/components/configuracoes/toggle-sync-legado";
 
 export default async function ConfiguracoesPage() {
   const contexto = await getContextoLoja();
   const supabase = await createClient();
 
-  const { data: membros } = await supabase
-    .from("membros_loja")
-    .select("user_id, papel, criado_em")
-    .order("criado_em");
+  const [{ data: membros }, syncAtivo] = await Promise.all([
+    supabase
+      .from("membros_loja")
+      .select("user_id, papel, criado_em")
+      .order("criado_em"),
+    obterSyncLegadoAtivo(),
+  ]);
+
+  const podeAlterarSync =
+    contexto?.papel === "dono" || Boolean(contexto?.isSuperAdmin);
 
   return (
     <div className="space-y-6 max-w-3xl">
       <h1 className="text-headline-lg text-on-surface font-bold tracking-tight">Configurações</h1>
 
-      {/* Loja */}
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">storefront</span>
@@ -35,9 +42,7 @@ export default async function ConfiguracoesPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-label-sm text-on-surface-variant">
-              WhatsApp da loja
-            </dt>
+            <dt className="text-label-sm text-on-surface-variant">WhatsApp da loja</dt>
             <dd className="font-mono text-code-md text-on-surface mt-1">
               {contexto?.loja?.telefone_whatsapp ?? "—"}
             </dd>
@@ -53,7 +58,26 @@ export default async function ConfiguracoesPage() {
         </dl>
       </section>
 
-      {/* Usuários */}
+      {contexto?.organizacaoId ? (
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+          <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px]">sync</span>
+            Integração legado
+          </h2>
+          {podeAlterarSync ? (
+            <ToggleSyncLegado ativoInicial={syncAtivo} />
+          ) : (
+            <p className="text-body-md text-on-surface-variant">
+              Sync SS Plus:{" "}
+              <strong className="text-on-surface">
+                {syncAtivo ? "ligada" : "desligada"}
+              </strong>
+              . Apenas o dono pode alterar.
+            </p>
+          )}
+        </section>
+      ) : null}
+
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
         <h2 className="text-headline-sm text-primary mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">group</span>
@@ -87,12 +111,8 @@ export default async function ConfiguracoesPage() {
             ))}
           </tbody>
         </table>
-        <p className="text-label-sm text-on-surface-variant mt-3 border-t border-outline-variant pt-3">
-          Convite de vendedores por e-mail entra na próxima fase (gestão de equipe).
-        </p>
       </section>
 
-      {/* Sobre + sair */}
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-headline-sm text-primary flex items-center gap-2">
@@ -100,7 +120,7 @@ export default async function ConfiguracoesPage() {
             Sobre
           </h2>
           <p className="text-body-md text-on-surface-variant mt-1">
-            Catálogo Industrial · MVP 1.0 · Catálogo consolidado 100+ fontes
+            Catálogo Industrial · ERP 2.0 · Espelho de estoque + balcão
           </p>
         </div>
         <form action={sair}>

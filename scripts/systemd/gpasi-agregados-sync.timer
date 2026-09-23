@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer: GPASI agregados sync a cada 30 min
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=30min
+AccuracySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

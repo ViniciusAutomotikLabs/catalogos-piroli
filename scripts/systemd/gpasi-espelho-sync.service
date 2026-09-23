@@ -1,0 +1,14 @@
+# Sync GPASI → espelho Postgres (estoque_saldos). No-op se sync_legado_ativo=false.
+[Unit]
+Description=GPASI espelho ERP sync
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/catalogos-piroli
+EnvironmentFile=-/opt/catalogos-piroli/.env
+ExecStart=/usr/bin/python3 /opt/catalogos-piroli/scripts/gpasi_espelho_sync.py
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

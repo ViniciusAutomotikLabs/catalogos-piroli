@@ -1,0 +1,12 @@
+[Unit]
+Description=GPASI → Redis enrich timer (autonomous, every 10min)
+
+[Timer]
+OnActiveSec=1min
+OnUnitActiveSec=10min
+AccuracySec=30s
+Persistent=true
+Unit=gpasi-redis-enrich.service
+
+[Install]
+WantedBy=timers.target

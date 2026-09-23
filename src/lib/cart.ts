@@ -9,7 +9,7 @@ export type CartItem = {
   fabricante?: string | null;
   fotoUrl?: string | null;
   quantidade: number;
-  precoUnitario: number; // preço manual — estoque_loja só no MVP 2.0
+  precoUnitario: number; // preenchido pelo espelho (estoque_saldos) quando disponível
 };
 
 const KEY = "orcamento-cart";

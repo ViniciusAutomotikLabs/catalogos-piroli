@@ -31,7 +31,7 @@ export function AdicionarAgregadosButton({ principal, agregados }: Props) {
         fabricante: a.fabricante,
         fotoUrl: a.fotoUrl,
         quantidade: a.quantidadeSugerida,
-        precoUnitario: 0,
+        precoUnitario: a.preco ?? 0,
       });
     }
     setAdicionado(true);

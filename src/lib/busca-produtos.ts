@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { buscarTecDoc, tecdocSyntheticId } from "@/lib/tecdoc-catalog";
+import { createErpClient } from "@/lib/supabase/erp";
+import { getContextoLoja } from "@/lib/loja";
 
-export type FonteProduto = "local" | "tecdoc";
+export type FonteProduto = "local" | "tecdoc" | "espelho";
 
 export type BuscaProdutoResultado = {
   id: number;
@@ -39,6 +41,20 @@ const TECDOC_LIMITE = 10;
 
 function sanitize(q: string) {
   return q.replace(/[,()%]/g, " ").trim();
+}
+
+/** Código ERP/catálogo sem espaços — evita RPC pesada (ex.: 000100 → 27s). */
+function isCodeLike(termo: string): boolean {
+  return /^[A-Za-z0-9][A-Za-z0-9._/-]{1,39}$/.test(termo);
+}
+
+function espelhoSyntheticId(codigo: string): number {
+  let h = 0;
+  for (let i = 0; i < codigo.length; i++) {
+    h = (h * 31 + codigo.charCodeAt(i)) | 0;
+  }
+  // IDs negativos estáveis para linhas do espelho (não colidem com produtos.id)
+  return -Math.abs(h || 1);
 }
 
 function mapLocalRow(
@@ -261,9 +277,29 @@ async function buscarProdutosLocal(opts: {
   pagina: number;
   limite: number;
 }): Promise<{ produtos: BuscaProdutoResultado[]; total: number; viaRpc: boolean }> {
-  const supabase = await createClient();
   const termo = opts.termo;
   const limite = opts.limite;
+
+  // Termo tipo código (000100, PH2870A): caminho rápido — a RPC de ranking
+  // estoura statement_timeout (~27s) por match em refs normalizadas.
+  if (termo && isCodeLike(termo) && !opts.catalogo) {
+    const [exatos, espelho] = await Promise.all([
+      buscarCodigoExatoRapido({ termo, comFoto: opts.comFoto, limite }),
+      buscarEspelhoPorTermo({ termo, limite }),
+    ]);
+    const vistos = new Set(exatos.produtos.map((p) => p.codigo_produto_interno));
+    const extras = espelho.produtos.filter(
+      (p) => !vistos.has(p.codigo_produto_interno)
+    );
+    const produtos = [...exatos.produtos, ...extras].slice(0, limite);
+    return {
+      produtos,
+      total: Math.max(exatos.total + extras.length, produtos.length),
+      viaRpc: false,
+    };
+  }
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("buscar_produtos", {
     p_termo: termo || undefined,
@@ -296,6 +332,135 @@ async function buscarProdutosLocal(opts: {
     pagina: opts.pagina,
     limite,
   });
+}
+
+/** Match exato por código (eq) — evita ilike %código% e a RPC pesada. */
+async function buscarCodigoExatoRapido(opts: {
+  termo: string;
+  comFoto: boolean;
+  limite: number;
+}): Promise<{ produtos: BuscaProdutoResultado[]; total: number }> {
+  const supabase = await createClient();
+  const t = opts.termo;
+
+  const { data: porCodigo } = await supabase
+    .from("produtos")
+    .select(
+      "id, codigo_produto_interno, codigo_principal, numero_produto, descricao, descricao_original, titulo_normalizado, aplicacao_resumo, foto_url, origem_catalogo, unidade, fabricantes(nome_fabricante)"
+    )
+    .or(
+      `codigo_produto_interno.eq.${t},codigo_principal.eq.${t},numero_produto.eq.${t}`
+    )
+    .limit(opts.limite);
+
+  const { data: refs } = await supabase
+    .from("referencias_cruzadas")
+    .select("produto_id")
+    .eq("numero_referencia", t)
+    .limit(40);
+
+  const idsRef = [
+    ...new Set(
+      (refs ?? [])
+        .map((r) => r.produto_id)
+        .filter((id): id is number => id != null)
+    ),
+  ];
+
+  let porRef: typeof porCodigo = [];
+  if (idsRef.length > 0) {
+    let q = supabase
+      .from("produtos")
+      .select(
+        "id, codigo_produto_interno, codigo_principal, numero_produto, descricao, descricao_original, titulo_normalizado, aplicacao_resumo, foto_url, origem_catalogo, unidade, fabricantes(nome_fabricante)"
+      )
+      .in("id", idsRef)
+      .limit(opts.limite);
+    if (opts.comFoto) q = q.not("foto_url", "is", null);
+    const { data } = await q;
+    porRef = data ?? [];
+  }
+
+  const seen = new Set<number>();
+  const merged = [...(porCodigo ?? []), ...porRef].filter((p) => {
+    if (seen.has(p.id)) return false;
+    if (opts.comFoto && !p.foto_url) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  const produtos = merged.map((p) => {
+    const exactCode =
+      p.codigo_principal === t ||
+      p.codigo_produto_interno === t ||
+      p.numero_produto === t;
+    return mapLocalRow({
+      id: p.id,
+      codigo_principal: p.codigo_principal,
+      codigo_produto_interno: p.codigo_produto_interno,
+      numero_produto: p.numero_produto,
+      titulo_normalizado: p.titulo_normalizado,
+      descricao_original: p.descricao_original,
+      descricao: p.descricao,
+      origem_catalogo: p.origem_catalogo,
+      foto_url: p.foto_url,
+      unidade: p.unidade,
+      fabricante: p.fabricantes?.nome_fabricante ?? null,
+      referencias: [],
+      aplicacao_resumo: p.aplicacao_resumo,
+      match_tipo: exactCode ? "codigo_exato" : "referencia_exata",
+      match_valor: t,
+      score: exactCode ? 1000 : 900,
+    });
+  });
+
+  return { produtos, total: produtos.length };
+}
+
+/** Hits do espelho SS (estoque_saldos) para o termo de código. */
+async function buscarEspelhoPorTermo(opts: {
+  termo: string;
+  limite: number;
+}): Promise<{ produtos: BuscaProdutoResultado[] }> {
+  const contexto = await getContextoLoja();
+  if (!contexto?.organizacaoId) return { produtos: [] };
+
+  const sb = await createErpClient();
+  const t = opts.termo;
+  const { data } = await sb
+    .from("estoque_saldos")
+    .select("codigo, descricao, preco, produto_id, quantidade, reservado")
+    .eq("organizacao_id", contexto.organizacaoId)
+    .or(`codigo.eq.${t},codigo.ilike."${t}%"`)
+    .order("codigo")
+    .limit(opts.limite);
+
+  const produtos: BuscaProdutoResultado[] = (data ?? []).map((row) => {
+    const codigo = String(row.codigo ?? "").trim();
+    const qtd = Number(row.quantidade) || 0;
+    const res = Number(row.reservado) || 0;
+    return {
+      id: row.produto_id ?? espelhoSyntheticId(codigo),
+      codigo_principal: codigo,
+      codigo_produto_interno: codigo,
+      numero_produto: null,
+      titulo_normalizado: row.descricao,
+      descricao_original: row.descricao,
+      descricao: row.descricao,
+      origem_catalogo: "ssplus",
+      foto_url: null,
+      unidade: null,
+      fabricante: null,
+      referencias: [],
+      aplicacao_resumo: `Estoque SS · disp. ${qtd - res}`,
+      match_tipo: codigo === t ? "codigo_exato" : "codigo_normalizado",
+      match_valor: t,
+      score: codigo === t ? 1100 : 950,
+      fonte: "espelho" as const,
+    };
+  });
+
+  return { produtos };
 }
 
 function apenasCodigo(q: string) {

@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 .venv-gpasi/
+.venv-sync/
+.cache/
+
 
 # debug
 npm-debug.log*
@@ -41,3 +44,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+scripts/__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# local meeting assets / agent stores
+Reunião /
+.octo/sentinel/canary-*.md
+metrics-session.json
