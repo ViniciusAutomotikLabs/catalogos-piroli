@@ -41,9 +41,11 @@ None open.
 | npm audit failure on PR #1 | P2 | `/octo:debug` after merge (non-blocking for promote) |
 | Canary production URL | P1 post-push | Watch Vercel production deploy |
 
-## Safety / commit exclusions
+## Outcome (2026-09-23)
 
-- `.env*` (gitignored) — **not** committed
-- `scripts/__pycache__/` — ignored
-- `Reunião /` screenshots — excluded (binaries / local meeting assets)
-- No auto-execute of workflows beyond triage + requested git promote
+- Commit `f21d160` on `feat/erp-2.0` + fast-forward `main`
+- Pushed `origin/main` and `origin/feat/erp-2.0`
+- PR #1 reported already merged by `gh`
+- Excluded: `.env*`, `Reunião /`, `__pycache__`
+- Residual: npm audit CI failure (P2) — recommend `/octo:debug` when convenient
+- Production: watch Vercel deploy of `main`
