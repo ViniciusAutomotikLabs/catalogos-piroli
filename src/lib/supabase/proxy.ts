@@ -2,12 +2,20 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicEnv } from "@/lib/env";
 
+function isPublicPath(pathname: string): boolean {
+  if (pathname === "/") return true;
+  if (pathname.startsWith("/login")) return true;
+  if (pathname.startsWith("/auth/callback")) return true;
+  if (pathname.startsWith("/api/cep")) return true;
+  return false;
+}
+
 export async function updateSession(request: NextRequest) {
   const { url, key } = getSupabasePublicEnv();
 
   if (!url || !key) {
-    // Sem env: deixa /login carregar; demais rotas mostram aviso em texto
-    if (request.nextUrl.pathname.startsWith("/login")) {
+    // Sem env: deixa landing e /login carregarem; demais rotas mostram aviso
+    if (isPublicPath(request.nextUrl.pathname)) {
       return NextResponse.next();
     }
     return new NextResponse(
@@ -37,19 +45,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
-  const isCepApi = request.nextUrl.pathname.startsWith("/api/cep");
+  const pathname = request.nextUrl.pathname;
+  const isLoginRoute = pathname.startsWith("/login");
+  const isLanding = pathname === "/";
 
-  if (!user && !isLoginRoute && !isCepApi) {
+  if (!user && !isPublicPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && isLoginRoute) {
+  if (user && (isLoginRoute || isLanding)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/";
+    redirectUrl.pathname = "/inicio";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

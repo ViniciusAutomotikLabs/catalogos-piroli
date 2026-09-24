@@ -77,7 +77,7 @@ export default async function DashboardPage() {
           />
           <button
             type="submit"
-            className="absolute right-2 z-10 flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-label-sm uppercase text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="absolute right-2 z-10 flex min-h-11 h-11 items-center gap-2 rounded-md bg-primary px-4 text-label-sm uppercase text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
             <span className="hidden sm:inline">Buscar</span>

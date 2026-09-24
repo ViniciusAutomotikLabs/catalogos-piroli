@@ -17,7 +17,7 @@ export default async function AdminLayout({
     redirect("/login");
   }
   if (!contexto) redirect("/login");
-  if (!contexto.isSuperAdmin) redirect("/");
+  if (!contexto.isSuperAdmin) redirect("/inicio");
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,7 +35,7 @@ export default async function AdminLayout({
           <div className="flex items-center gap-2">
             {contexto.lojaId && (
               <Link
-                href="/"
+                href="/inicio"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-label-sm uppercase"
               >
                 <span className="material-symbols-outlined text-[18px]">storefront</span>

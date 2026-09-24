@@ -14,7 +14,7 @@ const ITEMS: Array<{
   showCartBadge?: boolean;
   modulo?: ModuloChave;
 }> = [
-  { href: "/", icon: "home", label: "Início" },
+  { href: "/inicio", icon: "home", label: "Início" },
   { href: "/busca", icon: "search", label: "Busca", modulo: "busca" },
   { href: "/orcamento", icon: "shopping_cart", label: "Orçamento", showCartBadge: true, modulo: "orcamento" },
   { href: "/vendas", icon: "point_of_sale", label: "Vendas", modulo: "vendas" },
@@ -32,7 +32,7 @@ const ITEMS: Array<{
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
+  if (href === "/inicio") return pathname === "/inicio" || pathname === "/";
   if (href === "/busca") return pathname.startsWith("/busca") || pathname.startsWith("/produtos");
   return pathname.startsWith(href);
 }
@@ -107,8 +107,8 @@ export function Sidebar({ lojaNome, modulos, isSuperAdmin, open = false, onClose
                 aria-current={active ? "page" : undefined}
                 className={
                   active
-                    ? "flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg bg-primary/20 text-white font-semibold border-l-4 border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
-                    : "flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-lg text-on-sidebar-variant hover:bg-white/5 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
+                    ? "flex min-h-11 items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg bg-primary/20 text-white font-semibold border-l-4 border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
+                    : "flex min-h-11 items-center gap-3 pl-4 pr-3 py-2.5 rounded-lg text-on-sidebar-variant hover:bg-white/5 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-primary"
                 }
               >
                 <span

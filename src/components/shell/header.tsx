@@ -25,7 +25,7 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
         type="button"
         onClick={onOpenMenu}
         aria-label="Abrir menu de navegação"
-        className="lg:hidden -ml-1 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="lg:hidden -ml-1 min-h-11 min-w-11 inline-flex items-center justify-center p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <span className="material-symbols-outlined">menu</span>
       </button>
@@ -51,7 +51,7 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
       <div className="flex items-center gap-1.5">
         <Link
           href="/busca"
-          className="lg:hidden p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="lg:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Buscar peças"
           aria-label="Buscar peças"
         >
@@ -59,7 +59,7 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
         </Link>
         <Link
           href="/orcamento"
-          className="relative p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="relative min-h-11 min-w-11 inline-flex items-center justify-center p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Carrinho de orçamento"
           aria-label={count > 0 ? `Carrinho de orçamento, ${count} item(ns)` : "Carrinho de orçamento"}
         >
@@ -72,7 +72,7 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
         </Link>
         <Link
           href="/configuracoes"
-          className="p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Perfil e configurações"
           aria-label="Perfil e configurações"
         >

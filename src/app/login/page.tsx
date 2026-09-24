@@ -1,15 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { buildContatoLojaUrl } from "@/lib/whatsapp";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState<string | null>(null);
+  const [erro, setErro] = useState<string | null>(
+    searchParams.get("erro") === "link"
+      ? "Link de convite inválido ou expirado. Peça um novo convite ao dono da loja."
+      : null
+  );
   const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -26,7 +31,7 @@ export default function LoginPage() {
       setCarregando(false);
       return;
     }
-    router.push("/");
+    router.push("/inicio");
     router.refresh();
   }
 
@@ -72,7 +77,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="usuario@loja.com.br"
-                  className="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+                  className="w-full min-h-11 pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -105,7 +110,7 @@ export default function LoginPage() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors tracking-widest"
+                  className="w-full min-h-11 pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-mono text-code-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors tracking-widest"
                 />
               </div>
             </div>
@@ -119,7 +124,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={carregando}
-              className="w-full mt-2 bg-primary hover:bg-primary-container disabled:opacity-60 text-on-primary text-label-sm uppercase py-3 rounded-lg border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary outline-none transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full mt-2 min-h-12 bg-primary hover:bg-primary-container disabled:opacity-60 text-on-primary text-label-sm uppercase py-3 rounded-lg border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary outline-none transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               {carregando ? "Entrando…" : "Entrar"}
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -135,5 +140,13 @@ export default function LoginPage() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

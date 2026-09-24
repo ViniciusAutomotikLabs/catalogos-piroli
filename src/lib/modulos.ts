@@ -30,7 +30,7 @@ export type ModuloChave = (typeof MODULO_CHAVES)[number];
 
 /**
  * Mapeia prefixos de rota → módulo exigido. Rotas fora deste mapa são sempre
- * liberadas (ex.: "/" e "/configuracoes"). Ordem importa: prefixos mais
+ * liberadas (ex.: "/inicio" e "/configuracoes"). Ordem importa: prefixos mais
  * específicos primeiro.
  */
 const ROTA_MODULO: ReadonlyArray<[string, ModuloChave]> = [

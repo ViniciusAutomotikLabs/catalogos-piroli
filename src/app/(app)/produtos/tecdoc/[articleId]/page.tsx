@@ -26,7 +26,7 @@ export default async function TecDocProdutoPage({
   return (
     <div className="pb-24">
       <nav className="flex items-center gap-2 text-body-md text-on-surface-variant mb-6">
-        <Link href="/" className="hover:text-primary hover:underline">
+        <Link href="/inicio" className="hover:text-primary hover:underline">
           Início
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>

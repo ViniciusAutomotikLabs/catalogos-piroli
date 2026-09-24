@@ -206,7 +206,8 @@ export default async function VendaDetalhePage({
       )}
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
-        <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[640px]">
           <thead className="bg-surface-container-high text-label-sm text-on-surface-variant">
             <tr>
               <th className="py-3 px-4">Código</th>
@@ -240,6 +241,7 @@ export default async function VendaDetalhePage({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <AcoesVenda

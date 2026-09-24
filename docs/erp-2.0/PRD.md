@@ -123,7 +123,7 @@ Ordem atualizada (22–23/09/2026). O que já avançou fica marcado.
 | 3 | RH básico (contratos/férias/folha) | P0/P1 | 🟡 | Fora do cadastro comercial |
 | 4 | Espelho estoque/preço GPASI + ficha SS (fab, marca, filiais, agregados) | P0/P1 | 🟡 | Sync + UI `/estoque`; foto API ainda quebrada |
 | 5 | **Vendas no ERP** — páginas + fluxo balcão (FR-050–054) | **P1** | ⬜ | Shell `/vendas` existe; **sem** dados SS |
-| 6 | **Convite/login de funcionários** (FR-060–063) | **P1** | ⬜ | Admin manda link; conta própria |
+| 6 | **Convite/login de funcionários** (FR-060–063) | **P1** | ✅ | Admin manda link; conta própria |
 | 7 | **Migração completa SS → ERP** (FR-070–076) | **P1 cutover** | ⬜ | Jobs noturnos + throttle API; clientes + vendas + resto |
 | 8 | Infra self-host + backups | P1 | ⬜ | Paralelo |
 | 9 | Módulo IA + medição de tokens | P1 | ⬜ | |

@@ -77,7 +77,7 @@ export default async function ProdutoPage({
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-body-md text-on-surface-variant mb-6">
-        <Link href="/" className="hover:text-primary hover:underline">
+        <Link href="/inicio" className="hover:text-primary hover:underline">
           Início
         </Link>
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>

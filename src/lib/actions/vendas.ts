@@ -51,7 +51,7 @@ export async function criarVendaDeOrcamento(
     };
   }
 
-  let clienteId = opts?.clienteId ?? null;
+  const clienteId = opts?.clienteId ?? null;
   if (clienteId != null) {
     const { data: cli } = await sb
       .from("clientes")

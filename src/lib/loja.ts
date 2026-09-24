@@ -78,7 +78,7 @@ async function carregarOrganizacaoId(
 export async function requireModulo(modulo: ModuloChave): Promise<void> {
   const contexto = await getContextoLoja();
   if (!moduloLiberado(modulo, contexto?.modulos ?? null)) {
-    redirect("/");
+    redirect("/inicio");
   }
 }
 
